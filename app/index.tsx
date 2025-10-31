@@ -1,29 +1,59 @@
-import { Canvas, Rect } from "@shopify/react-native-skia";
-import { Dimensions, GestureResponderEvent } from "react-native";
+import { useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useSharedValue } from "react-native-reanimated";
+
+import Touchable, { useGestureHandler } from "react-native-skia-gesture";
+
+interface Circle {
+  x: number;
+  y: number;
+  r: number;
+}
 
 export default function App() {
-  const size = Dimensions.get("window");
-
-  function onTouchStart(event: GestureResponderEvent) {
-    const { locationX, locationY } = event.nativeEvent;
-    console.log(event.nativeEvent);
-  }
-  function onTouchMove(event: GestureResponderEvent) {
-    const { locationX, locationY } = event.nativeEvent;
-  }
-  function onTouchEnd(event: GestureResponderEvent) {
-    const { locationX, locationY } = event.nativeEvent;
-  }
+  const [objects, setObjects] = useState<Circle[]>([
+    { x: 50, y: 50, r: 10 },
+    { x: 150, y: 150, r: 20 },
+    { x: 250, y: 250, r: 30 },
+  ]);
 
   return (
-    <Canvas
-      style={{ flex: 1 }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      <Rect color="cyan" x={100} y={100} width={20} height={20} />
-      <Rect color="cyan" x={500} y={100} width={20} height={20} />
-    </Canvas>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Touchable.Canvas style={{ flex: 1 }}>
+        {objects.map((obj, index) => {
+          const cx = useSharedValue(obj.x);
+          const cy = useSharedValue(obj.y);
+
+          const circleGesture = useGestureHandler({
+            onStart: () => {
+              "worklet"; // Remember the 'worklet' keyword
+              cx.value = obj.x;
+              cy.value = obj.y;
+            },
+            onActive: ({ translationX, translationY }) => {
+              "worklet";
+              cx.value = obj.x + translationX;
+              cy.value = obj.y + translationY;
+            },
+            onEnd: () => {
+              "worklet";
+              cx.value = obj.x;
+              cy.value = obj.y;
+            },
+          });
+
+          return (
+            <Touchable.Circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r={obj.r}
+              color="blue"
+              {...circleGesture}
+            />
+          );
+        })}
+      </Touchable.Canvas>
+    </GestureHandlerRootView>
   );
 }
