@@ -3,7 +3,7 @@
     "name": "Across-The-Gap",
     "slug": "Across-The-Gap",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/images/icon.png",
     "scheme": "acrossthegap",
     "userInterfaceStyle": "automatic",
