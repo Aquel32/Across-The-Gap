@@ -1,5 +1,12 @@
 import { Connection, NodeData } from "@/lib/types";
-import { Canvas, Circle, Line, SkPoint, vec } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Circle,
+  Line,
+  Rect,
+  SkPoint,
+  vec,
+} from "@shopify/react-native-skia";
 import Matter from "matter-js";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, View } from "react-native";
@@ -8,6 +15,9 @@ import {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
+
+const CAR_WIDTH = 80;
+const CAR_HEIGHT = 40;
 
 const { height, width } = Dimensions.get("window");
 
@@ -26,8 +36,22 @@ export default function Simulation({
   const nodePositions = useSharedValue(nodes.map((n) => vec(n.x, n.y)));
   const bodies = useRef<Matter.Body[]>([]);
 
+  const carPositions = useSharedValue<SkPoint>(vec(300, 20));
+
   useEffect(() => {
     Matter.World.clear(world, false);
+
+    const carBody = Matter.Bodies.rectangle(
+      carPositions.value.x,
+      carPositions.value.y,
+      CAR_WIDTH,
+      CAR_HEIGHT,
+      {
+        restitution: 0.5,
+        friction: 0.3,
+      }
+    );
+    Matter.World.add(world, carBody);
 
     const initialBodies = nodes.map((node) => {
       return Matter.Bodies.circle(node.x, node.y, node.r, {
@@ -36,7 +60,10 @@ export default function Simulation({
         isStatic: node.isStatic ?? false,
       });
     });
+    bodies.current = initialBodies;
+    Matter.World.add(world, initialBodies);
 
+    //invisible links
     const initialConstraints = connections.map((conn) => {
       return Matter.Constraint.create({
         bodyA: initialBodies[conn.from],
@@ -45,9 +72,6 @@ export default function Simulation({
       });
     });
     Matter.World.add(world, initialConstraints);
-
-    bodies.current = initialBodies;
-    Matter.World.add(world, initialBodies);
 
     const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
       isStatic: true,
@@ -64,6 +88,9 @@ export default function Simulation({
       });
 
       nodePositions.value = newPositions;
+
+      carPositions.value = vec(carBody.position.x, carBody.position.y);
+
       animationFrame = requestAnimationFrame(update);
     };
 
@@ -74,7 +101,7 @@ export default function Simulation({
       Matter.World.clear(world, false);
       Matter.Engine.clear(engine);
     };
-  }, [engine, world, nodes]);
+  }, [engine, world, nodes, connections]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -97,6 +124,7 @@ export default function Simulation({
             nodePositions={nodePositions}
           />
         ))}
+        <PhysicsBasedCar carPosition={carPositions} />
       </Canvas>
     </View>
   );
@@ -144,5 +172,23 @@ const PhysicsBasedLine = ({
       color={conn.material.color}
       style={"stroke"}
     />
+  );
+};
+
+const PhysicsBasedCar = ({
+  carPosition,
+}: {
+  carPosition: SharedValue<SkPoint>;
+}) => {
+  const xPosition = useDerivedValue(() => {
+    return carPosition.value.x - CAR_WIDTH / 2;
+  }, [carPosition]);
+
+  const yPosition = useDerivedValue(() => {
+    return carPosition.value.y - CAR_HEIGHT / 2;
+  }, [carPosition]);
+
+  return (
+    <Rect x={xPosition} y={yPosition} width={CAR_WIDTH} height={CAR_HEIGHT} />
   );
 };
