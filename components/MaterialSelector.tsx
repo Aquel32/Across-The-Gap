@@ -1,9 +1,6 @@
+import { Materials } from "@/lib/materials";
+import { Material } from "@/lib/types";
 import { Text, TouchableOpacity, View } from "react-native";
-
-export interface Material {
-  name: string;
-  color: string;
-}
 
 export default function MaterialSelector({
   onMaterialSelect,
@@ -13,24 +10,22 @@ export default function MaterialSelector({
   return (
     <View className="flex flex-row gap-3 items-center justify-center w-full">
       <TouchableOpacity
-        className="bg-blue-500 px-4 py-2 rounded"
-        onPress={() => onMaterialSelect({ name: "Material 1", color: "blue" })}
+        className={`bg-red-500 px-4 py-2 rounded`}
+        onPress={() => onMaterialSelect(Materials.ROAD)}
       >
-        <Text>Material 1</Text>
+        <Text>{Materials.ROAD.name}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="bg-green-500 px-4 py-2 rounded"
-        onPress={() => onMaterialSelect({ name: "Material 2", color: "green" })}
+        className={`bg-green-500 px-4 py-2 rounded`}
+        onPress={() => onMaterialSelect(Materials.STEEL)}
       >
-        <Text>Material 2</Text>
+        <Text>{Materials.STEEL.name}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className="bg-yellow-500 px-4 py-2 rounded"
-        onPress={() =>
-          onMaterialSelect({ name: "Material 3", color: "yellow" })
-        }
+        className={`bg-blue-500 px-4 py-2 rounded`}
+        onPress={() => onMaterialSelect(Materials.WOOD)}
       >
-        <Text>Material 3</Text>
+        <Text>{Materials.WOOD.name}</Text>
       </TouchableOpacity>
     </View>
   );

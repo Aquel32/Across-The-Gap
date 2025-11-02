@@ -1,5 +1,7 @@
-import MaterialSelector, { Material } from "@/components/MaterialSelector";
-import { Canvas, Circle, Line, SkPoint, vec } from "@shopify/react-native-skia";
+import MaterialSelector from "@/components/MaterialSelector";
+import { Materials } from "@/lib/materials";
+import { CircleData, Connection, LineData, Material } from "@/lib/types";
+import { Canvas, Circle, Line, vec } from "@shopify/react-native-skia";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import {
@@ -7,25 +9,7 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
-import { runOnJS, SharedValue, useSharedValue } from "react-native-reanimated";
-
-export interface CircleData {
-  x: number;
-  y: number;
-  r: number;
-}
-
-export interface LineData {
-  p1: SharedValue<SkPoint>;
-  p2: SharedValue<SkPoint>;
-  strokeWidth: number;
-}
-
-export interface Connection {
-  from: number;
-  to: number;
-  material: Material;
-}
+import { runOnJS, useSharedValue } from "react-native-reanimated";
 
 const overlaps = (
   x: number,
@@ -95,10 +79,9 @@ export default function App() {
   };
 
   const selectedNode = useSharedValue<number | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<Material>({
-    name: "Material 1",
-    color: "blue",
-  });
+  const [selectedMaterial, setSelectedMaterial] = useState<Material>(
+    Materials.ROAD
+  );
 
   const gesture = Gesture.Pan()
     .onStart((e) => {
