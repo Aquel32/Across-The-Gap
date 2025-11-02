@@ -1,5 +1,7 @@
+import MaterialSelector, { Material } from "@/components/MaterialSelector";
 import { Canvas, Circle, Line, SkPoint, vec } from "@shopify/react-native-skia";
 import React, { useEffect, useState } from "react";
+import { View } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -22,6 +24,7 @@ export interface LineData {
 export interface Connection {
   from: number;
   to: number;
+  material: Material;
 }
 
 const overlaps = (
@@ -47,9 +50,8 @@ const overlaps = (
 
 export default function App() {
   const [nodes, setNodes] = useState<CircleData[]>([
-    { x: 150, y: 150, r: 30 },
-    { x: 300, y: 250, r: 30 },
-    { x: 500, y: 200, r: 30 },
+    { x: 150, y: 250, r: 13 },
+    { x: 630, y: 250, r: 13 },
   ]);
   const [connections, setConnections] = useState<Connection[]>([]);
 
@@ -71,7 +73,7 @@ export default function App() {
       }
 
       console.log("Connecting node", from, "to", to);
-      return [...conns, { from, to }];
+      return [...conns, { from, to, material: selectedMaterial }];
     });
   }
 
@@ -80,7 +82,7 @@ export default function App() {
       const newIndex = currentNodes.length;
       setConnections((currentConns) => [
         ...currentConns,
-        { from: fromIndex, to: newIndex },
+        { from: fromIndex, to: newIndex, material: selectedMaterial },
       ]);
       return [...currentNodes, newNode];
     });
@@ -93,6 +95,10 @@ export default function App() {
   };
 
   const selectedNode = useSharedValue<number | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material>({
+    name: "Material 1",
+    color: "blue",
+  });
 
   const gesture = Gesture.Pan()
     .onStart((e) => {
@@ -131,7 +137,7 @@ export default function App() {
         const newNode: CircleData = {
           x: e.x,
           y: e.y,
-          r: 30,
+          r: 13,
         };
         sharedNodes.value = [...sharedNodes.value, newNode];
         runOnJS(addNode)(fromIndex, newNode);
@@ -139,32 +145,46 @@ export default function App() {
     });
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <GestureDetector gesture={gesture}>
-        <Canvas style={{ flex: 1 }}>
-          {connections.map((conn, index) => {
-            const fromNode = nodes[conn.from];
-            const toNode = nodes[conn.to];
-            if (!fromNode || !toNode) return null;
-            return (
-              <Line
-                key={index}
-                p1={vec(fromNode.x, fromNode.y)}
-                p2={vec(toNode.x, toNode.y)}
-                strokeWidth={5}
-                color={"green"}
-                style={"stroke"}
+    <View style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureDetector gesture={gesture}>
+          <Canvas style={{ flex: 1 }}>
+            {connections.map((conn, index) => {
+              const fromNode = nodes[conn.from];
+              const toNode = nodes[conn.to];
+              if (!fromNode || !toNode) return null;
+              return (
+                <Line
+                  key={index}
+                  p1={vec(fromNode.x, fromNode.y)}
+                  p2={vec(toNode.x, toNode.y)}
+                  strokeWidth={10}
+                  color={conn.material.color}
+                  style={"stroke"}
+                />
+              );
+            })}
+
+            {nodes.map((node, i) => (
+              <Circle
+                key={i}
+                cx={node.x}
+                cy={node.y}
+                r={node.r}
+                color="orange"
               />
-            );
-          })}
+            ))}
 
-          {nodes.map((node, i) => (
-            <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="blue" />
-          ))}
+            <Line p1={line.p1} p2={line.p2} strokeWidth={10} color="red" />
+          </Canvas>
+        </GestureDetector>
+      </GestureHandlerRootView>
 
-          <Line p1={line.p1} p2={line.p2} strokeWidth={10} color={"red"} />
-        </Canvas>
-      </GestureDetector>
-    </GestureHandlerRootView>
+      <View>
+        <MaterialSelector
+          onMaterialSelect={(material) => setSelectedMaterial(material)}
+        />
+      </View>
+    </View>
   );
 }
