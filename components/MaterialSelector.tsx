@@ -8,7 +8,7 @@ export default function MaterialSelector({
   onMaterialSelect: (material: Material) => void;
 }) {
   return (
-    <View className="flex flex-row gap-3 items-center justify-center w-full">
+    <View className="flex flex-row gap-3 items-center justify-center">
       <TouchableOpacity
         className={`bg-red-500 px-4 py-2 rounded`}
         onPress={() => onMaterialSelect(Materials.ROAD)}
