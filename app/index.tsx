@@ -7,8 +7,15 @@ import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const INITIAL_NODES: NodeData[] = [
-  { x: 150, y: 250, r: 13 },
-  //{ x: 630, y: 250, r: 13 },
+  { x: -100, y: 150, r: 13, isStatic: true },
+  { x: 150, y: 150, r: 13, isStatic: true },
+  { x: 630, y: 150, r: 13, isStatic: true },
+  { x: 1000, y: 150, r: 13, isStatic: true },
+];
+
+const INITIAL_CONNECTIONS: Connection[] = [
+  { from: 0, to: 1, material: Materials.STEEL },
+  { from: 2, to: 3, material: Materials.STEEL },
 ];
 
 export default function App() {
@@ -16,11 +23,12 @@ export default function App() {
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
 
   const [nodes, setNodes] = useState<NodeData[]>(INITIAL_NODES);
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [connections, setConnections] =
+    useState<Connection[]>(INITIAL_CONNECTIONS);
 
   function clearLevel() {
     setNodes(INITIAL_NODES);
-    setConnections([]);
+    setConnections(INITIAL_CONNECTIONS);
     setSelectedMaterial(Materials.ROAD);
   }
 
@@ -43,11 +51,13 @@ export default function App() {
         <TouchableOpacity
           className={`bg-red-500 px-4 py-2 rounded`}
           onPress={clearLevel}
+          disabled={running}
         >
           <Text>CLEAR</Text>
         </TouchableOpacity>
         <MaterialSelector
           onMaterialSelect={(material) => setSelectedMaterial(material)}
+          disabled={running}
         />
         <TouchableOpacity
           className={`bg-green-500 px-4 py-2 rounded`}

@@ -2,6 +2,7 @@ export interface NodeData {
   x: number;
   y: number;
   r: number;
+  isStatic?: boolean;
 }
 
 export interface Connection {
@@ -13,4 +14,5 @@ export interface Connection {
 export interface Material {
   name: string;
   color: string;
+  stiffness: number;
 }

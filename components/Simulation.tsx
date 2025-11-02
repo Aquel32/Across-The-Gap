@@ -33,6 +33,7 @@ export default function Simulation({
       return Matter.Bodies.circle(node.x, node.y, node.r, {
         restitution: 0.8,
         friction: 0.01,
+        isStatic: node.isStatic ?? false,
       });
     });
 
@@ -40,7 +41,7 @@ export default function Simulation({
       return Matter.Constraint.create({
         bodyA: initialBodies[conn.from],
         bodyB: initialBodies[conn.to],
-        stiffness: 0.1,
+        stiffness: conn.material.stiffness,
       });
     });
     Matter.World.add(world, initialConstraints);
@@ -91,7 +92,7 @@ export default function Simulation({
         {nodes.map((node, i) => (
           <PhysicsBasedCircle
             key={i}
-            r={node.r}
+            r={5}
             index={i}
             nodePositions={nodePositions}
           />
