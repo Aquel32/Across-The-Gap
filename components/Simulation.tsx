@@ -34,16 +34,22 @@ export default function Simulation({
   const [world] = useState(() => engine.world);
 
   const nodePositions = useSharedValue(nodes.map((n) => vec(n.x, n.y)));
-  const bodies = useRef<Matter.Body[]>([]);
+  const nodeBodies = useRef<Matter.Body[]>([]);
 
-  const carPositions = useSharedValue<SkPoint>(vec(300, 20));
+  const connectionsConstraints = useRef<Matter.Constraint[]>([]);
+  const connectionsBodies = useRef<Matter.Body[]>([]);
+
+  const carData = useSharedValue<{ position: SkPoint; angle: number }>({
+    position: vec(300, 100),
+    angle: 0,
+  });
 
   useEffect(() => {
     Matter.World.clear(world, false);
 
     const carBody = Matter.Bodies.rectangle(
-      carPositions.value.x,
-      carPositions.value.y,
+      carData.value.position.x,
+      carData.value.position.y,
       CAR_WIDTH,
       CAR_HEIGHT,
       {
@@ -54,16 +60,15 @@ export default function Simulation({
     Matter.World.add(world, carBody);
 
     const initialBodies = nodes.map((node) => {
-      return Matter.Bodies.circle(node.x, node.y, node.r, {
+      return Matter.Bodies.circle(node.x, node.y, 5, {
         restitution: 0.8,
         friction: 0.01,
         isStatic: node.isStatic ?? false,
       });
     });
-    bodies.current = initialBodies;
+    nodeBodies.current = initialBodies;
     Matter.World.add(world, initialBodies);
 
-    //invisible links
     const initialConstraints = connections.map((conn) => {
       return Matter.Constraint.create({
         bodyA: initialBodies[conn.from],
@@ -71,7 +76,33 @@ export default function Simulation({
         stiffness: conn.material.stiffness,
       });
     });
+    connectionsConstraints.current = initialConstraints;
     Matter.World.add(world, initialConstraints);
+
+    const constraintsCollisions = connections.map((conn) => {
+      const from = nodes[conn.from];
+      const to = nodes[conn.to];
+
+      const distance = Math.sqrt(
+        Math.pow(Math.abs(from.x - to.x), 2) +
+          Math.pow(Math.abs(from.y - to.y), 2)
+      );
+
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+
+      return Matter.Bodies.rectangle(
+        (from.x + to.x) / 2,
+        (from.y + to.y) / 2,
+        distance - 10,
+        5,
+        {
+          angle,
+          isStatic: true,
+        }
+      );
+    });
+    connectionsBodies.current = constraintsCollisions;
+    Matter.World.add(world, constraintsCollisions);
 
     const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
       isStatic: true,
@@ -83,13 +114,27 @@ export default function Simulation({
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
 
-      const newPositions = bodies.current.map((body) => {
-        return vec(body.position.x, body.position.y);
+      const newPositions = nodeBodies.current.map((node) => {
+        return vec(node.position.x, node.position.y);
       });
-
       nodePositions.value = newPositions;
 
-      carPositions.value = vec(carBody.position.x, carBody.position.y);
+      connectionsBodies.current.forEach((beamBody, index) => {
+        const posA = connectionsConstraints.current[index].bodyA!.position;
+        const posB = connectionsConstraints.current[index].bodyB!.position;
+
+        const angle = Math.atan2(posB.y - posA.y, posB.x - posA.x);
+        Matter.Body.setPosition(beamBody, {
+          x: (posA.x + posB.x) / 2,
+          y: (posA.y + posB.y) / 2,
+        });
+        Matter.Body.setAngle(beamBody, angle);
+      });
+
+      carData.value = {
+        position: vec(carBody.position.x, carBody.position.y),
+        angle: carBody.angle,
+      };
 
       animationFrame = requestAnimationFrame(update);
     };
@@ -124,7 +169,7 @@ export default function Simulation({
             nodePositions={nodePositions}
           />
         ))}
-        <PhysicsBasedCar carPosition={carPositions} />
+        <PhysicsBasedCar carData={carData} />
       </Canvas>
     </View>
   );
@@ -176,19 +221,24 @@ const PhysicsBasedLine = ({
 };
 
 const PhysicsBasedCar = ({
-  carPosition,
+  carData,
 }: {
-  carPosition: SharedValue<SkPoint>;
+  carData: SharedValue<{ position: SkPoint; angle: number }>;
 }) => {
-  const xPosition = useDerivedValue(() => {
-    return carPosition.value.x - CAR_WIDTH / 2;
-  }, [carPosition]);
+  const rect = {
+    x: -CAR_WIDTH / 2,
+    y: -CAR_HEIGHT / 2,
+    width: CAR_WIDTH,
+    height: CAR_HEIGHT,
+  };
 
-  const yPosition = useDerivedValue(() => {
-    return carPosition.value.y - CAR_HEIGHT / 2;
-  }, [carPosition]);
+  const transform = useDerivedValue(() => {
+    return [
+      { translateX: carData.value.position.x },
+      { translateY: carData.value.position.y },
+      { rotate: carData.value.angle },
+    ];
+  }, [carData]);
 
-  return (
-    <Rect x={xPosition} y={yPosition} width={CAR_WIDTH} height={CAR_HEIGHT} />
-  );
+  return <Rect rect={rect} transform={transform} />;
 };
