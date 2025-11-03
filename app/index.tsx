@@ -7,15 +7,15 @@ import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const INITIAL_NODES: NodeData[] = [
-  { x: -100, y: 150, r: 13 },
-  { x: 150, y: 150, r: 13 },
-  { x: 630, y: 150, r: 13 },
-  { x: 1000, y: 150, r: 13 },
+  { x: -100, y: 150, r: 13, isStatic: true },
+  { x: 150, y: 150, r: 13, isStatic: true },
+  { x: 630, y: 150, r: 13, isStatic: true },
+  { x: 1000, y: 150, r: 13, isStatic: true },
 ];
 
 const INITIAL_CONNECTIONS: Connection[] = [
-  { from: 0, to: 1, material: Materials.STEEL, isStatic: true },
-  { from: 2, to: 3, material: Materials.STEEL, isStatic: true },
+  { from: 0, to: 1, material: Materials.STEEL },
+  { from: 2, to: 3, material: Materials.STEEL },
 ];
 
 export default function App() {

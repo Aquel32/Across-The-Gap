@@ -2,13 +2,13 @@ export interface NodeData {
   x: number;
   y: number;
   r: number;
+  isStatic?: boolean;
 }
 
 export interface Connection {
   from: number;
   to: number;
   material: Material;
-  isStatic?: boolean;
 }
 
 export interface Material {
