@@ -38,7 +38,10 @@ export default function Simulation({
 
   const connectionsConstraints = useRef<Matter.Constraint[]>([]);
   const connectionsBodies = useRef<Matter.Body[]>([]);
-  const bodiesColors = useSharedValue<number[]>(connections.map((c) => 0));
+  const internalConstraintsForces = useSharedValue<number[]>(
+    connections.map((c) => 0)
+  );
+  const maxForce = useSharedValue<number>(0);
 
   const carData = useSharedValue<{ position: SkPoint; angle: number }>({
     position: vec(50, 100),
@@ -57,7 +60,7 @@ export default function Simulation({
       {
         restitution: 0.5,
         friction: 0.3,
-        collisionFilter: { mask: carCollisionFilter }
+        collisionFilter: { mask: carCollisionFilter },
       }
     );
     Matter.World.add(world, carBody);
@@ -67,7 +70,7 @@ export default function Simulation({
         restitution: 0.8,
         friction: 0.01,
         isStatic: node.isStatic ?? false,
-        mass: 100
+        mass: 100,
       });
     });
     nodeBodies.current = initialBodies;
@@ -89,7 +92,7 @@ export default function Simulation({
 
       const distance = Math.sqrt(
         Math.pow(Math.abs(from.x - to.x), 2) +
-        Math.pow(Math.abs(from.y - to.y), 2)
+          Math.pow(Math.abs(from.y - to.y), 2)
       );
 
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
@@ -101,7 +104,12 @@ export default function Simulation({
         {
           angle,
           isStatic: true,
-          collisionFilter: { category: conn.material.collideWithCar === true ? carCollisionFilter : undefined }
+          collisionFilter: {
+            category:
+              conn.material.collideWithCar === true
+                ? carCollisionFilter
+                : undefined,
+          },
         }
       );
     });
@@ -111,27 +119,61 @@ export default function Simulation({
     const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
       isStatic: true,
       mass: 1,
-      collisionFilter: { category: carCollisionFilter }
+      collisionFilter: { category: carCollisionFilter },
     });
     Matter.World.add(world, ground);
 
     let animationFrame: number;
 
-    Events.on(engine, 'collisionActive', (event) => {
-      const c = connections.map((conn) => 0);
-      event.pairs.forEach((pair) => {
-        if (pair.bodyA != carBody) return;
+    // Events.on(engine, "collisionActive", (event) => {
+    //   const c = connections.map((conn) => 0);
+    //   event.pairs.forEach((pair) => {
+    //     if (pair.bodyA != carBody) return;
 
-        const bodyAMomentun = Vector.mult(pair.bodyA.velocity, pair.bodyA.mass);
-        const bodyBMomentun = Vector.mult(pair.bodyB.velocity, 1);
-        const relativeMomentum = Vector.sub(bodyAMomentun, bodyBMomentun);
+    //     const bodyAMomentun = Vector.mult(pair.bodyA.velocity, pair.bodyA.mass);
+    //     const bodyBMomentun = Vector.mult(pair.bodyB.velocity, 1);
+    //     const relativeMomentum = Vector.sub(bodyAMomentun, bodyBMomentun);
 
-        const i = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
-        if (i == -1) return;
-        c[i] = Vector.magnitude(relativeMomentum);
-      })
-      bodiesColors.value = c;
-    })
+    //     const i = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
+    //     if (i == -1) return;
+    //     c[i] = Vector.magnitude(relativeMomentum);
+    //   });
+    //   internalConstraintsForces.value = c;
+    // });
+
+    Events.on(engine, "afterUpdate", function (event) {
+      function getConstraintCurrentLength(constraint: Matter.Constraint) {
+        const worldPointA = Vector.add(
+          constraint.bodyA!.position,
+          Vector.rotate(constraint.pointA!, constraint.bodyA!.angle)
+        );
+
+        const worldPointB = Vector.add(
+          constraint.bodyB!.position,
+          Vector.rotate(constraint.pointB!, constraint.bodyB!.angle)
+        );
+
+        const delta = Vector.sub(worldPointA, worldPointB);
+        return Vector.magnitude(delta);
+      }
+
+      function getConstraintForce(constraint: Matter.Constraint) {
+        const displacement =
+          getConstraintCurrentLength(constraint) - constraint.length;
+        const force = Math.abs(constraint.stiffness * displacement) * 50;
+
+        if (Math.abs(force) > maxForce.value) {
+          maxForce.value = Math.abs(force);
+        }
+
+        return force;
+      }
+
+      let forces = connectionsConstraints.current.map(
+        (c) => getConstraintForce(c) / maxForce.value
+      );
+      internalConstraintsForces.value = forces;
+    });
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
@@ -141,7 +183,6 @@ export default function Simulation({
       });
       nodePositions.value = newPositions;
       connectionsBodies.current.forEach((beamBody, index) => {
-
         const posA = connectionsConstraints.current[index].bodyA!.position;
         const posB = connectionsConstraints.current[index].bodyB!.position;
 
@@ -181,7 +222,7 @@ export default function Simulation({
               conn={conn}
               index={index}
               nodePositions={nodePositions}
-              colors={bodiesColors}
+              forces={internalConstraintsForces}
             />
           );
         })}
@@ -223,12 +264,12 @@ const PhysicsBasedLine = ({
   conn,
   index,
   nodePositions,
-  colors,
+  forces,
 }: {
   conn: Connection;
   index: number;
   nodePositions: SharedValue<SkPoint[]>;
-  colors: SharedValue<number[]>;
+  forces: SharedValue<number[]>;
 }) => {
   const p1 = useDerivedValue(() => {
     return nodePositions.value[conn.from];
@@ -239,8 +280,8 @@ const PhysicsBasedLine = ({
   }, [nodePositions, conn.to]);
 
   const n = useDerivedValue(() => {
-    return (colors.value[index]) / 5;
-  }, [index, colors])
+    return forces.value[index];
+  }, [index, forces]);
 
   return (
     <Line
