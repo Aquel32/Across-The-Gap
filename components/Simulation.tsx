@@ -7,7 +7,7 @@ import {
   SkPoint,
   vec,
 } from "@shopify/react-native-skia";
-import Matter from "matter-js";
+import Matter, { Events, Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, View } from "react-native";
 import {
@@ -38,9 +38,10 @@ export default function Simulation({
 
   const connectionsConstraints = useRef<Matter.Constraint[]>([]);
   const connectionsBodies = useRef<Matter.Body[]>([]);
+  const bodiesColors = useSharedValue<number[]>(connections.map((c) => 0));
 
   const carData = useSharedValue<{ position: SkPoint; angle: number }>({
-    position: vec(300, 100),
+    position: vec(50, 100),
     angle: 0,
   });
 
@@ -66,6 +67,7 @@ export default function Simulation({
         restitution: 0.8,
         friction: 0.01,
         isStatic: node.isStatic ?? false,
+        mass: 100
       });
     });
     nodeBodies.current = initialBodies;
@@ -91,7 +93,6 @@ export default function Simulation({
       );
 
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
-
       return Matter.Bodies.rectangle(
         (from.x + to.x) / 2,
         (from.y + to.y) / 2,
@@ -109,11 +110,28 @@ export default function Simulation({
 
     const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
       isStatic: true,
+      mass: 1,
       collisionFilter: { category: carCollisionFilter }
     });
     Matter.World.add(world, ground);
 
     let animationFrame: number;
+
+    Events.on(engine, 'collisionActive', (event) => {
+      const c = connections.map((conn) => 0);
+      event.pairs.forEach((pair) => {
+        if (pair.bodyA != carBody) return;
+
+        const bodyAMomentun = Vector.mult(pair.bodyA.velocity, pair.bodyA.mass);
+        const bodyBMomentun = Vector.mult(pair.bodyB.velocity, 1);
+        const relativeMomentum = Vector.sub(bodyAMomentun, bodyBMomentun);
+
+        const i = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
+        if (i == -1) return;
+        c[i] = Vector.magnitude(relativeMomentum);
+      })
+      bodiesColors.value = c;
+    })
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
@@ -122,8 +140,8 @@ export default function Simulation({
         return vec(node.position.x, node.position.y);
       });
       nodePositions.value = newPositions;
-
       connectionsBodies.current.forEach((beamBody, index) => {
+
         const posA = connectionsConstraints.current[index].bodyA!.position;
         const posB = connectionsConstraints.current[index].bodyB!.position;
 
@@ -135,6 +153,7 @@ export default function Simulation({
         Matter.Body.setAngle(beamBody, angle);
       });
 
+      Matter.Body.setVelocity(carBody, { x: 1, y: carBody.velocity.y });
       carData.value = {
         position: vec(carBody.position.x, carBody.position.y),
         angle: carBody.angle,
@@ -160,7 +179,9 @@ export default function Simulation({
             <PhysicsBasedLine
               key={index}
               conn={conn}
+              index={index}
               nodePositions={nodePositions}
+              colors={bodiesColors}
             />
           );
         })}
@@ -200,10 +221,14 @@ const PhysicsBasedCircle = ({
 
 const PhysicsBasedLine = ({
   conn,
+  index,
   nodePositions,
+  colors,
 }: {
   conn: Connection;
+  index: number;
   nodePositions: SharedValue<SkPoint[]>;
+  colors: SharedValue<number[]>;
 }) => {
   const p1 = useDerivedValue(() => {
     return nodePositions.value[conn.from];
@@ -213,12 +238,17 @@ const PhysicsBasedLine = ({
     return nodePositions.value[conn.to];
   }, [nodePositions, conn.to]);
 
+  const n = useDerivedValue(() => {
+    return (colors.value[index]) / 5;
+  }, [index, colors])
+
   return (
     <Line
       p1={p1}
       p2={p2}
       strokeWidth={10}
       color={conn.material.color}
+      opacity={n}
       style={"stroke"}
     />
   );
