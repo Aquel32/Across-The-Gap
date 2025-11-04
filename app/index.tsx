@@ -14,8 +14,8 @@ const INITIAL_NODES: NodeData[] = [
 ];
 
 const INITIAL_CONNECTIONS: Connection[] = [
-  { from: 0, to: 1, material: Materials.STEEL },
-  { from: 2, to: 3, material: Materials.STEEL },
+  { from: 0, to: 1, material: Materials.ROAD },
+  { from: 2, to: 3, material: Materials.ROAD },
 ];
 
 export default function App() {

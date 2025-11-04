@@ -47,6 +47,7 @@ export default function Simulation({
   useEffect(() => {
     Matter.World.clear(world, false);
 
+    const carCollisionFilter = Matter.Body.nextCategory();
     const carBody = Matter.Bodies.rectangle(
       carData.value.position.x,
       carData.value.position.y,
@@ -55,6 +56,7 @@ export default function Simulation({
       {
         restitution: 0.5,
         friction: 0.3,
+        collisionFilter: { mask: carCollisionFilter }
       }
     );
     Matter.World.add(world, carBody);
@@ -85,7 +87,7 @@ export default function Simulation({
 
       const distance = Math.sqrt(
         Math.pow(Math.abs(from.x - to.x), 2) +
-          Math.pow(Math.abs(from.y - to.y), 2)
+        Math.pow(Math.abs(from.y - to.y), 2)
       );
 
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
@@ -98,6 +100,7 @@ export default function Simulation({
         {
           angle,
           isStatic: true,
+          collisionFilter: { category: conn.material.collideWithCar === true ? carCollisionFilter : undefined }
         }
       );
     });
@@ -106,6 +109,7 @@ export default function Simulation({
 
     const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
       isStatic: true,
+      collisionFilter: { category: carCollisionFilter }
     });
     Matter.World.add(world, ground);
 
