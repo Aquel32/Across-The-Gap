@@ -41,6 +41,9 @@ export default function Simulation({
   const internalConstraintsForces = useSharedValue<number[]>(
     connections.map((c) => 0)
   );
+
+  const brokenBeams = useSharedValue<number[]>([]);
+  const timePassed = useSharedValue<number>(0);
   const maxForce = useSharedValue<number>(0);
 
   const carData = useSharedValue<{ position: SkPoint; angle: number }>({
@@ -50,6 +53,7 @@ export default function Simulation({
 
   useEffect(() => {
     Matter.World.clear(world, false);
+    brokenBeams.value = []
 
     const carCollisionFilter = Matter.Body.nextCategory();
     const carBody = Matter.Bodies.rectangle(
@@ -126,7 +130,7 @@ export default function Simulation({
 
     let animationFrame: number;
 
-    const toa: Vector[] = connections.map((c) => ({ x: 0, y: 0 }));
+    const externalForceToAdd: Vector[] = connections.map((c) => ({ x: 0, y: 0 }));
     Events.on(engine, "collisionActive", (event) => {
       event.pairs.forEach((pair) => {
 
@@ -138,29 +142,43 @@ export default function Simulation({
         }
 
         if (!beamBody) return
-        const beamIndex = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
+        const beamIndex = connectionsBodies.current.findIndex((e) => e === pair.bodyB);
         if (beamIndex == -1) return;
         const conn = connections[beamIndex];
+        if (brokenBeams.value.includes(beamIndex)) return;
 
         const normal = pair.collision.normal;
         const carMomentum = Vector.mult(carBody.velocity, carBody.mass);
         const impactMagnitude = Math.abs(Vector.dot(carMomentum, normal));
         const forceVector = Vector.mult(normal, (impactMagnitude * 5) / 30);
         const forcePerNode = Vector.div(forceVector, 2);
-        toa[beamIndex] = { x: Math.abs(forcePerNode.x), y: Math.abs(forcePerNode.y) }
+        externalForceToAdd[beamIndex] = { x: Math.abs(forcePerNode.x), y: Math.abs(forcePerNode.y) }
       });
     });
 
     Events.on(engine, 'beforeUpdate', (event) => {
-      toa.forEach((t, i) => {
+      connections.forEach((conn, index) => {
+        if (timePassed.value < 60 * 5) return;
+        if (brokenBeams.value.includes(index)) return;
+        if (internalConstraintsForces.value[index] == Infinity) return;
+        if (internalConstraintsForces.value[index] > conn.material.durability) {
+          console.log(`connection ${index} broke!`)
+          // brokenBeams.value.push(index);
+          // Matter.World.remove(world, connectionsBodies.current[index]);
+          // Matter.World.remove(world, connectionsConstraints.current[index]);
+        }
+      })
+
+      externalForceToAdd.forEach((force, i) => {
+        if (brokenBeams.value.includes(i)) return;
         const nodeA = nodeBodies.current[connections[i].from];
         const nodeB = nodeBodies.current[connections[i].to];
 
         if (!nodeA.isStatic) {
-          Matter.Body.applyForce(nodeA, nodeA.position, t);
+          Matter.Body.applyForce(nodeA, nodeA.position, force);
         }
         if (!nodeB.isStatic) {
-          Matter.Body.applyForce(nodeB, nodeB.position, t);
+          Matter.Body.applyForce(nodeB, nodeB.position, force);
         }
       })
     })
@@ -201,6 +219,7 @@ export default function Simulation({
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
+      timePassed.value++;
       const newPositions = nodeBodies.current.map((node) => {
         return vec(node.position.x, node.position.y);
       });
@@ -239,6 +258,7 @@ export default function Simulation({
     <View style={{ flex: 1 }}>
       <Canvas style={{ flex: 1 }}>
         {connections.map((conn, index) => {
+          if (brokenBeams.value.includes(index)) return;
           return (
             <PhysicsBasedLine
               key={index}

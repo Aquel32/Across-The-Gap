@@ -16,4 +16,5 @@ export interface Material {
   color: string;
   stiffness: number;
   collideWithCar?: boolean;
+  durability: number;
 }
