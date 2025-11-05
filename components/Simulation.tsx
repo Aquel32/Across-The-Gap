@@ -58,6 +58,7 @@ export default function Simulation({
       CAR_WIDTH,
       CAR_HEIGHT,
       {
+        mass: 5,
         restitution: 0.5,
         friction: 0.3,
         collisionFilter: { mask: carCollisionFilter },
@@ -92,7 +93,7 @@ export default function Simulation({
 
       const distance = Math.sqrt(
         Math.pow(Math.abs(from.x - to.x), 2) +
-          Math.pow(Math.abs(from.y - to.y), 2)
+        Math.pow(Math.abs(from.y - to.y), 2)
       );
 
       const angle = Math.atan2(to.y - from.y, to.x - from.x);
@@ -125,21 +126,44 @@ export default function Simulation({
 
     let animationFrame: number;
 
-    // Events.on(engine, "collisionActive", (event) => {
-    //   const c = connections.map((conn) => 0);
-    //   event.pairs.forEach((pair) => {
-    //     if (pair.bodyA != carBody) return;
+    const toa: Vector[] = connections.map((c) => ({ x: 0, y: 0 }));
+    Events.on(engine, "collisionActive", (event) => {
+      event.pairs.forEach((pair) => {
 
-    //     const bodyAMomentun = Vector.mult(pair.bodyA.velocity, pair.bodyA.mass);
-    //     const bodyBMomentun = Vector.mult(pair.bodyB.velocity, 1);
-    //     const relativeMomentum = Vector.sub(bodyAMomentun, bodyBMomentun);
+        let beamBody: Matter.Body | null = null;
+        if (pair.bodyA === carBody && pair.bodyB !== ground) {
+          beamBody = pair.bodyB;
+        } else if (pair.bodyB === carBody && pair.bodyA !== ground) {
+          beamBody = pair.bodyA;
+        }
 
-    //     const i = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
-    //     if (i == -1) return;
-    //     c[i] = Vector.magnitude(relativeMomentum);
-    //   });
-    //   internalConstraintsForces.value = c;
-    // });
+        if (!beamBody) return
+        const beamIndex = connectionsBodies.current.findIndex((e) => e == pair.bodyB);
+        if (beamIndex == -1) return;
+        const conn = connections[beamIndex];
+
+        const normal = pair.collision.normal;
+        const carMomentum = Vector.mult(carBody.velocity, carBody.mass);
+        const impactMagnitude = Math.abs(Vector.dot(carMomentum, normal));
+        const forceVector = Vector.mult(normal, (impactMagnitude * 5) / 30);
+        const forcePerNode = Vector.div(forceVector, 2);
+        toa[beamIndex] = { x: Math.abs(forcePerNode.x), y: Math.abs(forcePerNode.y) }
+      });
+    });
+
+    Events.on(engine, 'beforeUpdate', (event) => {
+      toa.forEach((t, i) => {
+        const nodeA = nodeBodies.current[connections[i].from];
+        const nodeB = nodeBodies.current[connections[i].to];
+
+        if (!nodeA.isStatic) {
+          Matter.Body.applyForce(nodeA, nodeA.position, t);
+        }
+        if (!nodeB.isStatic) {
+          Matter.Body.applyForce(nodeB, nodeB.position, t);
+        }
+      })
+    })
 
     Events.on(engine, "afterUpdate", function (event) {
       function getConstraintCurrentLength(constraint: Matter.Constraint) {
@@ -177,7 +201,6 @@ export default function Simulation({
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
-
       const newPositions = nodeBodies.current.map((node) => {
         return vec(node.position.x, node.position.y);
       });
