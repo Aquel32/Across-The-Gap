@@ -1,18 +1,20 @@
 import { Connection, Material, NodeData } from "@/lib/types";
-import { Canvas, Circle, Line, vec } from "@shopify/react-native-skia";
+import { Circle, Line, vec } from "@shopify/react-native-skia";
 import React, { useEffect } from "react";
 import { View } from "react-native";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, useSharedValue } from "react-native-reanimated";
+import CameraView from "./CameraView";
 
 const overlaps = (
   x: number,
   y: number,
   nodes: NodeData[],
+  transform: {
+    translateX: number;
+    translateY: number;
+    scale: number;
+  },
   excludeIndex: number = -1
 ) => {
   "worklet";
@@ -21,7 +23,13 @@ const overlaps = (
     if (i === excludeIndex) continue;
 
     const n = nodes[i];
-    const distance = Math.sqrt(Math.pow(x - n.x, 2) + Math.pow(y - n.y, 2));
+
+    const worldX = (x - transform.translateX) / transform.scale;
+    const worldY = (y - transform.translateY) / transform.scale;
+
+    const distance = Math.sqrt(
+      Math.pow(worldX - n.x, 2) + Math.pow(worldY - n.y, 2)
+    );
     if (distance < n.r) {
       result = i;
       break;
@@ -47,6 +55,13 @@ export default function Editor({
   running: boolean;
   selectedMaterial: Material;
 }) {
+  const enableCameraTransform = useSharedValue<boolean>(true);
+  const cameraTransform = useSharedValue<{
+    translateX: number;
+    translateY: number;
+    scale: number;
+  }>({ translateX: 0, translateY: 0, scale: 1 });
+
   const sharedNodes = useSharedValue(nodes);
   useEffect(() => {
     sharedNodes.value = nodes;
@@ -94,9 +109,15 @@ export default function Editor({
     .onStart((e) => {
       "worklet";
       if (running) return;
-      const nodeIndex = overlaps(e.x, e.y, sharedNodes.value);
+      const nodeIndex = overlaps(
+        e.x,
+        e.y,
+        sharedNodes.value,
+        cameraTransform.value
+      );
 
       if (nodeIndex !== undefined) {
+        enableCameraTransform.value = false;
         selectedNode.value = nodeIndex;
         const startNode = sharedNodes.value[nodeIndex];
         line.p1.value = vec(startNode.x, startNode.y);
@@ -109,10 +130,14 @@ export default function Editor({
       "worklet";
       if (running) return;
       if (selectedNode.value === null) return;
-      line.p2.value = vec(e.x, e.y);
+      line.p2.value = vec(
+        (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale,
+        (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale
+      );
     })
     .onEnd((e) => {
       "worklet";
+      enableCameraTransform.value = true;
       if (running) return;
       if (selectedNode.value === null) return;
 
@@ -122,14 +147,24 @@ export default function Editor({
       line.p2.value = vec(0, 0);
       selectedNode.value = null;
 
-      const targetIndex = overlaps(e.x, e.y, sharedNodes.value, fromIndex);
+      const targetIndex = overlaps(
+        e.x,
+        e.y,
+        sharedNodes.value,
+        cameraTransform.value,
+        fromIndex
+      );
 
       if (targetIndex !== undefined) {
         runOnJS(addConnection)(fromIndex, targetIndex);
       } else {
         const newNode: NodeData = {
-          x: e.x,
-          y: e.y,
+          x:
+            (e.x - cameraTransform.value.translateX) /
+            cameraTransform.value.scale,
+          y:
+            (e.y - cameraTransform.value.translateY) /
+            cameraTransform.value.scale,
           r: 13,
         };
         sharedNodes.value = [...sharedNodes.value, newNode];
@@ -139,44 +174,38 @@ export default function Editor({
 
   return (
     <View style={{ flex: 1 }}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <GestureDetector gesture={gesture}>
-          <Canvas style={{ flex: 1 }}>
-            {connections.map((conn, index) => {
-              const fromNode = nodes[conn.from];
-              const toNode = nodes[conn.to];
-              if (!fromNode || !toNode) return null;
-              return (
-                <Line
-                  key={index}
-                  p1={vec(fromNode.x, fromNode.y)}
-                  p2={vec(toNode.x, toNode.y)}
-                  strokeWidth={10}
-                  color={conn.material.color}
-                  style={"stroke"}
-                />
-              );
-            })}
-
-            {nodes.map((node, i) => (
-              <Circle
-                key={i}
-                cx={node.x}
-                cy={node.y}
-                r={node.r}
-                color="orange"
-              />
-            ))}
-
+      <CameraView
+        otherGestures={gesture}
+        enableTransform={enableCameraTransform}
+        transform={cameraTransform}
+      >
+        {connections.map((conn, index) => {
+          const fromNode = nodes[conn.from];
+          const toNode = nodes[conn.to];
+          if (!fromNode || !toNode) return null;
+          return (
             <Line
-              p1={line.p1}
-              p2={line.p2}
+              key={index}
+              p1={vec(fromNode.x, fromNode.y)}
+              p2={vec(toNode.x, toNode.y)}
               strokeWidth={10}
-              color={selectedMaterial.color}
+              color={conn.material.color}
+              style={"stroke"}
             />
-          </Canvas>
-        </GestureDetector>
-      </GestureHandlerRootView>
+          );
+        })}
+
+        {nodes.map((node, i) => (
+          <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
+        ))}
+
+        <Line
+          p1={line.p1}
+          p2={line.p2}
+          strokeWidth={10}
+          color={selectedMaterial.color}
+        />
+      </CameraView>
     </View>
   );
 }

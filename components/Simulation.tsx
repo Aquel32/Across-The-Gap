@@ -1,12 +1,5 @@
 import { Connection, NodeData } from "@/lib/types";
-import {
-  Canvas,
-  Circle,
-  Line,
-  Rect,
-  SkPoint,
-  vec,
-} from "@shopify/react-native-skia";
+import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, View } from "react-native";
@@ -15,6 +8,7 @@ import {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
+import CameraView from "./CameraView";
 
 const CAR_WIDTH = 80;
 const CAR_HEIGHT = 40;
@@ -226,7 +220,6 @@ export default function Simulation({
     });
 
     const update = () => {
-      console.log(maxForce.value, internalConstraintsForces.value);
       Matter.Engine.update(engine, 1000 / 60);
       timePassed.value++;
       const newPositions = nodeBodies.current.map((node) => {
@@ -265,7 +258,7 @@ export default function Simulation({
 
   return (
     <View style={{ flex: 1 }}>
-      <Canvas style={{ flex: 1 }}>
+      <CameraView>
         {connections.map((conn, index) => {
           return (
             <PhysicsBasedLine
@@ -288,7 +281,12 @@ export default function Simulation({
           />
         ))}
         <PhysicsBasedCar carData={carData} />
-      </Canvas>
+
+        <Rect
+          rect={{ x: 0, y: height - 35, width: width, height: 70 }}
+          color="green"
+        ></Rect>
+      </CameraView>
     </View>
   );
 }
