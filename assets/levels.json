@@ -1,0 +1,15 @@
+
+[
+    {
+        "nodes": [
+            { "x": -100, "y": 150, "r": 13, "isStatic": true },
+            { "x": 150, "y": 150, "r": 13, "isStatic": true },
+            { "x": 630, "y": 150, "r": 13, "isStatic": true },
+            { "x": 1000, "y": 150, "r": 13, "isStatic": true }
+        ],
+        "connections": [
+            { "from": 0, "to": 1, "material": "ROAD" },
+            { "from": 2, "to": 3, "material": "ROAD" }
+        ]
+    }
+]

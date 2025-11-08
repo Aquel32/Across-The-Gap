@@ -14,6 +14,7 @@ const CAR_WIDTH = 80;
 const CAR_HEIGHT = 20;
 const CAR_WHEEL_RADIUS = 15;
 const CAR_WHEEL_OFFSET_Y = 20;
+const CAR_WEIGHT = 5;
 
 const { height, width } = Dimensions.get("window");
 
@@ -65,7 +66,7 @@ export default function Simulation({
         carData.value.body.position.y + CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
         CAR_WHEEL_RADIUS,
         {
-          mass: 5,
+          mass: CAR_WEIGHT / 3,
           restitution: 0.5,
           friction: 0.3,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
@@ -77,7 +78,7 @@ export default function Simulation({
         carData.value.body.position.y + CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
         CAR_WHEEL_RADIUS,
         {
-          mass: 5,
+          mass: CAR_WEIGHT / 3,
           restitution: 0.5,
           friction: 0.3,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
@@ -91,7 +92,7 @@ export default function Simulation({
         CAR_WIDTH,
         CAR_HEIGHT,
         {
-          mass: 5,
+          mass: CAR_WEIGHT / 3,
           restitution: 0.5,
           friction: 0.3,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
