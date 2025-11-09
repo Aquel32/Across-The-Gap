@@ -1,5 +1,5 @@
-import { Connection, Material, NodeData } from "@/lib/types";
-import { Circle, Line, vec } from "@shopify/react-native-skia";
+import { Connection, MapElement, Material, NodeData } from "@/lib/types";
+import { Circle, Line, Rect, vec } from "@shopify/react-native-skia";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
@@ -46,6 +46,7 @@ export default function Editor({
   clearLevel,
   running,
   selectedMaterial,
+  mapElements,
 }: {
   nodes: NodeData[];
   connections: Connection[];
@@ -54,6 +55,7 @@ export default function Editor({
   clearLevel: () => void;
   running: boolean;
   selectedMaterial: Material;
+  mapElements: MapElement[];
 }) {
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -197,6 +199,19 @@ export default function Editor({
 
         {nodes.map((node, i) => (
           <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
+        ))}
+
+        {mapElements.map((elem, index) => (
+          <Rect
+            key={index}
+            rect={{
+              x: elem.x,
+              y: elem.y,
+              width: elem.width,
+              height: elem.height,
+            }}
+            color={elem.material.color}
+          />
         ))}
 
         <Line

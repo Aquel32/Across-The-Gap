@@ -2,16 +2,18 @@ import Editor from "@/components/Editor";
 import MaterialSelector from "@/components/MaterialSelector";
 import Simulation from "@/components/Simulation";
 import { Materials } from "@/lib/materials";
-import { Connection, NodeData } from "@/lib/types";
+import { Connection, MapElement, NodeData } from "@/lib/types";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function Level({
   INITIAL_NODES,
   INITIAL_CONNECTIONS,
+  MAP_ELEMENTS,
 }: {
   INITIAL_NODES: NodeData[];
   INITIAL_CONNECTIONS: Connection[];
+  MAP_ELEMENTS: MapElement[];
 }) {
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
@@ -29,7 +31,11 @@ export default function Level({
   return (
     <View style={{ flex: 1 }}>
       {running ? (
-        <Simulation nodes={[...nodes]} connections={[...connections]} />
+        <Simulation
+          nodes={[...nodes]}
+          connections={[...connections]}
+          mapElements={MAP_ELEMENTS}
+        />
       ) : (
         <Editor
           nodes={nodes}
@@ -39,6 +45,7 @@ export default function Level({
           clearLevel={clearLevel}
           running={running}
           selectedMaterial={selectedMaterial}
+          mapElements={MAP_ELEMENTS}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 pb-1">

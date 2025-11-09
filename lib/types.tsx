@@ -11,6 +11,15 @@ export interface Connection {
   material: Material;
 }
 
+export interface MapElement {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  angle: number;
+  material: Material;
+}
+
 export interface Material {
   name: string;
   color: string;

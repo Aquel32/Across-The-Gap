@@ -1,4 +1,4 @@
-import { Connection, NodeData } from "@/lib/types";
+import { Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
@@ -21,9 +21,11 @@ const { height, width } = Dimensions.get("window");
 export default function Simulation({
   nodes,
   connections,
+  mapElements,
 }: {
   nodes: NodeData[];
   connections: Connection[];
+  mapElements: MapElement[];
 }) {
   const [engine] = useState(() =>
     Matter.Engine.create({ gravity: { x: 0, y: 1 } })
@@ -59,6 +61,7 @@ export default function Simulation({
 
     const carCollisionFilter = Matter.Body.nextCategory();
     const carGroup = Matter.Body.nextGroup(true);
+    const mapGroup = Matter.Body.nextGroup(true);
 
     function createCar() {
       const frontWheel = Matter.Bodies.circle(
@@ -188,12 +191,24 @@ export default function Simulation({
     connectionsBodies.current = constraintsCollisions;
     Matter.World.add(world, constraintsCollisions);
 
-    const ground = Matter.Bodies.rectangle(width / 2, height, width, 70, {
-      isStatic: true,
-      mass: 1,
-      collisionFilter: { category: carCollisionFilter },
+    mapElements.forEach((elem) => {
+      const body = Matter.Bodies.rectangle(
+        elem.x + elem.width / 2,
+        elem.y + elem.height / 2,
+        elem.width,
+        elem.height,
+        {
+          angle: elem.angle,
+          isStatic: true,
+          collisionFilter: {
+            category: carCollisionFilter,
+            group: mapGroup,
+          },
+          label: "mapElement",
+        }
+      );
+      Matter.World.add(world, body);
     });
-    Matter.World.add(world, ground);
 
     let animationFrame: number;
 
@@ -205,10 +220,16 @@ export default function Simulation({
       event.pairs.forEach((pair) => {
         let beamBody: Matter.Body | null = null;
         let carPart: Matter.Body | null = null;
-        if (pair.bodyA.label === "carPart" && pair.bodyB !== ground) {
+        if (
+          pair.bodyA.label === "carPart" &&
+          pair.bodyB.label !== "mapElement"
+        ) {
           beamBody = pair.bodyB;
           carPart = pair.bodyA;
-        } else if (pair.bodyB.label === "carPart" && pair.bodyA !== ground) {
+        } else if (
+          pair.bodyB.label === "carPart" &&
+          pair.bodyA.label !== "mapElement"
+        ) {
           beamBody = pair.bodyA;
           carPart = pair.bodyB;
         }
@@ -374,10 +395,18 @@ export default function Simulation({
         ))}
         <PhysicsBasedCar carData={carData} />
 
-        <Rect
-          rect={{ x: 0, y: height - 35, width: width, height: 70 }}
-          color="green"
-        ></Rect>
+        {mapElements.map((elem, index) => (
+          <Rect
+            key={index}
+            rect={{
+              x: elem.x,
+              y: elem.y,
+              width: elem.width,
+              height: elem.height,
+            }}
+            color={elem.material.color}
+          />
+        ))}
       </CameraView>
     </View>
   );
@@ -425,7 +454,8 @@ const PhysicsBasedLine = ({
 
   const opacity = useDerivedValue(() => {
     const broken = brokenBeams.value.includes(index);
-    return broken ? 0 : 1 - forces.value[index];
+    //return broken ? 0 : 1 - forces.value[index];
+    return broken ? 0 : 1;
     //return broken ? 0 : 1;
   }, [index, forces, brokenBeams]);
 

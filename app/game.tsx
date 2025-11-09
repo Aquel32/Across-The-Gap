@@ -2,7 +2,7 @@ import Editor from "@/components/Editor";
 import MaterialSelector from "@/components/MaterialSelector";
 import Simulation from "@/components/Simulation";
 import { Materials } from "@/lib/materials";
-import { Connection, NodeData } from "@/lib/types";
+import { Connection, MapElement, NodeData } from "@/lib/types";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -16,6 +16,25 @@ const INITIAL_NODES: NodeData[] = [
 const INITIAL_CONNECTIONS: Connection[] = [
   { from: 0, to: 1, material: Materials.ROAD },
   { from: 2, to: 3, material: Materials.ROAD },
+];
+
+const GROUND_ELEMENTS: MapElement[] = [
+  {
+    x: -300,
+    y: 300,
+    width: 1600,
+    height: 50,
+    angle: 0,
+    material: Materials.STEEL,
+  },
+  {
+    x: 900,
+    y: 200,
+    width: 300,
+    height: 20,
+    angle: -0.3,
+    material: Materials.WOOD,
+  },
 ];
 
 export default function App() {
@@ -35,7 +54,11 @@ export default function App() {
   return (
     <View style={{ flex: 1 }}>
       {running ? (
-        <Simulation nodes={[...nodes]} connections={[...connections]} />
+        <Simulation
+          nodes={[...nodes]}
+          connections={[...connections]}
+          mapElements={GROUND_ELEMENTS}
+        />
       ) : (
         <Editor
           nodes={nodes}
@@ -45,6 +68,7 @@ export default function App() {
           clearLevel={clearLevel}
           running={running}
           selectedMaterial={selectedMaterial}
+          mapElements={GROUND_ELEMENTS}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 pb-1">
