@@ -48,6 +48,8 @@ const DefaultCarSettings: CarSettings = {
 };
 
 export default function App() {
+  const [budget, setBudget] = useState<number>(1000);
+
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
 
@@ -82,6 +84,8 @@ export default function App() {
           selectedMaterial={selectedMaterial}
           mapElements={GROUND_ELEMENTS}
           carSettings={DefaultCarSettings}
+          budget={budget}
+          setBudget={setBudget}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 pb-1">

@@ -5,11 +5,26 @@ import {
   Material,
   NodeData,
 } from "@/lib/types";
-import { Circle, Group, Line, Rect, vec } from "@shopify/react-native-skia";
+import {
+  Text as CanvasText,
+  Circle,
+  Group,
+  Line,
+  matchFont,
+  Rect,
+  SkFont,
+  vec,
+} from "@shopify/react-native-skia";
 import React, { useEffect } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
-import { runOnJS, useSharedValue } from "react-native-reanimated";
+import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
+import {
+  runOnJS,
+  SharedValue,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 import CameraView from "./CameraView";
 
 const overlaps = (
@@ -44,6 +59,11 @@ const overlaps = (
   return result;
 };
 
+const calculatePrice = (length: number, material: Material) => {
+  "worklet";
+  return Math.round(length * material.durability);
+};
+
 export default function Editor({
   nodes,
   connections,
@@ -54,6 +74,8 @@ export default function Editor({
   selectedMaterial,
   mapElements,
   carSettings,
+  budget,
+  setBudget,
 }: {
   nodes: NodeData[];
   connections: Connection[];
@@ -64,6 +86,8 @@ export default function Editor({
   selectedMaterial: Material;
   mapElements: MapElement[];
   carSettings: CarSettings;
+  budget: number;
+  setBudget: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -76,6 +100,12 @@ export default function Editor({
   useEffect(() => {
     sharedNodes.value = nodes;
   }, [nodes]);
+
+  const lastPrice = useSharedValue(0);
+  const lastPriceTextFont = matchFont({
+    fontFamily: "Helvetica",
+    fontSize: 14,
+  });
 
   function addConnection(from: number, to: number) {
     setConnections((conns) => {
@@ -144,6 +174,14 @@ export default function Editor({
         (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale,
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale
       );
+
+      const distance = Math.sqrt(
+        Math.pow(line.p2.value.x - line.p1.value.x, 2) +
+          Math.pow(line.p2.value.y - line.p1.value.y, 2)
+      );
+      lastPrice.value = calculatePrice(distance, selectedMaterial);
+
+      //check if reached max connection distance
     })
     .onEnd((e) => {
       "worklet";
@@ -156,6 +194,14 @@ export default function Editor({
       line.p1.value = vec(0, 0);
       line.p2.value = vec(0, 0);
       selectedNode.value = null;
+
+      if (lastPrice.value > budget) {
+        lastPrice.value = 0;
+        return;
+      }
+
+      runOnJS(setBudget)(budget - lastPrice.value);
+      lastPrice.value = 0;
 
       const targetIndex = overlaps(
         e.x,
@@ -230,7 +276,20 @@ export default function Editor({
         ))}
 
         <Car {...carSettings} />
+
+        <CurrentPriceIndicator
+          price={lastPrice}
+          font={lastPriceTextFont}
+          line={line}
+        />
       </CameraView>
+
+      <View className="w-full absolute top-0 justify-center items-center">
+        <View className="p-2 px-5 bg-gray-300 rounded-b-lg flex flex-row items-center gap-1">
+          <BanknotesIcon color={"green"} width={20} height={20} />
+          <Text className="text-center text-black">{budget}$</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -274,5 +333,45 @@ function Car(carSettings: CarSettings) {
         color="black"
       />
     </Group>
+  );
+}
+
+function CurrentPriceIndicator({
+  price,
+  font,
+  line,
+}: {
+  price: SharedValue<number>;
+  font: SkFont;
+  line: {
+    p1: SharedValue<{ x: number; y: number }>;
+    p2: SharedValue<{ x: number; y: number }>;
+  };
+}) {
+  const priceText = useDerivedValue(() => {
+    return price.value.toString() + "$";
+  }, [price]);
+
+  const midPointX = useDerivedValue(() => {
+    return (line.p1.value.x + line.p2.value.x) / 2;
+  }, [line]);
+
+  const midPointY = useDerivedValue(() => {
+    return (line.p1.value.y + line.p2.value.y) / 2 - 20;
+  }, [line]);
+
+  const opacity = useDerivedValue(() => {
+    return price.value > 0 ? 1 : 0;
+  }, [price]);
+
+  return (
+    <CanvasText
+      x={midPointX}
+      y={midPointY}
+      text={priceText}
+      font={font}
+      color="black"
+      opacity={opacity}
+    />
   );
 }

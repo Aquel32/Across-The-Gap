@@ -43,6 +43,7 @@ export default function LevelScreen() {
       MAP_ELEMENTS={mapElements}
       END_COLLISION={level.endCollision}
       CAR_SETTINGS={level.carSettings}
+      BUDGET={level.budget}
     />
   );
 }

@@ -19,13 +19,17 @@ export default function Level({
   MAP_ELEMENTS,
   END_COLLISION,
   CAR_SETTINGS,
+  BUDGET,
 }: {
   INITIAL_NODES: NodeData[];
   INITIAL_CONNECTIONS: Connection[];
   MAP_ELEMENTS: MapElement[];
   END_COLLISION: { x: number; y: number; width: number; height: number };
   CAR_SETTINGS: CarSettings;
+  BUDGET: number;
 }) {
+  const [budget, setBudget] = useState<number>(BUDGET);
+
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
 
@@ -37,6 +41,7 @@ export default function Level({
     setNodes(INITIAL_NODES);
     setConnections(INITIAL_CONNECTIONS);
     setSelectedMaterial(Materials.ROAD);
+    setBudget(BUDGET);
   }
 
   return (
@@ -60,6 +65,8 @@ export default function Level({
           selectedMaterial={selectedMaterial}
           mapElements={MAP_ELEMENTS}
           carSettings={CAR_SETTINGS}
+          budget={budget}
+          setBudget={setBudget}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">
