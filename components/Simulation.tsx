@@ -14,7 +14,8 @@ const CAR_WIDTH = 80;
 const CAR_HEIGHT = 20;
 const CAR_WHEEL_RADIUS = 15;
 const CAR_WHEEL_OFFSET_Y = 20;
-const CAR_WEIGHT = 5;
+const CAR_WEIGHT = 15;
+const CAR_VELOCITY = 0.2;
 
 const { height, width } = Dimensions.get("window");
 
@@ -22,10 +23,12 @@ export default function Simulation({
   nodes,
   connections,
   mapElements,
+  endCollision,
 }: {
   nodes: NodeData[];
   connections: Connection[];
   mapElements: MapElement[];
+  endCollision: { x: number; y: number; width: number; height: number };
 }) {
   const [engine] = useState(() =>
     Matter.Engine.create({ gravity: { x: 0, y: 1 } })
@@ -50,9 +53,9 @@ export default function Simulation({
     frontWheel: { position: SkPoint; angle: number };
     rearWheel: { position: SkPoint; angle: number };
   }>({
-    body: { position: vec(50, 100), angle: 0 },
-    frontWheel: { position: vec(50, 100), angle: 0 },
-    rearWheel: { position: vec(50, 100), angle: 0 },
+    body: { position: vec(50, 50), angle: 0 },
+    frontWheel: { position: vec(50, 50), angle: 0 },
+    rearWheel: { position: vec(50, 50), angle: 0 },
   });
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function Simulation({
         {
           mass: CAR_WEIGHT / 3,
           restitution: 0.5,
-          friction: 0.3,
+          friction: 0.7,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
           label: "carPart",
         }
@@ -97,7 +100,7 @@ export default function Simulation({
         {
           mass: CAR_WEIGHT / 3,
           restitution: 0.5,
-          friction: 0.3,
+          friction: 0.7,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
           label: "carPart",
         }
@@ -110,6 +113,7 @@ export default function Simulation({
           y: CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
         },
         bodyB: frontWheel,
+        pointB: { x: 0, y: 0 },
         length: 0,
         stiffness: 0.9,
       });
@@ -121,6 +125,7 @@ export default function Simulation({
           y: CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
         },
         bodyB: rearWheel,
+        pointB: { x: 0, y: 0 },
         length: 0,
         stiffness: 0.9,
       });
@@ -210,6 +215,22 @@ export default function Simulation({
       Matter.World.add(world, body);
     });
 
+    const endCollisionBody = Matter.Bodies.rectangle(
+      endCollision.x + endCollision.width / 2,
+      endCollision.y + endCollision.height / 2,
+      endCollision.width,
+      endCollision.height,
+      {
+        isStatic: true,
+        isSensor: true,
+        collisionFilter: {
+          category: carCollisionFilter,
+        },
+        label: "endCollision",
+      }
+    );
+    Matter.World.add(world, endCollisionBody);
+
     let animationFrame: number;
 
     const externalForceToAdd: Vector[] = connections.map((c) => ({
@@ -218,6 +239,15 @@ export default function Simulation({
     }));
     Events.on(engine, "collisionActive", (event) => {
       event.pairs.forEach((pair) => {
+        if (
+          (pair.bodyA.label === "endCollision" &&
+            pair.bodyB.label === "carPart") ||
+          (pair.bodyB.label === "endCollision" &&
+            pair.bodyA.label === "carPart")
+        ) {
+          console.log("Reached the end!");
+        }
+
         let beamBody: Matter.Body | null = null;
         let carPart: Matter.Body | null = null;
         if (
@@ -245,7 +275,7 @@ export default function Simulation({
         const normal = pair.collision.normal;
         const carMomentum = Vector.mult(carPart.velocity, carPart.mass);
         const impactMagnitude = Math.abs(Vector.dot(carMomentum, normal));
-        const forceVector = Vector.mult(normal, (impactMagnitude * 5) / 30);
+        const forceVector = Vector.mult(normal, impactMagnitude);
         const forcePerNode = Vector.div(forceVector, 2);
         externalForceToAdd[beamIndex] = {
           x: Math.abs(forcePerNode.x),
@@ -260,7 +290,12 @@ export default function Simulation({
         if (brokenBeams.value.includes(index)) return;
         if (internalConstraintsForces.value[index] == Infinity) return;
         if (internalConstraintsForces.value[index] > conn.material.durability) {
-          console.log("Breaking beam at index:", index);
+          console.log(
+            "Breaking beam at index:",
+            index,
+            " with force:",
+            internalConstraintsForces.value[index]
+          );
           brokenBeams.value = [...brokenBeams.value, index];
           Matter.World.remove(world, connectionsConstraints.current[index]);
           Matter.World.remove(world, connectionsBodies.current[index]);
@@ -335,7 +370,7 @@ export default function Simulation({
         Matter.Body.setAngle(beamBody, angle);
       });
 
-      Matter.Body.setAngularVelocity(carBody.rearWheel, 0.2);
+      Matter.Body.setAngularVelocity(carBody.rearWheel, CAR_VELOCITY);
       carData.value = {
         body: {
           position: vec(carBody.body.position.x, carBody.body.position.y),
@@ -454,9 +489,7 @@ const PhysicsBasedLine = ({
 
   const opacity = useDerivedValue(() => {
     const broken = brokenBeams.value.includes(index);
-    //return broken ? 0 : 1 - forces.value[index];
-    return broken ? 0 : 1;
-    //return broken ? 0 : 1;
+    return broken ? 0 : 1 - forces.value[index];
   }, [index, forces, brokenBeams]);
 
   return (

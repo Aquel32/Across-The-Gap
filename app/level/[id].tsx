@@ -13,15 +13,15 @@ export default function LevelScreen() {
   const nodes: NodeData[] = level.nodes;
   const connections: Connection[] = [];
 
-  level.connections.forEach((conn) => {
-    const material = (Materials as any)[conn.material];
+  // level.connections.forEach((conn) => {
+  //   const material = (Materials as any)[conn.material];
 
-    connections.push({
-      from: conn.from,
-      to: conn.to,
-      material: material,
-    });
-  });
+  //   connections.push({
+  //     from: conn.from,
+  //     to: conn.to,
+  //     material: material,
+  //   });
+  // });
 
   const mapElements: MapElement[] = [];
   level.mapElements.forEach((elem) => {
@@ -41,6 +41,7 @@ export default function LevelScreen() {
       INITIAL_NODES={nodes}
       INITIAL_CONNECTIONS={connections}
       MAP_ELEMENTS={mapElements}
+      END_COLLISION={level.endCollision}
     />
   );
 }

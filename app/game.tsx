@@ -58,6 +58,7 @@ export default function App() {
           nodes={[...nodes]}
           connections={[...connections]}
           mapElements={GROUND_ELEMENTS}
+          endCollision={{ x: 0, y: 0, width: 100, height: 100 }}
         />
       ) : (
         <Editor

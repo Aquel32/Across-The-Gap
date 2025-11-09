@@ -10,10 +10,12 @@ export default function Level({
   INITIAL_NODES,
   INITIAL_CONNECTIONS,
   MAP_ELEMENTS,
+  END_COLLISION,
 }: {
   INITIAL_NODES: NodeData[];
   INITIAL_CONNECTIONS: Connection[];
   MAP_ELEMENTS: MapElement[];
+  END_COLLISION: { x: number; y: number; width: number; height: number };
 }) {
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
@@ -35,6 +37,7 @@ export default function Level({
           nodes={[...nodes]}
           connections={[...connections]}
           mapElements={MAP_ELEMENTS}
+          endCollision={END_COLLISION}
         />
       ) : (
         <Editor
