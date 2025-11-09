@@ -48,7 +48,10 @@ export default function Simulation({
     frontWheel: { position: SkPoint; angle: number };
     rearWheel: { position: SkPoint; angle: number };
   }>({
-    body: { position: vec(50, 50), angle: 0 },
+    body: {
+      position: vec(carSettings.startTransform.x, carSettings.startTransform.y),
+      angle: carSettings.startTransform.angle,
+    },
     frontWheel: { position: vec(50, 50), angle: 0 },
     rearWheel: { position: vec(50, 50), angle: 0 },
   });

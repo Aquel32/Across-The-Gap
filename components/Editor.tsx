@@ -1,5 +1,11 @@
-import { Connection, MapElement, Material, NodeData } from "@/lib/types";
-import { Circle, Line, Rect, vec } from "@shopify/react-native-skia";
+import {
+  CarSettings,
+  Connection,
+  MapElement,
+  Material,
+  NodeData,
+} from "@/lib/types";
+import { Circle, Group, Line, Rect, vec } from "@shopify/react-native-skia";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
@@ -47,6 +53,7 @@ export default function Editor({
   running,
   selectedMaterial,
   mapElements,
+  carSettings,
 }: {
   nodes: NodeData[];
   connections: Connection[];
@@ -56,6 +63,7 @@ export default function Editor({
   running: boolean;
   selectedMaterial: Material;
   mapElements: MapElement[];
+  carSettings: CarSettings;
 }) {
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -220,7 +228,51 @@ export default function Editor({
         {nodes.map((node, i) => (
           <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
         ))}
+
+        <Car {...carSettings} />
       </CameraView>
     </View>
+  );
+}
+
+function Car(carSettings: CarSettings) {
+  const rectBody = {
+    x: -carSettings.width / 2,
+    y: -carSettings.height / 2,
+    width: carSettings.width,
+    height: carSettings.height,
+  };
+
+  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelRadius;
+  const frontWheel_cx = carSettings.width / 2 - carSettings.wheelRadius;
+  const wheels_cy = carSettings.height / 2 + carSettings.wheelOffsetY;
+
+  return (
+    <Group
+      transform={[
+        {
+          translateX: carSettings.startTransform.x,
+        },
+        {
+          translateY: carSettings.startTransform.y,
+        },
+      ]}
+    >
+      <Rect rect={rectBody} color="black" />
+
+      <Circle
+        cx={rearWheel_cx}
+        cy={wheels_cy}
+        r={carSettings.wheelRadius}
+        color="black"
+      />
+
+      <Circle
+        cx={frontWheel_cx}
+        cy={wheels_cy}
+        r={carSettings.wheelRadius}
+        color="black"
+      />
+    </Group>
   );
 }

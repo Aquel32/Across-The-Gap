@@ -59,6 +59,7 @@ export default function Level({
           running={running}
           selectedMaterial={selectedMaterial}
           mapElements={MAP_ELEMENTS}
+          carSettings={CAR_SETTINGS}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">

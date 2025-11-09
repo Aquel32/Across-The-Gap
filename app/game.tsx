@@ -81,6 +81,7 @@ export default function App() {
           running={running}
           selectedMaterial={selectedMaterial}
           mapElements={GROUND_ELEMENTS}
+          carSettings={DefaultCarSettings}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 pb-1">
