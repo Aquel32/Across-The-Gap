@@ -27,3 +27,13 @@ export interface Material {
   collideWithCar?: boolean;
   durability: number;
 }
+
+export interface CarSettings {
+  startTransform: { x: number; y: number; angle: number };
+  width: number;
+  height: number;
+  mass: number;
+  acceleration: number;
+  wheelRadius: number;
+  wheelOffsetY: number;
+}

@@ -12,21 +12,21 @@ export default function MaterialSelector({
   return (
     <View className="flex flex-row gap-3 items-center justify-center">
       <TouchableOpacity
-        className={`bg-red-500 px-4 py-2 rounded`}
+        className={`bg-red-500 px-4 py-2 rounded w-20 items-center`}
         onPress={() => onMaterialSelect(Materials.ROAD)}
         disabled={disabled}
       >
         <Text>{Materials.ROAD.name}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className={`bg-green-500 px-4 py-2 rounded`}
+        className={`bg-green-500 px-4 py-2 rounded w-20 items-center`}
         onPress={() => onMaterialSelect(Materials.STEEL)}
         disabled={disabled}
       >
         <Text>{Materials.STEEL.name}</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className={`bg-blue-500 px-4 py-2 rounded`}
+        className={`bg-blue-500 px-4 py-2 rounded w-20 items-center`}
         onPress={() => onMaterialSelect(Materials.WOOD)}
         disabled={disabled}
       >

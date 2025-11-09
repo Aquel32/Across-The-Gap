@@ -2,7 +2,7 @@ import Editor from "@/components/Editor";
 import MaterialSelector from "@/components/MaterialSelector";
 import Simulation from "@/components/Simulation";
 import { Materials } from "@/lib/materials";
-import { Connection, MapElement, NodeData } from "@/lib/types";
+import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -37,6 +37,16 @@ const GROUND_ELEMENTS: MapElement[] = [
   },
 ];
 
+const DefaultCarSettings: CarSettings = {
+  startTransform: { x: 0, y: 0, angle: 0 },
+  width: 80,
+  height: 20,
+  mass: 15,
+  acceleration: 0.4,
+  wheelRadius: 15,
+  wheelOffsetY: 20,
+};
+
 export default function App() {
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
@@ -59,6 +69,7 @@ export default function App() {
           connections={[...connections]}
           mapElements={GROUND_ELEMENTS}
           endCollision={{ x: 0, y: 0, width: 100, height: 100 }}
+          carSettings={DefaultCarSettings}
         />
       ) : (
         <Editor

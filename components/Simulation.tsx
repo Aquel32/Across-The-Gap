@@ -1,4 +1,4 @@
-import { Connection, MapElement, NodeData } from "@/lib/types";
+import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
@@ -10,13 +10,6 @@ import {
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
 
-const CAR_WIDTH = 80;
-const CAR_HEIGHT = 20;
-const CAR_WHEEL_RADIUS = 15;
-const CAR_WHEEL_OFFSET_Y = 20;
-const CAR_WEIGHT = 15;
-const CAR_VELOCITY = 0.2;
-
 const { height, width } = Dimensions.get("window");
 
 export default function Simulation({
@@ -24,11 +17,13 @@ export default function Simulation({
   connections,
   mapElements,
   endCollision,
+  carSettings,
 }: {
   nodes: NodeData[];
   connections: Connection[];
   mapElements: MapElement[];
   endCollision: { x: number; y: number; width: number; height: number };
+  carSettings: CarSettings;
 }) {
   const [engine] = useState(() =>
     Matter.Engine.create({ gravity: { x: 0, y: 1 } })
@@ -68,11 +63,15 @@ export default function Simulation({
 
     function createCar() {
       const frontWheel = Matter.Bodies.circle(
-        carData.value.body.position.x + CAR_WIDTH / 2 - CAR_WHEEL_RADIUS,
-        carData.value.body.position.y + CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
-        CAR_WHEEL_RADIUS,
+        carData.value.body.position.x +
+          carSettings.width / 2 -
+          carSettings.wheelRadius,
+        carData.value.body.position.y +
+          carSettings.height / 2 +
+          carSettings.wheelOffsetY,
+        carSettings.wheelRadius,
         {
-          mass: CAR_WEIGHT / 3,
+          mass: carSettings.mass / 3,
           restitution: 0.5,
           friction: 0.3,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
@@ -80,11 +79,15 @@ export default function Simulation({
         }
       );
       const rearWheel = Matter.Bodies.circle(
-        carData.value.body.position.x - CAR_WIDTH / 2 + CAR_WHEEL_RADIUS,
-        carData.value.body.position.y + CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
-        CAR_WHEEL_RADIUS,
+        carData.value.body.position.x -
+          carSettings.width / 2 +
+          carSettings.wheelRadius,
+        carData.value.body.position.y +
+          carSettings.height / 2 +
+          carSettings.wheelOffsetY,
+        carSettings.wheelRadius,
         {
-          mass: CAR_WEIGHT / 3,
+          mass: carSettings.mass / 3,
           restitution: 0.5,
           friction: 0.7,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
@@ -95,10 +98,10 @@ export default function Simulation({
       const body = Matter.Bodies.rectangle(
         carData.value.body.position.x,
         carData.value.body.position.y,
-        CAR_WIDTH,
-        CAR_HEIGHT,
+        carSettings.width,
+        carSettings.height,
         {
-          mass: CAR_WEIGHT / 3,
+          mass: carSettings.mass / 3,
           restitution: 0.5,
           friction: 0.7,
           collisionFilter: { mask: carCollisionFilter, group: carGroup },
@@ -109,8 +112,8 @@ export default function Simulation({
       const frontWheelConstraint = Matter.Constraint.create({
         bodyA: body,
         pointA: {
-          x: CAR_WIDTH / 2 - CAR_WHEEL_RADIUS,
-          y: CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
+          x: carSettings.width / 2 - carSettings.wheelRadius,
+          y: carSettings.height / 2 + carSettings.wheelOffsetY,
         },
         bodyB: frontWheel,
         pointB: { x: 0, y: 0 },
@@ -121,8 +124,8 @@ export default function Simulation({
       const rearWheelConstraint = Matter.Constraint.create({
         bodyA: body,
         pointA: {
-          x: -CAR_WIDTH / 2 + CAR_WHEEL_RADIUS,
-          y: CAR_HEIGHT / 2 + CAR_WHEEL_OFFSET_Y,
+          x: -carSettings.width / 2 + carSettings.wheelRadius,
+          y: carSettings.height / 2 + carSettings.wheelOffsetY,
         },
         bodyB: rearWheel,
         pointB: { x: 0, y: 0 },
@@ -370,7 +373,10 @@ export default function Simulation({
         Matter.Body.setAngle(beamBody, angle);
       });
 
-      Matter.Body.setAngularVelocity(carBody.rearWheel, CAR_VELOCITY);
+      Matter.Body.setAngularVelocity(
+        carBody.rearWheel,
+        carSettings.acceleration
+      );
       carData.value = {
         body: {
           position: vec(carBody.body.position.x, carBody.body.position.y),
@@ -407,6 +413,19 @@ export default function Simulation({
   return (
     <View style={{ flex: 1 }}>
       <CameraView>
+        {mapElements.map((elem, index) => (
+          <Rect
+            key={index}
+            rect={{
+              x: elem.x,
+              y: elem.y,
+              width: elem.width,
+              height: elem.height,
+            }}
+            color={elem.material.color}
+          />
+        ))}
+
         {connections.map((conn, index) => {
           return (
             <PhysicsBasedLine
@@ -428,20 +447,7 @@ export default function Simulation({
             nodePositions={nodePositions}
           />
         ))}
-        <PhysicsBasedCar carData={carData} />
-
-        {mapElements.map((elem, index) => (
-          <Rect
-            key={index}
-            rect={{
-              x: elem.x,
-              y: elem.y,
-              width: elem.width,
-              height: elem.height,
-            }}
-            color={elem.material.color}
-          />
-        ))}
+        <PhysicsBasedCar carData={carData} carSettings={carSettings} />
       </CameraView>
     </View>
   );
@@ -506,18 +512,20 @@ const PhysicsBasedLine = ({
 
 const PhysicsBasedCar = ({
   carData,
+  carSettings,
 }: {
   carData: SharedValue<{
     body: { position: SkPoint; angle: number };
     frontWheel: { position: SkPoint; angle: number };
     rearWheel: { position: SkPoint; angle: number };
   }>;
+  carSettings: CarSettings;
 }) => {
   const rect = {
-    x: -CAR_WIDTH / 2,
-    y: -CAR_HEIGHT / 2,
-    width: CAR_WIDTH,
-    height: CAR_HEIGHT,
+    x: -carSettings.width / 2,
+    y: -carSettings.height / 2,
+    width: carSettings.width,
+    height: carSettings.height,
   };
 
   const rectTransform = useDerivedValue(() => {
@@ -546,8 +554,18 @@ const PhysicsBasedCar = ({
   return (
     <>
       <Rect rect={rect} transform={rectTransform} />
-      <Circle cx={frontCx} cy={frontCy} r={CAR_WHEEL_RADIUS} color="black" />
-      <Circle cx={rearCx} cy={rearCy} r={CAR_WHEEL_RADIUS} color="black" />
+      <Circle
+        cx={frontCx}
+        cy={frontCy}
+        r={carSettings.wheelRadius}
+        color="black"
+      />
+      <Circle
+        cx={rearCx}
+        cy={rearCy}
+        r={carSettings.wheelRadius}
+        color="black"
+      />
     </>
   );
 };

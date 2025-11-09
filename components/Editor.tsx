@@ -181,26 +181,6 @@ export default function Editor({
         enableTransform={enableCameraTransform}
         transform={cameraTransform}
       >
-        {connections.map((conn, index) => {
-          const fromNode = nodes[conn.from];
-          const toNode = nodes[conn.to];
-          if (!fromNode || !toNode) return null;
-          return (
-            <Line
-              key={index}
-              p1={vec(fromNode.x, fromNode.y)}
-              p2={vec(toNode.x, toNode.y)}
-              strokeWidth={10}
-              color={conn.material.color}
-              style={"stroke"}
-            />
-          );
-        })}
-
-        {nodes.map((node, i) => (
-          <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
-        ))}
-
         {mapElements.map((elem, index) => (
           <Rect
             key={index}
@@ -220,6 +200,26 @@ export default function Editor({
           strokeWidth={10}
           color={selectedMaterial.color}
         />
+
+        {connections.map((conn, index) => {
+          const fromNode = nodes[conn.from];
+          const toNode = nodes[conn.to];
+          if (!fromNode || !toNode) return null;
+          return (
+            <Line
+              key={index}
+              p1={vec(fromNode.x, fromNode.y)}
+              p2={vec(toNode.x, toNode.y)}
+              strokeWidth={10}
+              color={conn.material.color}
+              style={"stroke"}
+            />
+          );
+        })}
+
+        {nodes.map((node, i) => (
+          <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
+        ))}
       </CameraView>
     </View>
   );
