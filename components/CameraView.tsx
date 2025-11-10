@@ -5,6 +5,7 @@ import {
   GestureDetector,
   GestureHandlerRootView,
   GestureType,
+  SimultaneousGesture,
 } from "react-native-gesture-handler";
 import {
   SharedValue,
@@ -19,7 +20,7 @@ export default function CameraView({
   transform,
 }: {
   children: React.ReactNode;
-  otherGestures?: GestureType;
+  otherGestures?: GestureType | SimultaneousGesture;
   enableTransform?: SharedValue<boolean>;
   transform?: SharedValue<{
     translateX: number;
@@ -93,7 +94,7 @@ export default function CameraView({
 
   const gestures: GestureType[] = [panGesture, pinchGesture];
   if (otherGestures) {
-    gestures.push(otherGestures);
+    gestures.push(otherGestures as GestureType);
   }
   const composedGesture = Gesture.Simultaneous(...gestures);
 

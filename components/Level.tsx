@@ -1,8 +1,14 @@
 import Editor from "@/components/Editor";
-import MaterialSelector from "@/components/MaterialSelector";
 import Simulation from "@/components/Simulation";
 import { Materials } from "@/lib/materials";
-import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
+import {
+  CarSettings,
+  Connection,
+  MapElement,
+  Menus,
+  Modes,
+  NodeData,
+} from "@/lib/types";
 import { router } from "expo-router";
 import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
@@ -10,8 +16,8 @@ import {
   ArrowLeftEndOnRectangleIcon,
   PauseIcon,
   PlayIcon,
-  TrashIcon,
 } from "react-native-heroicons/outline";
+import ToolsBar from "./ToolsBar";
 
 export default function Level({
   INITIAL_NODES,
@@ -28,6 +34,8 @@ export default function Level({
   CAR_SETTINGS: CarSettings;
   BUDGET: number;
 }) {
+  const [menu, setMenu] = useState<Menus>("none");
+  const [mode, setMode] = useState<Modes>("create");
   const [budget, setBudget] = useState<number>(BUDGET);
 
   const [running, setRunning] = useState<boolean>(false);
@@ -42,6 +50,10 @@ export default function Level({
     setConnections(INITIAL_CONNECTIONS);
     setSelectedMaterial(Materials.ROAD);
     setBudget(BUDGET);
+  }
+
+  function closeMenus() {
+    setMenu("none");
   }
 
   return (
@@ -60,13 +72,14 @@ export default function Level({
           connections={connections}
           setNodes={setNodes}
           setConnections={setConnections}
-          clearLevel={clearLevel}
+          mode={mode}
           running={running}
           selectedMaterial={selectedMaterial}
           mapElements={MAP_ELEMENTS}
           carSettings={CAR_SETTINGS}
           budget={budget}
           setBudget={setBudget}
+          closeMenus={closeMenus}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">
@@ -78,19 +91,18 @@ export default function Level({
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
           </TouchableOpacity>
-          <TouchableOpacity
-            className={`bg-red-500 px-4 py-2 rounded`}
-            onPress={clearLevel}
-            disabled={running}
-          >
-            <TrashIcon color={"white"} />
-          </TouchableOpacity>
         </View>
 
-        <MaterialSelector
+        <ToolsBar
+          menu={menu}
+          setMenu={setMenu}
+          clearLevel={clearLevel}
+          mode={mode}
+          setMode={setMode}
           onMaterialSelect={(material) => setSelectedMaterial(material)}
           disabled={running}
         />
+
         <View className="flex flex-row gap-3 w-40 justify-end">
           <TouchableOpacity
             className={`bg-green-500 px-4 py-2 rounded`}

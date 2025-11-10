@@ -3,6 +3,7 @@ import {
   Connection,
   MapElement,
   Material,
+  Modes,
   NodeData,
 } from "@/lib/types";
 import {
@@ -59,6 +60,69 @@ const overlaps = (
   return result;
 };
 
+const overlapsConnection = (
+  x: number,
+  y: number,
+  nodes: NodeData[],
+  connections: Connection[],
+  transform: {
+    translateX: number;
+    translateY: number;
+    scale: number;
+  },
+  touchRadius: number = 10,
+  excludeIndex: number = -1
+) => {
+  "worklet";
+  const worldX = (x - transform.translateX) / transform.scale;
+  const worldY = (y - transform.translateY) / transform.scale;
+
+  const touchRadiusSq = touchRadius * touchRadius;
+
+  let result: number | undefined = undefined;
+
+  for (let i = 0; i < connections.length; i++) {
+    if (i === excludeIndex) continue;
+
+    const c = connections[i];
+    const n1 = nodes[c.from];
+    const n2 = nodes[c.to];
+
+    if (!n1 || !n2) continue;
+
+    const dx = n2.x - n1.x;
+    const dy = n2.y - n1.y;
+
+    const lenSq = dx * dx + dy * dy;
+
+    const apx = worldX - n1.x;
+    const apy = worldY - n1.y;
+
+    let t;
+    if (lenSq === 0) {
+      t = 0;
+    } else {
+      const dot = apx * dx + apy * dy;
+      t = dot / lenSq;
+
+      t = Math.max(0, Math.min(1, t));
+    }
+
+    const closestX = n1.x + t * dx;
+    const closestY = n1.y + t * dy;
+
+    const distSq =
+      Math.pow(worldX - closestX, 2) + Math.pow(worldY - closestY, 2);
+
+    if (distSq < touchRadiusSq) {
+      result = i;
+      break;
+    }
+  }
+
+  return result;
+};
+
 const calculatePrice = (length: number, material: Material) => {
   "worklet";
   return Math.round(length * material.durability);
@@ -69,25 +133,27 @@ export default function Editor({
   connections,
   setNodes,
   setConnections,
-  clearLevel,
+  mode,
   running,
   selectedMaterial,
   mapElements,
   carSettings,
   budget,
   setBudget,
+  closeMenus,
 }: {
   nodes: NodeData[];
   connections: Connection[];
   setNodes: React.Dispatch<React.SetStateAction<NodeData[]>>;
   setConnections: React.Dispatch<React.SetStateAction<Connection[]>>;
-  clearLevel: () => void;
+  mode: Modes;
   running: boolean;
   selectedMaterial: Material;
   mapElements: MapElement[];
   carSettings: CarSettings;
   budget: number;
   setBudget: React.Dispatch<React.SetStateAction<number>>;
+  closeMenus: () => void;
 }) {
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -100,6 +166,11 @@ export default function Editor({
   useEffect(() => {
     sharedNodes.value = nodes;
   }, [nodes]);
+
+  const sharedConnections = useSharedValue(connections);
+  useEffect(() => {
+    sharedConnections.value = connections;
+  }, [connections]);
 
   const lastPrice = useSharedValue(0);
   const lastPriceTextFont = matchFont({
@@ -118,8 +189,6 @@ export default function Editor({
       ) {
         return conns;
       }
-
-      //check if new connections intersects with existing one, if so create node at intersection point
 
       console.log("Connecting node", from, "to", to);
       return [...conns, { from, to, material: selectedMaterial }];
@@ -143,12 +212,42 @@ export default function Editor({
     strokeWidth: 10,
   };
 
+  function deleteNode(nodeIndex: number) {
+    setNodes((currentNodes) => {
+      return currentNodes.filter((_, i) => i !== nodeIndex);
+    });
+
+    setConnections((currentConns) => {
+      const filtered = currentConns.filter(
+        (conn) => conn.from !== nodeIndex && conn.to !== nodeIndex
+      );
+
+      return filtered.map((conn) => ({
+        ...conn,
+        from: conn.from > nodeIndex ? conn.from - 1 : conn.from,
+        to: conn.to > nodeIndex ? conn.to - 1 : conn.to,
+      }));
+    });
+  }
+
+  function deleteConnection(connectionIndex: number) {
+    setConnections((currentConns) => {
+      const newConnections = currentConns.filter(
+        (_, i) => i !== connectionIndex
+      );
+
+      return newConnections;
+    });
+  }
+
   const selectedNode = useSharedValue<number | null>(null);
 
-  const gesture = Gesture.Pan()
+  const panGesture = Gesture.Pan()
     .onStart((e) => {
       "worklet";
+      runOnJS(closeMenus)();
       if (running) return;
+      if (mode == "delete") return;
       const nodeIndex = overlaps(
         e.x,
         e.y,
@@ -168,12 +267,33 @@ export default function Editor({
     })
     .onChange((e) => {
       "worklet";
+      if (mode == "delete") return;
       if (running) return;
       if (selectedNode.value === null) return;
-      line.p2.value = vec(
-        (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale,
-        (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale
-      );
+
+      if (mode == "create") {
+        line.p2.value = vec(
+          (e.x - cameraTransform.value.translateX) /
+            cameraTransform.value.scale,
+          (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale
+        );
+      } else if (mode == "move") {
+        if (nodes[selectedNode.value].isStatic) return;
+        const newX =
+          (e.x - cameraTransform.value.translateX) /
+          cameraTransform.value.scale;
+        const newY =
+          (e.y - cameraTransform.value.translateY) /
+          cameraTransform.value.scale;
+
+        const newNodes = [...nodes];
+        newNodes[selectedNode.value] = {
+          ...newNodes[selectedNode.value],
+          x: newX,
+          y: newY,
+        };
+        runOnJS(setNodes)(newNodes);
+      }
 
       const distance = Math.sqrt(
         Math.pow(line.p2.value.x - line.p1.value.x, 2) +
@@ -186,6 +306,7 @@ export default function Editor({
     .onEnd((e) => {
       "worklet";
       enableCameraTransform.value = true;
+      if (mode == "delete") return;
       if (running) return;
       if (selectedNode.value === null) return;
 
@@ -211,27 +332,61 @@ export default function Editor({
         fromIndex
       );
 
-      if (targetIndex !== undefined) {
-        runOnJS(addConnection)(fromIndex, targetIndex);
-      } else {
-        const newNode: NodeData = {
-          x:
-            (e.x - cameraTransform.value.translateX) /
-            cameraTransform.value.scale,
-          y:
-            (e.y - cameraTransform.value.translateY) /
-            cameraTransform.value.scale,
-          r: 13,
-        };
-        sharedNodes.value = [...sharedNodes.value, newNode];
-        runOnJS(addNode)(fromIndex, newNode);
+      if (mode == "create") {
+        if (targetIndex !== undefined) {
+          runOnJS(addConnection)(fromIndex, targetIndex);
+        } else {
+          const newNode: NodeData = {
+            x:
+              (e.x - cameraTransform.value.translateX) /
+              cameraTransform.value.scale,
+            y:
+              (e.y - cameraTransform.value.translateY) /
+              cameraTransform.value.scale,
+            r: 13,
+          };
+          sharedNodes.value = [...sharedNodes.value, newNode];
+          runOnJS(addNode)(fromIndex, newNode);
+        }
       }
     });
+
+  const tapGesture = Gesture.Tap().onEnd((e) => {
+    "worklet";
+    if (mode !== "delete" || running) return;
+
+    const connectionIndex = overlapsConnection(
+      e.x,
+      e.y,
+      sharedNodes.value,
+      sharedConnections.value,
+      cameraTransform.value
+    );
+
+    if (connectionIndex !== undefined) {
+      runOnJS(deleteConnection)(connectionIndex);
+      return;
+    }
+
+    const nodeIndex = overlaps(
+      e.x,
+      e.y,
+      sharedNodes.value,
+      cameraTransform.value
+    );
+
+    if (nodeIndex !== undefined) {
+      runOnJS(deleteNode)(nodeIndex);
+      return;
+    }
+  });
+
+  const composedGesture = Gesture.Simultaneous(panGesture, tapGesture);
 
   return (
     <View style={{ flex: 1 }}>
       <CameraView
-        otherGestures={gesture}
+        otherGestures={composedGesture}
         enableTransform={enableCameraTransform}
         transform={cameraTransform}
       >

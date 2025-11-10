@@ -37,3 +37,13 @@ export interface CarSettings {
   wheelRadius: number;
   wheelOffsetY: number;
 }
+
+export type Modes =
+  | "move"
+  | "create"
+  | "delete"
+  | "arch"
+  | "chain"
+  | "mesh"
+  | "none";
+export type Menus = "mode" | "tools" | "materials" | "none";
