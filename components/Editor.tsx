@@ -231,12 +231,38 @@ export default function Editor({
   }
 
   function deleteConnection(connectionIndex: number) {
+    const nodesToCheck = [];
+    nodesToCheck.push(connections[connectionIndex].from);
+    nodesToCheck.push(connections[connectionIndex].to);
+
     setConnections((currentConns) => {
       const newConnections = currentConns.filter(
         (_, i) => i !== connectionIndex
       );
 
       return newConnections;
+    });
+
+    const nodesToDelete = [];
+    let lastDeleted: number | undefined = undefined;
+    nodesToCheck.forEach((nodeIndex) => {
+      const stillConnected = connections.some(
+        (conn, i) =>
+          i !== connectionIndex &&
+          (conn.from === nodeIndex || conn.to === nodeIndex)
+      );
+
+      if (!stillConnected && nodes[nodeIndex].isStatic !== true) {
+        nodesToDelete.push(nodeIndex);
+        let ind = nodeIndex;
+        if (lastDeleted !== undefined && nodeIndex > lastDeleted) {
+          lastDeleted = nodeIndex;
+          ind = ind - 1;
+        }
+
+        lastDeleted = ind;
+        deleteNode(ind);
+      }
     });
   }
 
@@ -355,6 +381,18 @@ export default function Editor({
     "worklet";
     if (mode !== "delete" || running) return;
 
+    const nodeIndex = overlaps(
+      e.x,
+      e.y,
+      sharedNodes.value,
+      cameraTransform.value
+    );
+
+    if (nodeIndex !== undefined) {
+      runOnJS(deleteNode)(nodeIndex);
+      return;
+    }
+
     const connectionIndex = overlapsConnection(
       e.x,
       e.y,
@@ -365,18 +403,6 @@ export default function Editor({
 
     if (connectionIndex !== undefined) {
       runOnJS(deleteConnection)(connectionIndex);
-      return;
-    }
-
-    const nodeIndex = overlaps(
-      e.x,
-      e.y,
-      sharedNodes.value,
-      cameraTransform.value
-    );
-
-    if (nodeIndex !== undefined) {
-      runOnJS(deleteNode)(nodeIndex);
       return;
     }
   });
