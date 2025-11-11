@@ -16,7 +16,7 @@ import {
   SkFont,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
@@ -172,6 +172,10 @@ export default function Editor({
     sharedConnections.value = connections;
   }, [connections]);
 
+  const [temporaryChainNodes, setTemporaryChainNodes] = useState<
+    { x: number; y: number }[]
+  >([]);
+
   const MAX_CHAIN_SEGMENT_LENGTH = 100;
 
   const lastPrice = useSharedValue(0);
@@ -214,6 +218,7 @@ export default function Editor({
     toY: number,
     toNode?: number
   ) {
+    setTemporaryChainNodes([]);
     const fromNode = nodes[from];
 
     const chainSegments = [];
@@ -265,6 +270,33 @@ export default function Editor({
     }
 
     return chainSegments;
+  }
+
+  function generateChainPreview(from: number, toX: number, toY: number) {
+    setTemporaryChainNodes([]);
+
+    const fromNode = nodes[from];
+
+    const finalPosition = { x: toX, y: toY };
+
+    const distance = Math.sqrt(
+      Math.pow(fromNode.x - finalPosition.x, 2) +
+        Math.pow(fromNode.y - finalPosition.y, 2)
+    );
+
+    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH));
+
+    const segmentLength = distance / segments;
+    const angle = Math.atan2(
+      finalPosition.y - fromNode.y,
+      finalPosition.x - fromNode.x
+    );
+
+    for (let i = 1; i <= segments; i++) {
+      const newX = fromNode.x + i * segmentLength * Math.cos(angle);
+      const newY = fromNode.y + i * segmentLength * Math.sin(angle);
+      setTemporaryChainNodes((current) => [...current, { x: newX, y: newY }]);
+    }
   }
 
   const line = {
@@ -360,16 +392,16 @@ export default function Editor({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
-      if (mode === "chain" || mode === "create") {
-        line.p2.value = vec(worldX, worldY);
+      if (mode == "create" || mode == "chain") {
+        const distance = Math.sqrt(
+          Math.pow(worldX - line.p1.value.x, 2) +
+            Math.pow(worldY - line.p1.value.y, 2)
+        );
+        lastPrice.value = calculatePrice(distance, selectedMaterial);
       }
 
       if (mode == "create") {
-        const distance = Math.sqrt(
-          Math.pow(line.p2.value.x - line.p1.value.x, 2) +
-            Math.pow(line.p2.value.y - line.p1.value.y, 2)
-        );
-        lastPrice.value = calculatePrice(distance, selectedMaterial);
+        line.p2.value = vec(worldX, worldY);
       } else if (mode == "move") {
         if (nodes[selectedNode.value].isStatic) return;
         const newX = worldX;
@@ -382,6 +414,8 @@ export default function Editor({
         };
         runOnJS(setNodes)(newNodes);
         // calculate refund
+      } else if (mode == "chain") {
+        runOnJS(generateChainPreview)(selectedNode.value, worldX, worldY);
       }
     })
     .onEnd((e) => {
@@ -525,6 +559,10 @@ export default function Editor({
           font={lastPriceTextFont}
           line={line}
         />
+
+        {temporaryChainNodes.map((node, index) => (
+          <Circle key={index} cx={node.x} cy={node.y} r={13} color="orange" />
+        ))}
       </CameraView>
 
       <View className="w-full absolute top-0 justify-center items-center">
