@@ -125,7 +125,7 @@ const overlapsConnection = (
 
 const calculatePrice = (length: number, material: Material) => {
   "worklet";
-  return Math.round(length * material.durability);
+  return Math.round(length * material.pricePerUnit);
 };
 
 export default function Editor({
@@ -172,6 +172,8 @@ export default function Editor({
     sharedConnections.value = connections;
   }, [connections]);
 
+  const MAX_CHAIN_SEGMENT_LENGTH = 100;
+
   const lastPrice = useSharedValue(0);
   const lastPriceTextFont = matchFont({
     fontFamily: "Helvetica",
@@ -204,6 +206,65 @@ export default function Editor({
       ]);
       return [...currentNodes, newNode];
     });
+  }
+
+  function createChain(
+    from: number,
+    toX: number,
+    toY: number,
+    toNode?: number
+  ) {
+    const fromNode = nodes[from];
+
+    const chainSegments = [];
+
+    const finalPosition = { x: toX, y: toY };
+
+    if (toNode !== undefined) {
+      finalPosition.x = nodes[toNode].x;
+      finalPosition.y = nodes[toNode].y;
+    }
+
+    const distance = Math.sqrt(
+      Math.pow(fromNode.x - finalPosition.x, 2) +
+        Math.pow(fromNode.y - finalPosition.y, 2)
+    );
+
+    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH));
+
+    const segmentLength = distance / segments;
+    const angle = Math.atan2(
+      finalPosition.y - fromNode.y,
+      finalPosition.x - fromNode.x
+    );
+
+    if (toNode !== undefined) {
+      segments--;
+    }
+
+    let lastNodeIndex = from;
+    for (let i = 1; i <= segments; i++) {
+      const newX = fromNode.x + i * segmentLength * Math.cos(angle);
+      const newY = fromNode.y + i * segmentLength * Math.sin(angle);
+      const newNode: NodeData = {
+        x: newX,
+        y: newY,
+        r: 13,
+      };
+      chainSegments.push(lastNodeIndex);
+      addNode(lastNodeIndex, newNode);
+      lastNodeIndex = nodes.length + i - 1;
+    }
+
+    if (toNode !== undefined) {
+      chainSegments.push(toNode);
+      setConnections((currentConns) => [
+        ...currentConns,
+        { from: lastNodeIndex, to: toNode, material: selectedMaterial },
+      ]);
+    }
+
+    return chainSegments;
   }
 
   const line = {
@@ -243,7 +304,6 @@ export default function Editor({
       return newConnections;
     });
 
-    const nodesToDelete = [];
     let lastDeleted: number | undefined = undefined;
     nodesToCheck.forEach((nodeIndex) => {
       const stillConnected = connections.some(
@@ -253,7 +313,6 @@ export default function Editor({
       );
 
       if (!stillConnected && nodes[nodeIndex].isStatic !== true) {
-        nodesToDelete.push(nodeIndex);
         let ind = nodeIndex;
         if (lastDeleted !== undefined && nodeIndex > lastDeleted) {
           lastDeleted = nodeIndex;
@@ -274,6 +333,7 @@ export default function Editor({
       runOnJS(closeMenus)();
       if (running) return;
       if (mode == "delete") return;
+
       const nodeIndex = overlaps(
         e.x,
         e.y,
@@ -287,8 +347,6 @@ export default function Editor({
         const startNode = sharedNodes.value[nodeIndex];
         line.p1.value = vec(startNode.x, startNode.y);
         line.p2.value = vec(startNode.x, startNode.y);
-      } else {
-        return;
       }
     })
     .onChange((e) => {
@@ -297,21 +355,25 @@ export default function Editor({
       if (running) return;
       if (selectedNode.value === null) return;
 
+      const worldX =
+        (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale;
+      const worldY =
+        (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
+
+      if (mode === "chain" || mode === "create") {
+        line.p2.value = vec(worldX, worldY);
+      }
+
       if (mode == "create") {
-        line.p2.value = vec(
-          (e.x - cameraTransform.value.translateX) /
-            cameraTransform.value.scale,
-          (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale
+        const distance = Math.sqrt(
+          Math.pow(line.p2.value.x - line.p1.value.x, 2) +
+            Math.pow(line.p2.value.y - line.p1.value.y, 2)
         );
+        lastPrice.value = calculatePrice(distance, selectedMaterial);
       } else if (mode == "move") {
         if (nodes[selectedNode.value].isStatic) return;
-        const newX =
-          (e.x - cameraTransform.value.translateX) /
-          cameraTransform.value.scale;
-        const newY =
-          (e.y - cameraTransform.value.translateY) /
-          cameraTransform.value.scale;
-
+        const newX = worldX;
+        const newY = worldY;
         const newNodes = [...nodes];
         newNodes[selectedNode.value] = {
           ...newNodes[selectedNode.value],
@@ -319,15 +381,8 @@ export default function Editor({
           y: newY,
         };
         runOnJS(setNodes)(newNodes);
+        // calculate refund
       }
-
-      const distance = Math.sqrt(
-        Math.pow(line.p2.value.x - line.p1.value.x, 2) +
-          Math.pow(line.p2.value.y - line.p1.value.y, 2)
-      );
-      lastPrice.value = calculatePrice(distance, selectedMaterial);
-
-      //check if reached max connection distance
     })
     .onEnd((e) => {
       "worklet";
@@ -335,6 +390,11 @@ export default function Editor({
       if (mode == "delete") return;
       if (running) return;
       if (selectedNode.value === null) return;
+
+      const worldX =
+        (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale;
+      const worldY =
+        (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
       const fromIndex = selectedNode.value;
 
@@ -358,21 +418,35 @@ export default function Editor({
         fromIndex
       );
 
+      if (mode == "chain") {
+        runOnJS(createChain)(fromIndex, worldX, worldY, targetIndex);
+        return;
+      }
+
       if (mode == "create") {
         if (targetIndex !== undefined) {
           runOnJS(addConnection)(fromIndex, targetIndex);
         } else {
           const newNode: NodeData = {
-            x:
-              (e.x - cameraTransform.value.translateX) /
-              cameraTransform.value.scale,
-            y:
-              (e.y - cameraTransform.value.translateY) /
-              cameraTransform.value.scale,
+            x: worldX,
+            y: worldY,
             r: 13,
           };
           sharedNodes.value = [...sharedNodes.value, newNode];
           runOnJS(addNode)(fromIndex, newNode);
+        }
+      } else if (mode == "move") {
+        if (targetIndex !== undefined) {
+          const connsToUpdate = connections.filter(
+            (conn) => conn.from === fromIndex || conn.to === fromIndex
+          );
+          connsToUpdate.forEach((conn) => {
+            const otherNodeIndex =
+              conn.from === fromIndex ? conn.to : conn.from;
+            runOnJS(addConnection)(otherNodeIndex, targetIndex);
+          });
+
+          runOnJS(deleteNode)(fromIndex);
         }
       }
     });
@@ -380,18 +454,6 @@ export default function Editor({
   const tapGesture = Gesture.Tap().onEnd((e) => {
     "worklet";
     if (mode !== "delete" || running) return;
-
-    const nodeIndex = overlaps(
-      e.x,
-      e.y,
-      sharedNodes.value,
-      cameraTransform.value
-    );
-
-    if (nodeIndex !== undefined) {
-      runOnJS(deleteNode)(nodeIndex);
-      return;
-    }
 
     const connectionIndex = overlapsConnection(
       e.x,

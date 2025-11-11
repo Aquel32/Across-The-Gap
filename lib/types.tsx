@@ -26,6 +26,8 @@ export interface Material {
   stiffness: number;
   collideWithCar?: boolean;
   durability: number;
+  lengthPenaltyFactor: number;
+  pricePerUnit: number;
 }
 
 export interface CarSettings {

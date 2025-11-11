@@ -1,3 +1,4 @@
+import { Materials } from "@/lib/materials";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
@@ -295,7 +296,16 @@ export default function Simulation({
         if (timePassed.value < 60 * 2) return;
         if (brokenBeams.value.includes(index)) return;
         if (internalConstraintsForces.value[index] == Infinity) return;
-        if (internalConstraintsForces.value[index] > conn.material.durability) {
+        const maxStrength =
+          conn.material.durability /
+          (1 +
+            connectionsConstraints.current[index].length *
+              conn.material.lengthPenaltyFactor) **
+            2;
+        if (conn.material == Materials.STEEL) {
+          console.log(maxStrength);
+        }
+        if (internalConstraintsForces.value[index] > maxStrength) {
           console.log(
             "Breaking beam at index:",
             index,
