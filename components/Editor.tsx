@@ -328,6 +328,20 @@ export default function Editor({
     nodesToCheck.push(connections[connectionIndex].from);
     nodesToCheck.push(connections[connectionIndex].to);
 
+    const distance = Math.sqrt(
+      Math.pow(
+        nodes[connections[connectionIndex].from].x -
+          nodes[connections[connectionIndex].to].x,
+        2
+      ) +
+        Math.pow(
+          nodes[connections[connectionIndex].from].y -
+            nodes[connections[connectionIndex].to].y,
+          2
+        )
+    );
+    setBudget(budget + calculatePrice(distance, selectedMaterial));
+
     setConnections((currentConns) => {
       const newConnections = currentConns.filter(
         (_, i) => i !== connectionIndex
@@ -393,6 +407,7 @@ export default function Editor({
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
       if (mode == "create" || mode == "chain") {
+        line.p2.value = vec(worldX, worldY);
         const distance = Math.sqrt(
           Math.pow(worldX - line.p1.value.x, 2) +
             Math.pow(worldY - line.p1.value.y, 2)
@@ -401,7 +416,6 @@ export default function Editor({
       }
 
       if (mode == "create") {
-        line.p2.value = vec(worldX, worldY);
       } else if (mode == "move") {
         if (nodes[selectedNode.value].isStatic) return;
         const newX = worldX;
