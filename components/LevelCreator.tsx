@@ -114,6 +114,14 @@ export default function LevelCreator({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
+      const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
+
+      if (nodeIndex !== undefined) {
+        selectedNode.value = nodeIndex;
+        selectedElement.value = undefined;
+        return;
+      }
+
       const elementIndex = sharedMapElements.value.findIndex((elem) => {
         return (
           worldX >= elem.x &&
@@ -124,12 +132,6 @@ export default function LevelCreator({
       });
 
       if (elementIndex === -1) {
-        const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
-        if (nodeIndex !== undefined) {
-          selectedNode.value = nodeIndex;
-          return;
-        }
-
         selectedElement.value = undefined;
         selectedNode.value = undefined;
         enableCameraTransform.value = true;
@@ -227,6 +229,13 @@ export default function LevelCreator({
       };
       runOnJS(addElement)(newElement);
     } else if (mode == "delete") {
+      const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
+
+      if (nodeIndex !== undefined) {
+        runOnJS(removeNode)(nodeIndex);
+        return;
+      }
+
       const elementIndex = sharedMapElements.value.findIndex((elem) => {
         return (
           worldX >= elem.x &&
@@ -236,14 +245,9 @@ export default function LevelCreator({
         );
       });
 
-      if (elementIndex === -1) {
-        const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
-        if (nodeIndex === undefined) return;
-        runOnJS(removeNode)(nodeIndex);
-        return;
+      if (elementIndex !== -1) {
+        runOnJS(removeElement)(elementIndex);
       }
-
-      runOnJS(removeElement)(elementIndex);
     } else if (mode == "arch") {
       const newNode: NodeData = {
         x: worldX,
