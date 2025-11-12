@@ -16,7 +16,7 @@ import {
   SkFont,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
@@ -27,6 +27,7 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
+import NumericInput from "./NumericInput";
 
 const overlaps = (
   x: number,
@@ -176,7 +177,7 @@ export default function Editor({
     { x: number; y: number }[]
   >([]);
 
-  const MAX_CHAIN_SEGMENT_LENGTH = 100;
+  const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
 
   const lastPrice = useSharedValue(0);
   const lastPriceTextFont = matchFont({
@@ -232,10 +233,10 @@ export default function Editor({
 
     const distance = Math.sqrt(
       Math.pow(fromNode.x - finalPosition.x, 2) +
-        Math.pow(fromNode.y - finalPosition.y, 2)
+      Math.pow(fromNode.y - finalPosition.y, 2)
     );
 
-    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH));
+    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current));
 
     const segmentLength = distance / segments;
     const angle = Math.atan2(
@@ -281,10 +282,10 @@ export default function Editor({
 
     const distance = Math.sqrt(
       Math.pow(fromNode.x - finalPosition.x, 2) +
-        Math.pow(fromNode.y - finalPosition.y, 2)
+      Math.pow(fromNode.y - finalPosition.y, 2)
     );
 
-    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH));
+    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current));
 
     const segmentLength = distance / segments;
     const angle = Math.atan2(
@@ -331,14 +332,14 @@ export default function Editor({
     const distance = Math.sqrt(
       Math.pow(
         nodes[connections[connectionIndex].from].x -
-          nodes[connections[connectionIndex].to].x,
+        nodes[connections[connectionIndex].to].x,
         2
       ) +
-        Math.pow(
-          nodes[connections[connectionIndex].from].y -
-            nodes[connections[connectionIndex].to].y,
-          2
-        )
+      Math.pow(
+        nodes[connections[connectionIndex].from].y -
+        nodes[connections[connectionIndex].to].y,
+        2
+      )
     );
     setBudget(budget + calculatePrice(distance, selectedMaterial));
 
@@ -410,7 +411,7 @@ export default function Editor({
         line.p2.value = vec(worldX, worldY);
         const distance = Math.sqrt(
           Math.pow(worldX - line.p1.value.x, 2) +
-            Math.pow(worldY - line.p1.value.y, 2)
+          Math.pow(worldY - line.p1.value.y, 2)
         );
         lastPrice.value = calculatePrice(distance, selectedMaterial);
       }
@@ -585,6 +586,19 @@ export default function Editor({
           <Text className="text-center text-black">{budget}$</Text>
         </View>
       </View>
+
+      {(mode == "chain" || mode == "arch") &&
+        <View className="absolute right-0 top-[50%] justify-center items-center rounded-l-lg bg-gray-300">
+          <View className="p-2 px-5 flex flex-row items-center gap-1">
+            <BanknotesIcon color={"green"} width={20} height={20} />
+            <Text className="text-center text-black">{mode} menu</Text>
+          </View>
+          <View className="p-2 px-5  flex flex-row items-center gap-1">
+            <BanknotesIcon color={"green"} width={20} height={20} />
+            <NumericInput min={20} max={200} step={10} defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current} onChange={(newValue) => MAX_CHAIN_SEGMENT_LENGTH.current = newValue} />
+          </View>
+        </View>
+      }
     </View>
   );
 }

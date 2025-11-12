@@ -48,4 +48,4 @@ export type Modes =
   | "chain"
   | "mesh"
   | "none";
-export type Menus = "mode" | "tools" | "materials" | "none";
+export type Menus = "mode" | "tools" | "materials" | "settings" | "none";

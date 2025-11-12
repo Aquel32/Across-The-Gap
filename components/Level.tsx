@@ -14,6 +14,7 @@ import { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
+  Cog6ToothIcon,
   PauseIcon,
   PlayIcon,
 } from "react-native-heroicons/outline";
@@ -90,6 +91,13 @@ export default function Level({
             disabled={running}
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`bg-gray-500 px-4 py-2 rounded`}
+            onPress={() => setMenu("settings")}
+            disabled={running}
+          >
+            <Cog6ToothIcon color={"white"} />
           </TouchableOpacity>
         </View>
 

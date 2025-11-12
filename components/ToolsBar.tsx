@@ -76,13 +76,7 @@ export default function ToolsBar({
                   >
                     <Text>DELETE</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    className={`bg-gray-500 w-20 h-20 rounded items-center justify-center`}
-                    onPress={clearLevel}
-                    disabled={disabled}
-                  >
-                    <TrashIcon color={"white"} />
-                  </TouchableOpacity>
+
                 </>
               )}
               {menu == "tools" && (
@@ -135,6 +129,16 @@ export default function ToolsBar({
                   </TouchableOpacity>
                 </>
               )}
+              {menu == "settings" &&
+                <>
+                  <TouchableOpacity
+                    className={`bg-gray-500 w-20 h-20 rounded items-center justify-center`}
+                    onPress={clearLevel}
+                    disabled={disabled}
+                  >
+                    <TrashIcon color={"white"} />
+                  </TouchableOpacity>
+                </>}
             </View>
           </View>
         )}
