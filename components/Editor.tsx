@@ -261,8 +261,13 @@ export default function Editor({
       finalPosition.x - fromNode.x
     );
 
-    if (chainData.value.to !== undefined && mode != "arch") {
+    if (chainData.value.to !== undefined) {
       segments--;
+    }
+
+    let archChange = 0;
+    if (mode == "arch") {
+      archChange++;
     }
 
 
@@ -274,7 +279,7 @@ export default function Editor({
       const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
       const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
 
-      const archProgress = (i / segments)
+      const archProgress = (i / (segments + archChange))
       const heightFromArch = (mode === "arch")
         ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
         : 0;
@@ -548,7 +553,6 @@ export default function Editor({
         chainData.value.toy = worldY;
         chainData.value.to = targetIndex ? targetIndex : undefined;
       }
-      console.log(chainData.value);
     });
 
   const tapGesture = Gesture.Tap().onEnd((e) => {

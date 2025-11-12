@@ -2,10 +2,13 @@ import { Materials } from "@/lib/materials";
 import { Material, Menus, Modes } from "@/lib/types";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
-  BeakerIcon,
-  InboxStackIcon,
-  TrashIcon,
-  WrenchScrewdriverIcon,
+  BarsArrowUpIcon,
+  BoltSlashIcon,
+  ChevronUpIcon,
+  CursorArrowRippleIcon,
+  EllipsisHorizontalIcon,
+  LinkIcon,
+  TrashIcon
 } from "react-native-heroicons/outline";
 
 export default function ToolsBar({
@@ -29,25 +32,46 @@ export default function ToolsBar({
     <>
       <View className="flex flex-row gap-3 items-center justify-center relative">
         <TouchableOpacity
-          className={`bg-red-500 px-4 py-2 rounded items-center`}
-          onPress={() => setMenu("mode")}
+          className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+          onPress={() => setMode("move")}
           disabled={disabled}
         >
-          <BeakerIcon color={"white"} />
+          <CursorArrowRippleIcon color={"white"} />
         </TouchableOpacity>
         <TouchableOpacity
-          className={`bg-green-500 px-4 py-2 rounded items-center`}
-          onPress={() => setMenu("tools")}
+          className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+          onPress={() => setMode("create")}
           disabled={disabled}
         >
-          <WrenchScrewdriverIcon color={"white"} />
+          <LinkIcon color={"white"} />
         </TouchableOpacity>
         <TouchableOpacity
-          className={`bg-blue-500 px-4 py-2 rounded items-center`}
+          className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+          onPress={() => setMode("delete")}
+          disabled={disabled}
+        >
+          <BoltSlashIcon color={"white"} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+          onPress={() => setMode("arch")}
+          disabled={disabled}
+        >
+          <ChevronUpIcon color={"white"} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+          onPress={() => setMode("chain")}
+          disabled={disabled}
+        >
+          <EllipsisHorizontalIcon color={"white"} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`bg-[#003049] px-4 py-2 rounded items-center`}
           onPress={() => setMenu("materials")}
           disabled={disabled}
         >
-          <InboxStackIcon color={"white"} />
+          <BarsArrowUpIcon color={"white"} />
         </TouchableOpacity>
 
         {menu != "none" && (

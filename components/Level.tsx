@@ -92,14 +92,14 @@ export default function Level({
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">
         <View className="flex flex-row justify-start gap-3 w-40">
           <TouchableOpacity
-            className={`bg-gray-500 px-4 py-2 rounded`}
+            className={`bg-[#2b2d42] px-4 py-2 rounded`}
             onPress={() => router.back()}
             disabled={running}
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
           </TouchableOpacity>
           <TouchableOpacity
-            className={`bg-gray-500 px-4 py-2 rounded`}
+            className={`bg-[#2b2d42] px-4 py-2 rounded`}
             onPress={() => setMenu("settings")}
             disabled={running}
           >
@@ -119,7 +119,7 @@ export default function Level({
 
         <View className="flex flex-row gap-3 w-40 justify-end">
           <TouchableOpacity
-            className={`bg-green-500 px-4 py-2 rounded`}
+            className={`bg-[#588157] px-4 py-2 rounded`}
             onPress={() => setRunning((r) => !r)}
           >
             {running ? (

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import { ArrowDownIcon, ArrowUpIcon } from "react-native-heroicons/outline";
+import { ChevronDownIcon, ChevronUpIcon } from "react-native-heroicons/outline";
 
 export default function NumericInput(
     { min, max, step, onChange, defaultValue }:
@@ -51,7 +51,7 @@ export default function NumericInput(
                 onLongPress={() => longPress(step)}
                 onPressOut={() => pressing.current = false}
             >
-                <ArrowUpIcon size={14} />
+                <ChevronUpIcon size={14} />
             </TouchableOpacity>
             <TouchableOpacity
                 className="p-2 bg-white rounded-br-lg"
@@ -60,7 +60,7 @@ export default function NumericInput(
                 onPressOut={() => pressing.current = false}
 
             >
-                <ArrowDownIcon size={14} />
+                <ChevronDownIcon size={14} />
             </TouchableOpacity>
         </View>
     </View >
