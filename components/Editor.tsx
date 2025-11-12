@@ -187,6 +187,7 @@ export default function Editor({
   >([]);
 
   const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
+  const ARCH_HEIGHT = useRef(30);
   const [generatingChain, setGeneratingChain] = useState(false);
   const chainData = useSharedValue<{ from: number, tox: number, toy: number, to?: number | undefined }>({ from: -1, tox: 0, toy: 0 })
 
@@ -260,14 +261,26 @@ export default function Editor({
       finalPosition.x - fromNode.x
     );
 
-    if (chainData.value.to !== undefined) {
+    if (chainData.value.to !== undefined && mode != "arch") {
       segments--;
     }
 
+
+    const perpAngleX = Math.sin(angle);
+    const perpAngleY = -Math.cos(angle);
+
     let lastNodeIndex = chainData.value.from;
     for (let i = 1; i <= segments; i++) {
-      const newX = fromNode.x + i * segmentLength * Math.cos(angle);
-      const newY = fromNode.y + i * segmentLength * Math.sin(angle);
+      const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
+      const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
+
+      const archProgress = (i / segments)
+      const heightFromArch = (mode === "arch")
+        ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
+        : 0;
+
+      const newX = chordX + heightFromArch * perpAngleX;
+      const newY = chordY + heightFromArch * perpAngleY;
       const newNode: NodeData = {
         x: newX,
         y: newY,
@@ -306,10 +319,23 @@ export default function Editor({
       finalPosition.x - fromNode.x
     );
 
+    const perpAngleX = Math.sin(angle);
+    const perpAngleY = -Math.cos(angle);
+
+    let archStep = (-Math.floor(segments / 2)) + 1
     for (let i = 1; i <= segments; i++) {
-      const newX = fromNode.x + i * segmentLength * Math.cos(angle);
-      const newY = fromNode.y + i * segmentLength * Math.sin(angle);
+      const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
+      const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
+
+      const archProgress = i / segments;
+      const heightFromArch = (mode === "arch")
+        ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
+        : 0;
+
+      const newX = chordX + heightFromArch * perpAngleX;
+      const newY = chordY + heightFromArch * perpAngleY;
       setTemporaryChainNodes((current) => [...current, { x: newX, y: newY }]);
+      archStep++;
     }
   }
 
@@ -408,7 +434,7 @@ export default function Editor({
         line.p1.value = vec(startNode.x, startNode.y);
         line.p2.value = vec(startNode.x, startNode.y);
 
-        if (mode == "chain") {
+        if (mode == "chain" || mode == "arch") {
           runOnJS(setGeneratingChain)(true);
         }
       }
@@ -424,7 +450,7 @@ export default function Editor({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
-      if (mode == "create" || mode == "chain") {
+      if (mode == "create" || mode == "chain" || mode == "arch") {
         line.p2.value = vec(worldX, worldY);
         const distance = Math.sqrt(
           Math.pow(worldX - line.p1.value.x, 2) +
@@ -446,7 +472,7 @@ export default function Editor({
         };
         runOnJS(setNodes)(newNodes);
         // calculate refund
-      } else if (mode == "chain") {
+      } else if (mode == "chain" || mode == "arch") {
         runOnJS(setGeneratingChain)(true);
         runOnJS(generateChainPreview)(selectedNode.value, worldX, worldY);
       }
@@ -484,7 +510,7 @@ export default function Editor({
         fromIndex
       );
 
-      if (mode != "chain") {
+      if (mode != "chain" && mode != "arch") {
         runOnJS(setTemporaryChainNodes)([]);
         line.p1.value = vec(0, 0);
         line.p2.value = vec(0, 0);
@@ -516,7 +542,7 @@ export default function Editor({
           runOnJS(deleteNode)(fromIndex);
         }
       }
-      else if (mode == "chain") {
+      else if (mode == "chain" || mode == "arch") {
         chainData.value.from = fromIndex;
         chainData.value.tox = worldX;
         chainData.value.toy = worldY;
@@ -613,7 +639,7 @@ export default function Editor({
       </View>
 
       {(mode == "chain" || mode == "arch") &&
-        <View className="absolute right-0 top-[50%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
+        <View className="absolute right-0 top-[30%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
           <View className="p-2 px-5  flex flex-row items-center gap-1">
             <NumericInput min={60} max={300} step={10} defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current} onChange={(newValue) => {
               MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
@@ -623,6 +649,15 @@ export default function Editor({
               }
             }} />
           </View>
+          {mode == "arch" &&
+            <View className="p-2 px-5  flex flex-row items-center gap-1">
+              <NumericInput min={-100} max={100} step={5} defaultValue={ARCH_HEIGHT.current} onChange={(newValue) => {
+                ARCH_HEIGHT.current = newValue;
+                if (generatingChain == true) {
+                  generateChainPreview(chainData.value.from, chainData.value.tox, chainData.value.toy);
+                }
+              }} />
+            </View>}
           <View className="flex flex-row gap-5">
             <TouchableOpacity
               onPress={() => createChain()}>

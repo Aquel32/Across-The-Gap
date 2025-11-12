@@ -10,7 +10,7 @@ import {
   NodeData,
 } from "@/lib/types";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
@@ -57,6 +57,10 @@ export default function Level({
   function closeMenus() {
     setMenu("none");
   }
+
+  useEffect(() => {
+    setMenu("none");
+  }, [mode])
 
   return (
     <View style={{ flex: 1 }}>
