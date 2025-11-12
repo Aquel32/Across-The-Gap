@@ -51,6 +51,7 @@ export default function Level({
     setConnections(INITIAL_CONNECTIONS);
     setSelectedMaterial(Materials.ROAD);
     setBudget(BUDGET);
+    setMode("create");
   }
 
   function closeMenus() {
@@ -74,6 +75,7 @@ export default function Level({
           setNodes={setNodes}
           setConnections={setConnections}
           mode={mode}
+          setMode={setMode}
           running={running}
           selectedMaterial={selectedMaterial}
           mapElements={MAP_ELEMENTS}

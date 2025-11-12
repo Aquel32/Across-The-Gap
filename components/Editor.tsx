@@ -17,8 +17,9 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
+import { ArrowPathRoundedSquareIcon, PlusIcon } from "react-native-heroicons/outline";
 import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
 import {
   runOnJS,
@@ -135,6 +136,7 @@ export default function Editor({
   setNodes,
   setConnections,
   mode,
+  setMode,
   running,
   selectedMaterial,
   mapElements,
@@ -148,6 +150,7 @@ export default function Editor({
   setNodes: React.Dispatch<React.SetStateAction<NodeData[]>>;
   setConnections: React.Dispatch<React.SetStateAction<Connection[]>>;
   mode: Modes;
+  setMode: React.Dispatch<React.SetStateAction<Modes>>;
   running: boolean;
   selectedMaterial: Material;
   mapElements: MapElement[];
@@ -173,17 +176,32 @@ export default function Editor({
     sharedConnections.value = connections;
   }, [connections]);
 
+  useEffect(() => {
+    setGeneratingChain(false);
+    setTemporaryChainNodes([]);
+  }, [mode])
+
+
   const [temporaryChainNodes, setTemporaryChainNodes] = useState<
     { x: number; y: number }[]
   >([]);
 
   const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
+  const [generatingChain, setGeneratingChain] = useState(false);
+  const chainData = useSharedValue<{ from: number, tox: number, toy: number, to?: number | undefined }>({ from: -1, tox: 0, toy: 0 })
 
   const lastPrice = useSharedValue(0);
   const lastPriceTextFont = matchFont({
     fontFamily: "Helvetica",
     fontSize: 14,
   });
+
+  useEffect(() => {
+    if (generatingChain == true) return;
+
+    line.p1.value = { x: 0, y: 0 };
+    line.p2.value = { x: 0, y: 0 };
+  }, [generatingChain])
 
   function addConnection(from: number, to: number) {
     setConnections((conns) => {
@@ -213,22 +231,20 @@ export default function Editor({
     });
   }
 
-  function createChain(
-    from: number,
-    toX: number,
-    toY: number,
-    toNode?: number
-  ) {
+  function createChain() {
+    if (generatingChain == false) return;
+
+    setMode("create");
+    setGeneratingChain(false);
     setTemporaryChainNodes([]);
-    const fromNode = nodes[from];
 
-    const chainSegments = [];
+    const fromNode = nodes[chainData.value.from];
 
-    const finalPosition = { x: toX, y: toY };
+    const finalPosition = { x: chainData.value.tox, y: chainData.value.toy };
 
-    if (toNode !== undefined) {
-      finalPosition.x = nodes[toNode].x;
-      finalPosition.y = nodes[toNode].y;
+    if (chainData.value.to !== undefined) {
+      finalPosition.x = nodes[chainData.value.to].x;
+      finalPosition.y = nodes[chainData.value.to].y;
     }
 
     const distance = Math.sqrt(
@@ -244,11 +260,11 @@ export default function Editor({
       finalPosition.x - fromNode.x
     );
 
-    if (toNode !== undefined) {
+    if (chainData.value.to !== undefined) {
       segments--;
     }
 
-    let lastNodeIndex = from;
+    let lastNodeIndex = chainData.value.from;
     for (let i = 1; i <= segments; i++) {
       const newX = fromNode.x + i * segmentLength * Math.cos(angle);
       const newY = fromNode.y + i * segmentLength * Math.sin(angle);
@@ -257,20 +273,17 @@ export default function Editor({
         y: newY,
         r: 13,
       };
-      chainSegments.push(lastNodeIndex);
       addNode(lastNodeIndex, newNode);
       lastNodeIndex = nodes.length + i - 1;
     }
 
-    if (toNode !== undefined) {
-      chainSegments.push(toNode);
+    if (chainData.value.to !== undefined) {
       setConnections((currentConns) => [
         ...currentConns,
-        { from: lastNodeIndex, to: toNode, material: selectedMaterial },
+        { from: lastNodeIndex, to: chainData.value.to!, material: selectedMaterial },
       ]);
     }
 
-    return chainSegments;
   }
 
   function generateChainPreview(from: number, toX: number, toY: number) {
@@ -394,6 +407,10 @@ export default function Editor({
         const startNode = sharedNodes.value[nodeIndex];
         line.p1.value = vec(startNode.x, startNode.y);
         line.p2.value = vec(startNode.x, startNode.y);
+
+        if (mode == "chain") {
+          runOnJS(setGeneratingChain)(true);
+        }
       }
     })
     .onChange((e) => {
@@ -430,6 +447,7 @@ export default function Editor({
         runOnJS(setNodes)(newNodes);
         // calculate refund
       } else if (mode == "chain") {
+        runOnJS(setGeneratingChain)(true);
         runOnJS(generateChainPreview)(selectedNode.value, worldX, worldY);
       }
     })
@@ -447,8 +465,7 @@ export default function Editor({
 
       const fromIndex = selectedNode.value;
 
-      line.p1.value = vec(0, 0);
-      line.p2.value = vec(0, 0);
+
       selectedNode.value = null;
 
       if (lastPrice.value > budget) {
@@ -467,9 +484,10 @@ export default function Editor({
         fromIndex
       );
 
-      if (mode == "chain") {
-        runOnJS(createChain)(fromIndex, worldX, worldY, targetIndex);
-        return;
+      if (mode != "chain") {
+        runOnJS(setTemporaryChainNodes)([]);
+        line.p1.value = vec(0, 0);
+        line.p2.value = vec(0, 0);
       }
 
       if (mode == "create") {
@@ -498,6 +516,13 @@ export default function Editor({
           runOnJS(deleteNode)(fromIndex);
         }
       }
+      else if (mode == "chain") {
+        chainData.value.from = fromIndex;
+        chainData.value.tox = worldX;
+        chainData.value.toy = worldY;
+        chainData.value.to = targetIndex ? targetIndex : undefined;
+      }
+      console.log(chainData.value);
     });
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
@@ -588,14 +613,30 @@ export default function Editor({
       </View>
 
       {(mode == "chain" || mode == "arch") &&
-        <View className="absolute right-0 top-[50%] justify-center items-center rounded-l-lg bg-gray-300">
-          <View className="p-2 px-5 flex flex-row items-center gap-1">
-            <BanknotesIcon color={"green"} width={20} height={20} />
-            <Text className="text-center text-black">{mode} menu</Text>
-          </View>
+        <View className="absolute right-0 top-[50%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
           <View className="p-2 px-5  flex flex-row items-center gap-1">
-            <BanknotesIcon color={"green"} width={20} height={20} />
-            <NumericInput min={20} max={200} step={10} defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current} onChange={(newValue) => MAX_CHAIN_SEGMENT_LENGTH.current = newValue} />
+            <NumericInput min={60} max={300} step={10} defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current} onChange={(newValue) => {
+              MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
+              if (generatingChain == true) {
+                generateChainPreview(chainData.value.from, chainData.value.tox, chainData.value.toy);
+
+              }
+            }} />
+          </View>
+          <View className="flex flex-row gap-5">
+            <TouchableOpacity
+              onPress={() => createChain()}>
+              <PlusIcon color={"white"} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setGeneratingChain(false);
+                setTemporaryChainNodes([])
+                line.p2.value = { x: 0, y: 0 }
+                line.p1.value = { x: 0, y: 0 }
+              }}>
+              <ArrowPathRoundedSquareIcon color={"white"} />
+            </TouchableOpacity>
           </View>
         </View>
       }
