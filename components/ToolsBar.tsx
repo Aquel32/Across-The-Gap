@@ -8,7 +8,7 @@ import {
   CursorArrowRippleIcon,
   EllipsisHorizontalIcon,
   LinkIcon,
-  TrashIcon
+  TrashIcon,
 } from "react-native-heroicons/outline";
 
 export default function ToolsBar({
@@ -100,7 +100,6 @@ export default function ToolsBar({
                   >
                     <Text>DELETE</Text>
                   </TouchableOpacity>
-
                 </>
               )}
               {menu == "tools" && (
@@ -153,7 +152,7 @@ export default function ToolsBar({
                   </TouchableOpacity>
                 </>
               )}
-              {menu == "settings" &&
+              {menu == "settings" && (
                 <>
                   <TouchableOpacity
                     className={`bg-gray-500 w-20 h-20 rounded items-center justify-center`}
@@ -162,7 +161,8 @@ export default function ToolsBar({
                   >
                     <TrashIcon color={"white"} />
                   </TouchableOpacity>
-                </>}
+                </>
+              )}
             </View>
           </View>
         )}

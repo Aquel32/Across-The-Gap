@@ -47,5 +47,7 @@ export type Modes =
   | "arch"
   | "chain"
   | "mesh"
+  | "resize"
+  | "rotate"
   | "none";
 export type Menus = "mode" | "tools" | "materials" | "settings" | "none";

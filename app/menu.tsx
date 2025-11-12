@@ -30,7 +30,7 @@ export default function Menu() {
 
             <TouchableOpacity
               className={`bg-amber-500 px-4 py-2 rounded`}
-              onPress={() => router.push("/game")}
+              onPress={() => router.push("/customs")}
             >
               <PencilSquareIcon color={"white"} />
             </TouchableOpacity>

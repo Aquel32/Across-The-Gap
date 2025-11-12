@@ -19,7 +19,10 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
-import { ArrowPathRoundedSquareIcon, PlusIcon } from "react-native-heroicons/outline";
+import {
+  ArrowPathRoundedSquareIcon,
+  PlusIcon,
+} from "react-native-heroicons/outline";
 import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
 import {
   runOnJS,
@@ -179,8 +182,7 @@ export default function Editor({
   useEffect(() => {
     setGeneratingChain(false);
     setTemporaryChainNodes([]);
-  }, [mode])
-
+  }, [mode]);
 
   const [temporaryChainNodes, setTemporaryChainNodes] = useState<
     { x: number; y: number }[]
@@ -189,7 +191,12 @@ export default function Editor({
   const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
   const ARCH_HEIGHT = useRef(30);
   const [generatingChain, setGeneratingChain] = useState(false);
-  const chainData = useSharedValue<{ from: number, tox: number, toy: number, to?: number | undefined }>({ from: -1, tox: 0, toy: 0 })
+  const chainData = useSharedValue<{
+    from: number;
+    tox: number;
+    toy: number;
+    to?: number | undefined;
+  }>({ from: -1, tox: 0, toy: 0 });
 
   const lastPrice = useSharedValue(0);
   const lastPriceTextFont = matchFont({
@@ -202,7 +209,7 @@ export default function Editor({
 
     line.p1.value = { x: 0, y: 0 };
     line.p2.value = { x: 0, y: 0 };
-  }, [generatingChain])
+  }, [generatingChain]);
 
   function addConnection(from: number, to: number) {
     setConnections((conns) => {
@@ -228,6 +235,7 @@ export default function Editor({
         ...currentConns,
         { from: fromIndex, to: newIndex, material: selectedMaterial },
       ]);
+      console.log("Adding node at", newNode.x, newNode.y);
       return [...currentNodes, newNode];
     });
   }
@@ -250,10 +258,13 @@ export default function Editor({
 
     const distance = Math.sqrt(
       Math.pow(fromNode.x - finalPosition.x, 2) +
-      Math.pow(fromNode.y - finalPosition.y, 2)
+        Math.pow(fromNode.y - finalPosition.y, 2)
     );
 
-    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current));
+    let segments = Math.max(
+      1,
+      Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current)
+    );
 
     const segmentLength = distance / segments;
     const angle = Math.atan2(
@@ -270,7 +281,6 @@ export default function Editor({
       archChange++;
     }
 
-
     const perpAngleX = Math.sin(angle);
     const perpAngleY = -Math.cos(angle);
 
@@ -279,10 +289,11 @@ export default function Editor({
       const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
       const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
 
-      const archProgress = (i / (segments + archChange))
-      const heightFromArch = (mode === "arch")
-        ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
-        : 0;
+      const archProgress = i / (segments + archChange);
+      const heightFromArch =
+        mode === "arch"
+          ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
+          : 0;
 
       const newX = chordX + heightFromArch * perpAngleX;
       const newY = chordY + heightFromArch * perpAngleY;
@@ -298,10 +309,13 @@ export default function Editor({
     if (chainData.value.to !== undefined) {
       setConnections((currentConns) => [
         ...currentConns,
-        { from: lastNodeIndex, to: chainData.value.to!, material: selectedMaterial },
+        {
+          from: lastNodeIndex,
+          to: chainData.value.to!,
+          material: selectedMaterial,
+        },
       ]);
     }
-
   }
 
   function generateChainPreview(from: number, toX: number, toY: number) {
@@ -313,10 +327,13 @@ export default function Editor({
 
     const distance = Math.sqrt(
       Math.pow(fromNode.x - finalPosition.x, 2) +
-      Math.pow(fromNode.y - finalPosition.y, 2)
+        Math.pow(fromNode.y - finalPosition.y, 2)
     );
 
-    let segments = Math.max(1, Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current));
+    let segments = Math.max(
+      1,
+      Math.ceil(distance / MAX_CHAIN_SEGMENT_LENGTH.current)
+    );
 
     const segmentLength = distance / segments;
     const angle = Math.atan2(
@@ -327,15 +344,16 @@ export default function Editor({
     const perpAngleX = Math.sin(angle);
     const perpAngleY = -Math.cos(angle);
 
-    let archStep = (-Math.floor(segments / 2)) + 1
+    let archStep = -Math.floor(segments / 2) + 1;
     for (let i = 1; i <= segments; i++) {
       const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
       const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
 
       const archProgress = i / segments;
-      const heightFromArch = (mode === "arch")
-        ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
-        : 0;
+      const heightFromArch =
+        mode === "arch"
+          ? ARCH_HEIGHT.current * Math.sin(archProgress * Math.PI)
+          : 0;
 
       const newX = chordX + heightFromArch * perpAngleX;
       const newY = chordY + heightFromArch * perpAngleY;
@@ -376,14 +394,14 @@ export default function Editor({
     const distance = Math.sqrt(
       Math.pow(
         nodes[connections[connectionIndex].from].x -
-        nodes[connections[connectionIndex].to].x,
+          nodes[connections[connectionIndex].to].x,
         2
       ) +
-      Math.pow(
-        nodes[connections[connectionIndex].from].y -
-        nodes[connections[connectionIndex].to].y,
-        2
-      )
+        Math.pow(
+          nodes[connections[connectionIndex].from].y -
+            nodes[connections[connectionIndex].to].y,
+          2
+        )
     );
     setBudget(budget + calculatePrice(distance, selectedMaterial));
 
@@ -459,7 +477,7 @@ export default function Editor({
         line.p2.value = vec(worldX, worldY);
         const distance = Math.sqrt(
           Math.pow(worldX - line.p1.value.x, 2) +
-          Math.pow(worldY - line.p1.value.y, 2)
+            Math.pow(worldY - line.p1.value.y, 2)
         );
         lastPrice.value = calculatePrice(distance, selectedMaterial);
       }
@@ -496,11 +514,12 @@ export default function Editor({
 
       const fromIndex = selectedNode.value;
 
-
       selectedNode.value = null;
 
       if (lastPrice.value > budget) {
         lastPrice.value = 0;
+        line.p1.value = vec(0, 0);
+        line.p2.value = vec(0, 0);
         return;
       }
 
@@ -521,7 +540,9 @@ export default function Editor({
         line.p2.value = vec(0, 0);
       }
 
+      console.log(mode, "mode end");
       if (mode == "create") {
+        console.log("Create mode end");
         if (targetIndex !== undefined) {
           runOnJS(addConnection)(fromIndex, targetIndex);
         } else {
@@ -546,8 +567,7 @@ export default function Editor({
 
           runOnJS(deleteNode)(fromIndex);
         }
-      }
-      else if (mode == "chain" || mode == "arch") {
+      } else if (mode == "chain" || mode == "arch") {
         chainData.value.from = fromIndex;
         chainData.value.tox = worldX;
         chainData.value.toy = worldY;
@@ -642,43 +662,63 @@ export default function Editor({
         </View>
       </View>
 
-      {(mode == "chain" || mode == "arch") &&
+      {(mode == "chain" || mode == "arch") && (
         <View className="absolute right-0 top-[30%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
           <View className="p-2 px-5  flex flex-row items-center gap-1">
-            <NumericInput min={60} max={300} step={10} defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current} onChange={(newValue) => {
-              MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
-              if (generatingChain == true) {
-                generateChainPreview(chainData.value.from, chainData.value.tox, chainData.value.toy);
-
-              }
-            }} />
-          </View>
-          {mode == "arch" &&
-            <View className="p-2 px-5  flex flex-row items-center gap-1">
-              <NumericInput min={-100} max={100} step={5} defaultValue={ARCH_HEIGHT.current} onChange={(newValue) => {
-                ARCH_HEIGHT.current = newValue;
+            <NumericInput
+              min={60}
+              max={300}
+              step={10}
+              defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current}
+              onChange={(newValue) => {
+                MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
                 if (generatingChain == true) {
-                  generateChainPreview(chainData.value.from, chainData.value.tox, chainData.value.toy);
+                  generateChainPreview(
+                    chainData.value.from,
+                    chainData.value.tox,
+                    chainData.value.toy
+                  );
                 }
-              }} />
-            </View>}
+              }}
+            />
+          </View>
+          {mode == "arch" && (
+            <View className="p-2 px-5  flex flex-row items-center gap-1">
+              <NumericInput
+                min={-100}
+                max={100}
+                step={5}
+                defaultValue={ARCH_HEIGHT.current}
+                onChange={(newValue) => {
+                  ARCH_HEIGHT.current = newValue;
+                  if (generatingChain == true) {
+                    generateChainPreview(
+                      chainData.value.from,
+                      chainData.value.tox,
+                      chainData.value.toy
+                    );
+                  }
+                }}
+              />
+            </View>
+          )}
           <View className="flex flex-row gap-5">
-            <TouchableOpacity
-              onPress={() => createChain()}>
+            <TouchableOpacity onPress={() => createChain()}>
               <PlusIcon color={"white"} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 setGeneratingChain(false);
-                setTemporaryChainNodes([])
-                line.p2.value = { x: 0, y: 0 }
-                line.p1.value = { x: 0, y: 0 }
-              }}>
+                setTemporaryChainNodes([]);
+                line.p2.value = { x: 0, y: 0 };
+                line.p1.value = { x: 0, y: 0 };
+              }}
+            >
               <ArrowPathRoundedSquareIcon color={"white"} />
             </TouchableOpacity>
           </View>
         </View>
-      }
+      )}
     </View>
   );
 }

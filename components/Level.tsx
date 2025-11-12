@@ -17,6 +17,7 @@ import {
   Cog6ToothIcon,
   PauseIcon,
   PlayIcon,
+  WrenchIcon,
 } from "react-native-heroicons/outline";
 import ToolsBar from "./ToolsBar";
 
@@ -27,6 +28,8 @@ export default function Level({
   END_COLLISION,
   CAR_SETTINGS,
   BUDGET,
+  parentTesting,
+  setParentTesting,
 }: {
   INITIAL_NODES: NodeData[];
   INITIAL_CONNECTIONS: Connection[];
@@ -34,6 +37,8 @@ export default function Level({
   END_COLLISION: { x: number; y: number; width: number; height: number };
   CAR_SETTINGS: CarSettings;
   BUDGET: number;
+  parentTesting?: boolean;
+  setParentTesting?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [menu, setMenu] = useState<Menus>("none");
   const [mode, setMode] = useState<Modes>("create");
@@ -60,7 +65,7 @@ export default function Level({
 
   useEffect(() => {
     setMenu("none");
-  }, [mode])
+  }, [mode]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -118,6 +123,15 @@ export default function Level({
         />
 
         <View className="flex flex-row gap-3 w-40 justify-end">
+          {parentTesting && setParentTesting && (
+            <TouchableOpacity
+              className={`bg-[#588157] px-4 py-2 rounded`}
+              onPress={() => setParentTesting((r) => !r)}
+            >
+              <WrenchIcon color={"white"} />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             className={`bg-[#588157] px-4 py-2 rounded`}
             onPress={() => setRunning((r) => !r)}
