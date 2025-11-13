@@ -12,7 +12,7 @@ import {
 } from "@/lib/types";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { Text, View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
   BarsArrowDownIcon,
@@ -28,6 +28,7 @@ import {
   TrashIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
+import Modal from "react-native-modal";
 import Button from "./Button";
 
 export default function Level({
@@ -80,6 +81,8 @@ export default function Level({
   useEffect(() => {
     setMenu("none");
   }, [mode, running]);
+
+  const [clearLevelModalVisible, setClearLevelModalVisible] = useState(false);
 
   return (
     <View style={{ flex: 1 }}>
@@ -138,7 +141,7 @@ export default function Level({
               </Button>
               <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={() => clearLevel()}
+                onPress={() => setClearLevelModalVisible(true)}
                 hapticStyle={"Heavy"}
                 sound="success"
               >
@@ -268,6 +271,40 @@ export default function Level({
             )}
           </Button>
         </View>
+      </View>
+
+      <View style={{ flex: 1 }} className="absolute">
+        <Modal
+          isVisible={clearLevelModalVisible}
+          animationIn="slideInUp"
+          animationOut="slideOutDown"
+          backdropColor="transparent"
+        >
+          <View className="bg-white p-5 rounded-lg flex items-center">
+            <Text>CZY NAPEWNO WYCZYŚCIĆ POZIOM?</Text>
+            <View className="flex flex-row gap-5 m-10">
+              <Button
+                className="bg-red-500 px-4 py-2 rounded"
+                onPress={() => setClearLevelModalVisible(false)}
+                hapticStyle="Heavy"
+                sound="error"
+              >
+                <Text>NIE</Text>
+              </Button>
+              <Button
+                className="bg-green-500 px-4 py-2 rounded"
+                onPress={() => {
+                  clearLevel();
+                  setClearLevelModalVisible(false);
+                }}
+                hapticStyle="Heavy"
+                sound="success"
+              >
+                <Text>TAK</Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );

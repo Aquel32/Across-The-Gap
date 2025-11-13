@@ -32,6 +32,7 @@ import {
   PuzzlePieceIcon,
   TrashIcon,
 } from "react-native-heroicons/outline";
+import Modal from "react-native-modal";
 
 const DEFAULT_LEVEL: LevelData = {
   nodes: [
@@ -144,7 +145,10 @@ export default function NewLevel() {
   }
 
   function deleteLevel() {
-    if (!Levels[index.current]) return;
+    if (!Levels[index.current]) {
+      router.back();
+      return;
+    }
 
     setLevels((levels) => {
       const updatedLevels = levels.filter((_, i) => i !== index.current);
@@ -154,7 +158,22 @@ export default function NewLevel() {
     });
   }
 
-  function clearLevel() {}
+  function clearLevel() {
+    setNodes([]);
+    setMapElements([]);
+    setCarSettings(DEFAULT_LEVEL.carSettings);
+    setSelectedMaterial(Materials.ROAD);
+    setMode("create");
+  }
+
+  function backToCustoms() {
+    if (!Levels[index.current]) {
+      setNotSavedModalVisible(true);
+      return;
+    }
+
+    router.back();
+  }
 
   function setMaterial(material: Material) {
     setSelectedMaterial(material);
@@ -164,6 +183,10 @@ export default function NewLevel() {
   useEffect(() => {
     setMenu("none");
   }, [running]);
+
+  const [deleteLevelModalVisible, setDeleteLevelModalVisible] = useState(false);
+  const [clearLevelModalVisible, setClearLevelModalVisible] = useState(false);
+  const [notSavedModalVisible, setNotSavedModalVisible] = useState(false);
 
   return (
     <View style={{ flex: 1 }}>
@@ -190,7 +213,7 @@ export default function NewLevel() {
                   setMenu((prev) => (prev === "settings" ? "none" : "settings"))
                 }
                 hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 {menu === "settings" ? (
                   <BarsArrowDownIcon color={"white"} />
@@ -203,9 +226,9 @@ export default function NewLevel() {
                 <View className="absolute bottom-12 flex flex-col gap-2">
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                    onPress={() => router.back()}
+                    onPress={() => backToCustoms()}
                     hapticStyle={"Heavy"}
-                    sound="success"
+                    sound="click"
                   >
                     <ArrowLeftEndOnRectangleIcon color={"white"} />
                   </Button>
@@ -213,23 +236,23 @@ export default function NewLevel() {
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => saveLevel()}
                     hapticStyle={"Heavy"}
-                    sound="success"
+                    sound="click"
                   >
                     <ArchiveBoxArrowDownIcon color={"white"} />
                   </Button>
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                    onPress={() => deleteLevel()}
+                    onPress={() => setDeleteLevelModalVisible(true)}
                     hapticStyle={"Heavy"}
-                    sound="success"
+                    sound="click"
                   >
                     <ArchiveBoxXMarkIcon color={"white"} />
                   </Button>
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                    onPress={() => clearLevel()}
+                    onPress={() => setClearLevelModalVisible(true)}
                     hapticStyle={"Heavy"}
-                    sound="success"
+                    sound="click"
                   >
                     <TrashIcon color={"white"} />
                   </Button>
@@ -358,6 +381,102 @@ export default function NewLevel() {
               <BanknotesIcon color={"green"} width={20} height={20} />
               <Text className="text-center text-black">{newLevel.budget}$</Text>
             </View>
+          </View>
+
+          <View style={{ flex: 1 }} className="absolute">
+            <Modal
+              isVisible={clearLevelModalVisible}
+              animationIn="slideInUp"
+              animationOut="slideOutDown"
+              backdropColor="transparent"
+            >
+              <View className="bg-white p-5 rounded-lg flex items-center">
+                <Text>CZY NAPEWNO CHCESZ WYCZYŚCIĆ POZIOM?</Text>
+                <View className="flex flex-row gap-5 m-10">
+                  <Button
+                    className="bg-red-500 px-4 py-2 rounded"
+                    onPress={() => setClearLevelModalVisible(false)}
+                    hapticStyle="Heavy"
+                    sound="error"
+                  >
+                    <Text>NIE</Text>
+                  </Button>
+                  <Button
+                    className="bg-green-500 px-4 py-2 rounded"
+                    onPress={() => {
+                      clearLevel();
+                      setClearLevelModalVisible(false);
+                    }}
+                    hapticStyle="Heavy"
+                    sound="success"
+                  >
+                    <Text>TAK</Text>
+                  </Button>
+                </View>
+              </View>
+            </Modal>
+            <Modal
+              isVisible={deleteLevelModalVisible}
+              animationIn="slideInUp"
+              animationOut="slideOutDown"
+              backdropColor="transparent"
+            >
+              <View className="bg-white p-5 rounded-lg flex items-center">
+                <Text>CZY NAPEWNO CHCESZ USUNĄĆ POZIOM?</Text>
+                <View className="flex flex-row gap-5 m-10">
+                  <Button
+                    className="bg-red-500 px-4 py-2 rounded"
+                    onPress={() => setDeleteLevelModalVisible(false)}
+                    hapticStyle="Heavy"
+                    sound="error"
+                  >
+                    <Text>NIE</Text>
+                  </Button>
+                  <Button
+                    className="bg-green-500 px-4 py-2 rounded"
+                    onPress={() => {
+                      deleteLevel();
+                      setDeleteLevelModalVisible(false);
+                    }}
+                    hapticStyle="Heavy"
+                    sound="success"
+                  >
+                    <Text>TAK</Text>
+                  </Button>
+                </View>
+              </View>
+            </Modal>
+            <Modal
+              isVisible={notSavedModalVisible}
+              animationIn="slideInUp"
+              animationOut="slideOutDown"
+              backdropColor="transparent"
+            >
+              <View className="bg-white p-5 rounded-lg flex items-center">
+                <Text>CZY NAPEWNO CHCESZ OPUŚCIĆ POZIOM BEZ ZAPISU?</Text>
+                <View className="flex flex-row gap-5 m-10">
+                  <Button
+                    className="bg-red-500 px-4 py-2 rounded"
+                    onPress={() => setNotSavedModalVisible(false)}
+                    hapticStyle="Heavy"
+                    sound="error"
+                  >
+                    <Text>NIE</Text>
+                  </Button>
+                  <Button
+                    className="bg-green-500 px-4 py-2 rounded"
+                    onPress={() => {
+                      router.back();
+                      setNotSavedModalVisible(false);
+                    }}
+                    hapticStyle="Heavy"
+                    sound="success"
+                  >
+                    <Text>TAK</Text>
+                  </Button>
+                </View>
+              </View>
+            </Modal>
           </View>
         </>
       ) : (
