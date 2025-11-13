@@ -32,6 +32,7 @@ import {
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
 import NumericInput from "./NumericInput";
+import { useSFX } from "./SFXProvider";
 
 const overlaps = (
   x: number,
@@ -162,6 +163,8 @@ export default function Editor({
   setBudget: React.Dispatch<React.SetStateAction<number>>;
   closeMenus: () => void;
 }) {
+  const sfx = useSFX();
+
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
     translateX: number;
@@ -226,6 +229,8 @@ export default function Editor({
       console.log("Connecting node", from, "to", to);
       return [...conns, { from, to, material: selectedMaterial }];
     });
+    sfx.playSound("click");
+    sfx.playHaptic("Light");
   }
 
   function addNode(fromIndex: number, newNode: NodeData) {
@@ -238,10 +243,16 @@ export default function Editor({
       console.log("Adding node at", newNode.x, newNode.y);
       return [...currentNodes, newNode];
     });
+    sfx.playSound("click");
+    sfx.playHaptic("Light");
   }
 
   function createChain() {
-    if (generatingChain == false) return;
+    if (generatingChain == false) {
+      sfx.playSound("error");
+      sfx.playHaptic("Heavy");
+      return;
+    }
 
     setMode("create");
     setGeneratingChain(false);
@@ -432,6 +443,9 @@ export default function Editor({
         deleteNode(ind);
       }
     });
+
+    sfx.playSound("click");
+    sfx.playHaptic("Light");
   }
 
   const selectedNode = useSharedValue<number | null>(null);
@@ -459,6 +473,15 @@ export default function Editor({
 
         if (mode == "chain" || mode == "arch") {
           runOnJS(setGeneratingChain)(true);
+        }
+
+        if (mode == "move") {
+          if (nodes[nodeIndex].isStatic) {
+            runOnJS(sfx.playSound)("error");
+          } else {
+            runOnJS(sfx.playSound)("click");
+          }
+          runOnJS(sfx.playHaptic)("Light");
         }
       }
     })
@@ -565,6 +588,10 @@ export default function Editor({
 
           runOnJS(deleteNode)(fromIndex);
         }
+        if (nodes[fromIndex].isStatic !== true) {
+          runOnJS(sfx.playSound)("click");
+          runOnJS(sfx.playHaptic)("Light");
+        }
       } else if (mode == "chain" || mode == "arch") {
         chainData.value.from = fromIndex;
         chainData.value.tox = worldX;
@@ -670,6 +697,7 @@ export default function Editor({
               defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current}
               onChange={(newValue) => {
                 MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
+                sfx.playHaptic("Soft");
                 if (generatingChain == true) {
                   generateChainPreview(
                     chainData.value.from,
@@ -689,6 +717,7 @@ export default function Editor({
                 defaultValue={ARCH_HEIGHT.current}
                 onChange={(newValue) => {
                   ARCH_HEIGHT.current = newValue;
+                  sfx.playHaptic("Soft");
                   if (generatingChain == true) {
                     generateChainPreview(
                       chainData.value.from,
@@ -706,6 +735,7 @@ export default function Editor({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
+                sfx.playHaptic("Soft");
                 setGeneratingChain(false);
                 setTemporaryChainNodes([]);
                 line.p2.value = { x: 0, y: 0 };

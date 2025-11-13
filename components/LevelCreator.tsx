@@ -17,6 +17,7 @@ import {
 } from "react-native-reanimated";
 import { runOnJS } from "react-native-worklets";
 import CameraView from "./CameraView";
+import { useSFX } from "./SFXProvider";
 
 const overlaps = (
   worldX: number,
@@ -65,6 +66,8 @@ export default function LevelCreator({
   selectedMaterial: Material;
   running: boolean;
 }) {
+  const sfx = useSFX();
+
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
     translateX: number;
@@ -85,18 +88,22 @@ export default function LevelCreator({
   const selectedNode = useSharedValue<number | undefined>(undefined);
 
   function addNode(newNode: NodeData) {
+    sfx.playSound("click");
     setNodes((current) => [...current, newNode]);
   }
 
   function addElement(newElement: MapElement) {
+    sfx.playSound("click");
     setMapElements((current) => [...current, newElement]);
   }
 
   function removeNode(nodeIndex: number) {
+    sfx.playSound("click");
     setNodes((currentNodes) => currentNodes.filter((_, i) => i !== nodeIndex));
   }
 
   function removeElement(elementIndex: number) {
+    sfx.playSound("click");
     setMapElements((currentElements) =>
       currentElements.filter((_, i) => i !== elementIndex)
     );
@@ -118,6 +125,7 @@ export default function LevelCreator({
 
       if (nodeIndex !== undefined) {
         selectedNode.value = nodeIndex;
+        runOnJS(sfx.playSound)("click");
         selectedElement.value = undefined;
         return;
       }
@@ -138,6 +146,7 @@ export default function LevelCreator({
         return;
       }
       selectedElement.value = elementIndex;
+      runOnJS(sfx.playSound)("click");
     })
     .onChange((e) => {
       "worklet";

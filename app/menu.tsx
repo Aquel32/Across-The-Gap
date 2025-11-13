@@ -28,7 +28,7 @@ export default function Menu() {
               className="bg-gray-500 px-4 py-2 rounded items-center"
               onPress={() => {}}
               hapticStyle={"Heavy"}
-              sound="success"
+              sound="error"
             >
               <Cog6ToothIcon color={"white"} />
             </Button>
