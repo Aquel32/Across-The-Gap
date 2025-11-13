@@ -12,7 +12,7 @@ import {
 } from "@/lib/types";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
   BarsArrowDownIcon,
@@ -28,6 +28,7 @@ import {
   TrashIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
+import Button from "./Button";
 
 export default function Level({
   INITIAL_NODES,
@@ -109,108 +110,133 @@ export default function Level({
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">
         <View className="flex flex-row justify-start gap-3 w-40 relative">
-          <TouchableOpacity
+          <Button
             className={`bg-[#2b2d42] px-4 py-2 rounded`}
             onPress={() =>
               setMenu((prev) => (prev === "settings" ? "none" : "settings"))
             }
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             {menu === "settings" ? (
               <BarsArrowDownIcon color={"white"} />
             ) : (
               <BarsArrowUpIcon color={"white"} />
             )}
-          </TouchableOpacity>
+          </Button>
 
           {menu === "settings" && (
             <View className="absolute bottom-12 flex flex-col gap-2">
-              <TouchableOpacity
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => router.back()}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <ArrowLeftEndOnRectangleIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => clearLevel()}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <TrashIcon color={"white"} />
-              </TouchableOpacity>
+              </Button>
             </View>
           )}
         </View>
 
         <View className="flex flex-row gap-1">
-          <TouchableOpacity
+          <Button
             className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
             onPress={() => setMode("move")}
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             <CursorArrowRippleIcon color={"white"} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Button>
+          <Button
             className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
             onPress={() => setMode("create")}
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             <LinkIcon color={"white"} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Button>
+          <Button
             className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
             onPress={() => setMode("delete")}
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             <BoltSlashIcon color={"white"} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Button>
+          <Button
             className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
             onPress={() => setMode("arch")}
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             <ChevronUpIcon color={"white"} />
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Button>
+          <Button
             className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
             onPress={() => setMode("chain")}
             disabled={running}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             <EllipsisHorizontalIcon color={"white"} />
-          </TouchableOpacity>
+          </Button>
           <View className="flex flex-row gap-3 relative">
-            <TouchableOpacity
+            <Button
               className={`bg-[#2b2d42] px-4 py-2 rounded`}
               onPress={() =>
                 setMenu((prev) => (prev === "materials" ? "none" : "materials"))
               }
+              disabled={running}
+              hapticStyle={"Heavy"}
+              sound="success"
             >
               {menu === "materials" ? (
                 <BarsArrowDownIcon color={"white"} />
               ) : (
                 <BarsArrowUpIcon color={"white"} />
               )}
-            </TouchableOpacity>
+            </Button>
 
             {menu === "materials" && (
               <View className="absolute bottom-12 flex flex-col gap-2">
-                <TouchableOpacity
+                <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.ROAD)}
+                  hapticStyle={"Heavy"}
+                  sound="success"
                 >
                   <CakeIcon color={Materials.ROAD.color} />
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Button>
+                <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.STEEL)}
+                  hapticStyle={"Heavy"}
+                  sound="success"
                 >
                   <CakeIcon color={Materials.STEEL.color} />
-                </TouchableOpacity>
-                <TouchableOpacity
+                </Button>
+                <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.WOOD)}
+                  hapticStyle={"Heavy"}
+                  sound="success"
                 >
                   <CakeIcon color={Materials.WOOD.color} />
-                </TouchableOpacity>
+                </Button>
               </View>
             )}
           </View>
@@ -218,25 +244,29 @@ export default function Level({
 
         <View className="flex flex-row gap-3 w-40 justify-end">
           {parentTesting && setParentTesting && (
-            <TouchableOpacity
+            <Button
               className={`bg-[#588157] px-4 py-2 rounded`}
               onPress={() => setParentTesting((r) => !r)}
               disabled={running}
+              hapticStyle={"Heavy"}
+              sound="success"
             >
               <WrenchIcon color={"white"} />
-            </TouchableOpacity>
+            </Button>
           )}
 
-          <TouchableOpacity
+          <Button
             className={`bg-[#588157] px-4 py-2 rounded`}
             onPress={() => setRunning((r) => !r)}
+            hapticStyle={"Heavy"}
+            sound="success"
           >
             {running ? (
               <PauseIcon color={"white"} />
             ) : (
               <PlayIcon color={"white"} />
             )}
-          </TouchableOpacity>
+          </Button>
         </View>
       </View>
     </View>

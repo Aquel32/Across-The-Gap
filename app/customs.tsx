@@ -1,5 +1,6 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 
+import Button from "@/components/Button";
 import { loadFileAsync } from "@/lib/storage";
 import { LevelData } from "@/lib/types";
 import { router, useFocusEffect } from "expo-router";
@@ -34,7 +35,7 @@ export default function Customs() {
   return (
     <View className="w-full h-full flex flex-row gap-5 justify-center items-center">
       {Levels.map((level, index) => (
-        <TouchableOpacity
+        <Button
           key={index}
           onPress={() =>
             router.push({
@@ -43,6 +44,8 @@ export default function Customs() {
             })
           }
           className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
+          hapticStyle={"Heavy"}
+          sound="click"
         >
           <Text className="text-2xl">Level {index + 1}</Text>
           <View className="m-2">
@@ -63,9 +66,9 @@ export default function Customs() {
               <Text>{level.carSettings.acceleration}m/s</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </Button>
       ))}
-      <TouchableOpacity
+      <Button
         onPress={() =>
           router.push({
             pathname: "/level/custom/[id]",
@@ -73,18 +76,22 @@ export default function Customs() {
           })
         }
         className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
+        hapticStyle={"Heavy"}
+        sound="click"
       >
         <Text className="text-2xl">Create Level</Text>
-      </TouchableOpacity>
+      </Button>
 
       <View className="flex flex-row w-full justify-between items-center px-10 py-1 absolute bottom-0">
         <View className="flex flex-row justify-start gap-3 w-40">
-          <TouchableOpacity
+          <Button
             className={`bg-gray-500 px-4 py-2 rounded`}
             onPress={() => router.back()}
+            hapticStyle={"Heavy"}
+            sound="click"
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
-          </TouchableOpacity>
+          </Button>
         </View>
       </View>
     </View>

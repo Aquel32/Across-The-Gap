@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
 import { Materials } from "@/lib/materials";
@@ -12,7 +13,7 @@ import {
 } from "@/lib/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import {
   ArchiveBoxArrowDownIcon,
   ArchiveBoxXMarkIcon,
@@ -183,122 +184,152 @@ export default function NewLevel() {
 
           <View className="flex flex-row w-full justify-between items-center px-10 py-1">
             <View className="flex flex-row justify-start gap-3 w-40 relative">
-              <TouchableOpacity
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() =>
                   setMenu((prev) => (prev === "settings" ? "none" : "settings"))
                 }
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 {menu === "settings" ? (
                   <BarsArrowDownIcon color={"white"} />
                 ) : (
                   <BarsArrowUpIcon color={"white"} />
                 )}
-              </TouchableOpacity>
+              </Button>
 
               {menu === "settings" && (
                 <View className="absolute bottom-12 flex flex-col gap-2">
-                  <TouchableOpacity
+                  <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => router.back()}
+                    hapticStyle={"Heavy"}
+                    sound="success"
                   >
                     <ArrowLeftEndOnRectangleIcon color={"white"} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Button>
+                  <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => saveLevel()}
+                    hapticStyle={"Heavy"}
+                    sound="success"
                   >
                     <ArchiveBoxArrowDownIcon color={"white"} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Button>
+                  <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => deleteLevel()}
+                    hapticStyle={"Heavy"}
+                    sound="success"
                   >
                     <ArchiveBoxXMarkIcon color={"white"} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Button>
+                  <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => clearLevel()}
+                    hapticStyle={"Heavy"}
+                    sound="success"
                   >
                     <TrashIcon color={"white"} />
-                  </TouchableOpacity>
+                  </Button>
                 </View>
               )}
             </View>
 
             <View className="flex flex-row justify-center gap-1">
-              <TouchableOpacity
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <PuzzlePieceIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("arch")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <AtSymbolIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("move")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <CursorArrowRippleIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("resize")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <ArrowTopRightOnSquareIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("rotate")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <ArrowPathIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
+              </Button>
+              <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("delete")}
+                hapticStyle={"Heavy"}
+                sound="success"
               >
                 <BoltSlashIcon color={"white"} />
-              </TouchableOpacity>
+              </Button>
               <View className="flex flex-row gap-3 relative">
-                <TouchableOpacity
+                <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
                   onPress={() =>
                     setMenu((prev) =>
                       prev === "materials" ? "none" : "materials"
                     )
                   }
+                  hapticStyle={"Heavy"}
+                  sound="success"
                 >
                   {menu === "materials" ? (
                     <BarsArrowDownIcon color={"white"} />
                   ) : (
                     <BarsArrowUpIcon color={"white"} />
                   )}
-                </TouchableOpacity>
+                </Button>
 
                 {menu === "materials" && (
                   <View className="absolute bottom-12 flex flex-col gap-2">
-                    <TouchableOpacity
+                    <Button
                       className={`bg-[#2b2d42] px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.ROAD)}
+                      hapticStyle={"Heavy"}
+                      sound="success"
                     >
                       <CakeIcon color={Materials.ROAD.color} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                    </Button>
+                    <Button
                       className={`bg-[#2b2d42] px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.STEEL)}
+                      hapticStyle={"Heavy"}
+                      sound="success"
                     >
                       <CakeIcon color={Materials.STEEL.color} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                    </Button>
+                    <Button
                       className={`bg-[#2b2d42] px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.WOOD)}
+                      hapticStyle={"Heavy"}
+                      sound="success"
                     >
                       <CakeIcon color={Materials.WOOD.color} />
-                    </TouchableOpacity>
+                    </Button>
                   </View>
                 )}
               </View>
@@ -306,16 +337,18 @@ export default function NewLevel() {
 
             <View className="flex flex-row justify-end gap-3 w-40">
               <View className="flex flex-row gap-3 w-40 justify-end">
-                <TouchableOpacity
+                <Button
                   className={`bg-[#588157] px-4 py-2 rounded`}
                   onPress={() => setRunning((r) => !r)}
+                  hapticStyle={"Heavy"}
+                  sound="success"
                 >
                   {running ? (
                     <PauseIcon color={"white"} />
                   ) : (
                     <PlayIcon color={"white"} />
                   )}
-                </TouchableOpacity>
+                </Button>
               </View>
             </View>
           </View>

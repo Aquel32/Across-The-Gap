@@ -1,6 +1,7 @@
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 
 import Levels from "@/assets/levels.json";
+import Button from "@/components/Button";
 import { router } from "expo-router";
 import {
   ArrowLeftEndOnRectangleIcon,
@@ -13,7 +14,7 @@ export default function Campaign() {
   return (
     <View className="w-full h-full flex justify-center items-center">
       {Levels.map((level, index) => (
-        <TouchableOpacity
+        <Button
           key={index}
           onPress={() =>
             router.push({
@@ -21,6 +22,8 @@ export default function Campaign() {
               params: { id: String(index + 1) },
             })
           }
+          hapticStyle={"Heavy"}
+          sound="click"
           className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
         >
           <Text className="text-2xl">Level {index + 1}</Text>
@@ -42,17 +45,19 @@ export default function Campaign() {
               <Text>{level.carSettings.acceleration}m/s</Text>
             </View>
           </View>
-        </TouchableOpacity>
+        </Button>
       ))}
 
       <View className="flex flex-row w-full justify-between items-center px-10 py-1 absolute bottom-0">
         <View className="flex flex-row justify-start gap-3 w-40">
-          <TouchableOpacity
+          <Button
             className={`bg-gray-500 px-4 py-2 rounded`}
             onPress={() => router.back()}
+            hapticStyle={"Heavy"}
+            sound="click"
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
-          </TouchableOpacity>
+          </Button>
         </View>
       </View>
     </View>
