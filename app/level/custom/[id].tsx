@@ -12,7 +12,7 @@ import {
 } from "@/lib/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
   ArchiveBoxArrowDownIcon,
   ArchiveBoxXMarkIcon,
@@ -20,6 +20,7 @@ import {
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
   AtSymbolIcon,
+  BanknotesIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
   BoltSlashIcon,
@@ -158,6 +159,10 @@ export default function NewLevel() {
     setSelectedMaterial(material);
     setMenu("none");
   }
+
+  useEffect(() => {
+    setMenu("none");
+  }, [running]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -314,15 +319,22 @@ export default function NewLevel() {
               </View>
             </View>
           </View>
+
+          <View className="w-full absolute top-0 justify-center items-center">
+            <View className="p-2 px-5 bg-gray-300 rounded-b-lg flex flex-row items-center gap-1">
+              <BanknotesIcon color={"green"} width={20} height={20} />
+              <Text className="text-center text-black">{newLevel.budget}$</Text>
+            </View>
+          </View>
         </>
       ) : (
         <Level
-          INITIAL_NODES={nodes}
-          INITIAL_CONNECTIONS={[]}
-          MAP_ELEMENTS={mapElements}
-          END_COLLISION={{ x: 0, y: 0, width: 100, height: 20 }}
-          CAR_SETTINGS={carSettings}
-          BUDGET={1000}
+          INITIAL_NODES={newLevel.nodes}
+          INITIAL_CONNECTIONS={newLevel.connections}
+          MAP_ELEMENTS={newLevel.mapElements}
+          END_COLLISION={newLevel.endCollision}
+          CAR_SETTINGS={newLevel.carSettings}
+          BUDGET={newLevel.budget}
           parentTesting={running}
           setParentTesting={setRunning}
         />

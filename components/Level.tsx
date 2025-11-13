@@ -78,7 +78,7 @@ export default function Level({
 
   useEffect(() => {
     setMenu("none");
-  }, [mode]);
+  }, [mode, running]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -114,6 +114,7 @@ export default function Level({
             onPress={() =>
               setMenu((prev) => (prev === "settings" ? "none" : "settings"))
             }
+            disabled={running}
           >
             {menu === "settings" ? (
               <BarsArrowDownIcon color={"white"} />
@@ -220,6 +221,7 @@ export default function Level({
             <TouchableOpacity
               className={`bg-[#588157] px-4 py-2 rounded`}
               onPress={() => setParentTesting((r) => !r)}
+              disabled={running}
             >
               <WrenchIcon color={"white"} />
             </TouchableOpacity>
