@@ -5,6 +5,7 @@ import {
   CarSettings,
   Connection,
   MapElement,
+  Material,
   Menus,
   Modes,
   NodeData,
@@ -14,12 +15,19 @@ import { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
-  Cog6ToothIcon,
+  BarsArrowDownIcon,
+  BarsArrowUpIcon,
+  BoltSlashIcon,
+  CakeIcon,
+  ChevronUpIcon,
+  CursorArrowRippleIcon,
+  EllipsisHorizontalIcon,
+  LinkIcon,
   PauseIcon,
   PlayIcon,
+  TrashIcon,
   WrenchIcon,
 } from "react-native-heroicons/outline";
-import ToolsBar from "./ToolsBar";
 
 export default function Level({
   INITIAL_NODES,
@@ -63,6 +71,11 @@ export default function Level({
     setMenu("none");
   }
 
+  function setMaterial(material: Material) {
+    setSelectedMaterial(material);
+    closeMenus();
+  }
+
   useEffect(() => {
     setMenu("none");
   }, [mode]);
@@ -95,32 +108,112 @@ export default function Level({
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">
-        <View className="flex flex-row justify-start gap-3 w-40">
+        <View className="flex flex-row justify-start gap-3 w-40 relative">
           <TouchableOpacity
             className={`bg-[#2b2d42] px-4 py-2 rounded`}
-            onPress={() => router.back()}
-            disabled={running}
+            onPress={() =>
+              setMenu((prev) => (prev === "settings" ? "none" : "settings"))
+            }
           >
-            <ArrowLeftEndOnRectangleIcon color={"white"} />
+            {menu === "settings" ? (
+              <BarsArrowDownIcon color={"white"} />
+            ) : (
+              <BarsArrowUpIcon color={"white"} />
+            )}
           </TouchableOpacity>
-          <TouchableOpacity
-            className={`bg-[#2b2d42] px-4 py-2 rounded`}
-            onPress={() => setMenu("settings")}
-            disabled={running}
-          >
-            <Cog6ToothIcon color={"white"} />
-          </TouchableOpacity>
+
+          {menu === "settings" && (
+            <View className="absolute bottom-12 flex flex-col gap-2">
+              <TouchableOpacity
+                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                onPress={() => router.back()}
+              >
+                <ArrowLeftEndOnRectangleIcon color={"white"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                onPress={() => clearLevel()}
+              >
+                <TrashIcon color={"white"} />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        <ToolsBar
-          menu={menu}
-          setMenu={setMenu}
-          clearLevel={clearLevel}
-          mode={mode}
-          setMode={setMode}
-          onMaterialSelect={(material) => setSelectedMaterial(material)}
-          disabled={running}
-        />
+        <View className="flex flex-row gap-1">
+          <TouchableOpacity
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            onPress={() => setMode("move")}
+            disabled={running}
+          >
+            <CursorArrowRippleIcon color={"white"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            onPress={() => setMode("create")}
+            disabled={running}
+          >
+            <LinkIcon color={"white"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            onPress={() => setMode("delete")}
+            disabled={running}
+          >
+            <BoltSlashIcon color={"white"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+            onPress={() => setMode("arch")}
+            disabled={running}
+          >
+            <ChevronUpIcon color={"white"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+            onPress={() => setMode("chain")}
+            disabled={running}
+          >
+            <EllipsisHorizontalIcon color={"white"} />
+          </TouchableOpacity>
+          <View className="flex flex-row gap-3 relative">
+            <TouchableOpacity
+              className={`bg-[#2b2d42] px-4 py-2 rounded`}
+              onPress={() =>
+                setMenu((prev) => (prev === "materials" ? "none" : "materials"))
+              }
+            >
+              {menu === "materials" ? (
+                <BarsArrowDownIcon color={"white"} />
+              ) : (
+                <BarsArrowUpIcon color={"white"} />
+              )}
+            </TouchableOpacity>
+
+            {menu === "materials" && (
+              <View className="absolute bottom-12 flex flex-col gap-2">
+                <TouchableOpacity
+                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  onPress={() => setMaterial(Materials.ROAD)}
+                >
+                  <CakeIcon color={Materials.ROAD.color} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  onPress={() => setMaterial(Materials.STEEL)}
+                >
+                  <CakeIcon color={Materials.STEEL.color} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  onPress={() => setMaterial(Materials.WOOD)}
+                >
+                  <CakeIcon color={Materials.WOOD.color} />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
 
         <View className="flex flex-row gap-3 w-40 justify-end">
           {parentTesting && setParentTesting && (

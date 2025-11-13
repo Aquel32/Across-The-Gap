@@ -540,9 +540,7 @@ export default function Editor({
         line.p2.value = vec(0, 0);
       }
 
-      console.log(mode, "mode end");
       if (mode == "create") {
-        console.log("Create mode end");
         if (targetIndex !== undefined) {
           runOnJS(addConnection)(fromIndex, targetIndex);
         } else {

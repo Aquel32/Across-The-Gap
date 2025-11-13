@@ -162,7 +162,6 @@ export default function LevelCreator({
         };
         sharedMapElements.value = newElements;
       } else if (mode == "move" && selectedNode.value !== undefined) {
-        console.log("move node");
         const elem = sharedNodes.value[selectedNode.value!];
         const newElements = [...nodes];
         newElements[selectedNode.value!] = {

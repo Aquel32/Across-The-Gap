@@ -2,22 +2,33 @@ import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
 import { Materials } from "@/lib/materials";
 import { loadFileAsync, saveFileAsync } from "@/lib/storage";
-import { LevelData, MapElement, Menus, Modes, NodeData } from "@/lib/types";
+import {
+  LevelData,
+  MapElement,
+  Material,
+  Menus,
+  Modes,
+  NodeData,
+} from "@/lib/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import {
-  ArrowLeftOnRectangleIcon,
+  ArchiveBoxArrowDownIcon,
+  ArchiveBoxXMarkIcon,
+  ArrowLeftEndOnRectangleIcon,
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
   AtSymbolIcon,
+  BarsArrowDownIcon,
   BarsArrowUpIcon,
   BoltSlashIcon,
-  Cog6ToothIcon,
+  CakeIcon,
   CursorArrowRippleIcon,
   PauseIcon,
   PlayIcon,
   PuzzlePieceIcon,
+  TrashIcon,
 } from "react-native-heroicons/outline";
 
 const DEFAULT_LEVEL: LevelData = {
@@ -111,12 +122,11 @@ export default function NewLevel() {
   }, [nodes, mapElements, carSettings]);
 
   function saveLevel() {
-    console.log(index.current, Levels[index.current]);
     if (Levels[index.current]) {
       setLevels((levels) => {
         const updatedLevels = [...levels];
         updatedLevels[index.current] = newLevel;
-        saveFileAsync("custom_levels.json", JSON.stringify([updatedLevels]));
+        saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
         return updatedLevels;
       });
 
@@ -129,6 +139,24 @@ export default function NewLevel() {
       saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
       return updatedLevels;
     });
+  }
+
+  function deleteLevel() {
+    if (!Levels[index.current]) return;
+
+    setLevels((levels) => {
+      const updatedLevels = levels.filter((_, i) => i !== index.current);
+      saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
+      router.back();
+      return updatedLevels;
+    });
+  }
+
+  function clearLevel() {}
+
+  function setMaterial(material: Material) {
+    setSelectedMaterial(material);
+    setMenu("none");
   }
 
   return (
@@ -149,27 +177,51 @@ export default function NewLevel() {
           />
 
           <View className="flex flex-row w-full justify-between items-center px-10 py-1">
-            <View className="flex flex-row justify-start gap-3 w-40">
+            <View className="flex flex-row justify-start gap-3 w-40 relative">
               <TouchableOpacity
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={() => router.back()}
+                onPress={() =>
+                  setMenu((prev) => (prev === "settings" ? "none" : "settings"))
+                }
               >
-                <ArrowLeftOnRectangleIcon color={"white"} />
+                {menu === "settings" ? (
+                  <BarsArrowDownIcon color={"white"} />
+                ) : (
+                  <BarsArrowUpIcon color={"white"} />
+                )}
               </TouchableOpacity>
-              <TouchableOpacity
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={() => {}}
-              >
-                <Cog6ToothIcon color={"white"} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={saveLevel}
-              >
-                <Cog6ToothIcon color={"white"} />
-              </TouchableOpacity>
+
+              {menu === "settings" && (
+                <View className="absolute bottom-12 flex flex-col gap-2">
+                  <TouchableOpacity
+                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    onPress={() => router.back()}
+                  >
+                    <ArrowLeftEndOnRectangleIcon color={"white"} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    onPress={() => saveLevel()}
+                  >
+                    <ArchiveBoxArrowDownIcon color={"white"} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    onPress={() => deleteLevel()}
+                  >
+                    <ArchiveBoxXMarkIcon color={"white"} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    onPress={() => clearLevel()}
+                  >
+                    <TrashIcon color={"white"} />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
-            <View className="flex flex-row justify-center gap-3 w-40">
+
+            <View className="flex flex-row justify-center gap-1">
               <TouchableOpacity
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
@@ -206,13 +258,47 @@ export default function NewLevel() {
               >
                 <BoltSlashIcon color={"white"} />
               </TouchableOpacity>
-              <TouchableOpacity
-                className={`bg-[#003049] px-4 py-2 rounded items-center`}
-                onPress={() => setMenu("materials")}
-              >
-                <BarsArrowUpIcon color={"white"} />
-              </TouchableOpacity>
+              <View className="flex flex-row gap-3 relative">
+                <TouchableOpacity
+                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  onPress={() =>
+                    setMenu((prev) =>
+                      prev === "materials" ? "none" : "materials"
+                    )
+                  }
+                >
+                  {menu === "materials" ? (
+                    <BarsArrowDownIcon color={"white"} />
+                  ) : (
+                    <BarsArrowUpIcon color={"white"} />
+                  )}
+                </TouchableOpacity>
+
+                {menu === "materials" && (
+                  <View className="absolute bottom-12 flex flex-col gap-2">
+                    <TouchableOpacity
+                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      onPress={() => setMaterial(Materials.ROAD)}
+                    >
+                      <CakeIcon color={Materials.ROAD.color} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      onPress={() => setMaterial(Materials.STEEL)}
+                    >
+                      <CakeIcon color={Materials.STEEL.color} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      onPress={() => setMaterial(Materials.WOOD)}
+                    >
+                      <CakeIcon color={Materials.WOOD.color} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
+
             <View className="flex flex-row justify-end gap-3 w-40">
               <View className="flex flex-row gap-3 w-40 justify-end">
                 <TouchableOpacity
@@ -228,35 +314,6 @@ export default function NewLevel() {
               </View>
             </View>
           </View>
-
-          {menu != "none" && (
-            <View className="bottom-0 flex flex-row items-center justify-center absolute w-full">
-              <View className="bottom-12 bg-white p-4 rounded shadow-lg gap-4 flex flex-row justify-evenly items-center">
-                {menu == "materials" && (
-                  <>
-                    <TouchableOpacity
-                      className={`bg-${Materials.ROAD.color}-500 w-20 h-20 rounded items-center justify-center`}
-                      onPress={() => setSelectedMaterial(Materials.ROAD)}
-                    >
-                      <Text>{Materials.ROAD.name}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className={`bg-${Materials.STEEL.color}-500 w-20 h-20 rounded items-center justify-center`}
-                      onPress={() => setSelectedMaterial(Materials.STEEL)}
-                    >
-                      <Text>{Materials.STEEL.name}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className={`bg-${Materials.WOOD.color}-500 w-20 h-20 rounded items-center justify-center`}
-                      onPress={() => setSelectedMaterial(Materials.WOOD)}
-                    >
-                      <Text>{Materials.WOOD.name}</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
-            </View>
-          )}
         </>
       ) : (
         <Level
