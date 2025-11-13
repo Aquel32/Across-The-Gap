@@ -1,7 +1,9 @@
 import { Text, TouchableOpacity, View } from "react-native";
 
-import Levels from "@/assets/customs.json";
-import { router } from "expo-router";
+import { loadFileAsync } from "@/lib/storage";
+import { LevelData } from "@/lib/types";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeftEndOnRectangleIcon,
   BanknotesIcon,
@@ -10,6 +12,25 @@ import {
 } from "react-native-heroicons/outline";
 
 export default function Customs() {
+  const [Levels, setLevels] = useState<LevelData[]>([]);
+
+  async function loadLevels() {
+    const data = await loadFileAsync("custom_levels.json");
+
+    if (data === "") return;
+    setLevels(JSON.parse(data) as LevelData[]);
+  }
+
+  useEffect(() => {
+    loadLevels();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLevels();
+    }, [])
+  );
+
   return (
     <View className="w-full h-full flex flex-row gap-5 justify-center items-center">
       {Levels.map((level, index) => (
@@ -17,7 +38,7 @@ export default function Customs() {
           key={index}
           onPress={() =>
             router.push({
-              pathname: "/level/[id]",
+              pathname: "/level/custom/[id]",
               params: { id: String(index + 1) },
             })
           }
@@ -47,7 +68,8 @@ export default function Customs() {
       <TouchableOpacity
         onPress={() =>
           router.push({
-            pathname: "/newLevel",
+            pathname: "/level/custom/[id]",
+            params: { id: "new" },
           })
         }
         className="bg-gray-300 w-40 h-40 rounded items-center justify-center"

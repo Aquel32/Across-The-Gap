@@ -40,6 +40,20 @@ export interface CarSettings {
   wheelOffsetY: number;
 }
 
+export interface LevelData {
+  nodes: NodeData[];
+  connections: Connection[];
+  mapElements: MapElement[];
+  endCollision: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  carSettings: CarSettings;
+  budget: number;
+}
+
 export type Modes =
   | "move"
   | "create"

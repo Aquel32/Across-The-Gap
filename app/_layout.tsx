@@ -11,7 +11,10 @@ export default function RootLayout() {
         <Stack.Screen name="campaign" options={{ headerShown: false }} />
         <Stack.Screen name="customs" options={{ headerShown: false }} />
         <Stack.Screen name="level/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="newLevel" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="level/custom/[id]"
+          options={{ headerShown: false }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </>

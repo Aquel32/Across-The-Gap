@@ -1,9 +1,10 @@
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
 import { Materials } from "@/lib/materials";
-import { MapElement, Menus, Modes, NodeData } from "@/lib/types";
-import { router } from "expo-router";
-import { useState } from "react";
+import { loadFileAsync, saveFileAsync } from "@/lib/storage";
+import { LevelData, MapElement, Menus, Modes, NodeData } from "@/lib/types";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import {
   ArrowLeftOnRectangleIcon,
@@ -19,17 +20,40 @@ import {
   PuzzlePieceIcon,
 } from "react-native-heroicons/outline";
 
-export default function NewLevel() {
-  const [menu, setMenu] = useState<Menus>("none");
-  const [mode, setMode] = useState<Modes>("create");
-
-  const [running, setRunning] = useState<boolean>(false);
-  const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
-
-  const [nodes, setNodes] = useState<NodeData[]>([]);
-  const [mapElements, setMapElements] = useState<MapElement[]>([]);
-
-  const [carSettings, setCarSettings] = useState({
+const DEFAULT_LEVEL: LevelData = {
+  nodes: [
+    { x: 150, y: 150, r: 13, isStatic: true },
+    { x: 630, y: 150, r: 13, isStatic: true },
+  ],
+  connections: [],
+  mapElements: [
+    {
+      x: -300,
+      y: 300,
+      width: 1300,
+      height: 100,
+      angle: 0,
+      material: Materials.WATER,
+    },
+    {
+      x: -300,
+      y: 150,
+      width: 450,
+      height: 250,
+      angle: 0,
+      material: Materials.GRASS,
+    },
+    {
+      x: 630,
+      y: 150,
+      width: 370,
+      height: 250,
+      angle: 0,
+      material: Materials.GRASS,
+    },
+  ],
+  endCollision: { x: 950, y: 100, width: 100, height: 100 },
+  carSettings: {
     startTransform: { x: 50, y: 100, angle: 0 },
     width: 80,
     height: 30,
@@ -37,7 +61,75 @@ export default function NewLevel() {
     acceleration: 0.3,
     wheelRadius: 15,
     wheelOffsetY: 20,
-  });
+  },
+  budget: 13000,
+};
+
+export default function NewLevel() {
+  const [Levels, setLevels] = useState<LevelData[]>([]);
+
+  const params = useLocalSearchParams<{ id: string }>();
+  const index = useRef(Number(params.id) - 1);
+
+  const [menu, setMenu] = useState<Menus>("none");
+  const [mode, setMode] = useState<Modes>("create");
+
+  const [running, setRunning] = useState<boolean>(false);
+  const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
+  const [nodes, setNodes] = useState<NodeData[]>(DEFAULT_LEVEL.nodes);
+  const [mapElements, setMapElements] = useState<MapElement[]>(
+    DEFAULT_LEVEL.mapElements
+  );
+  const [carSettings, setCarSettings] = useState(DEFAULT_LEVEL.carSettings);
+  const [newLevel, setNewLevel] = useState<LevelData>(DEFAULT_LEVEL);
+
+  useEffect(() => {
+    async function loadLevels() {
+      const data = await loadFileAsync("custom_levels.json");
+
+      if (data === "") return;
+      const parsedLevels = JSON.parse(data) as LevelData[];
+      setLevels(parsedLevels);
+
+      if (!parsedLevels[index.current]) return;
+      setNodes(parsedLevels[index.current].nodes);
+      setMapElements(parsedLevels[index.current].mapElements);
+      setCarSettings(parsedLevels[index.current].carSettings);
+    }
+    loadLevels();
+  }, []);
+
+  useEffect(() => {
+    setNewLevel({
+      nodes: nodes,
+      mapElements: mapElements,
+      carSettings: carSettings,
+      budget: newLevel.budget,
+      connections: newLevel.connections,
+      endCollision: newLevel.endCollision,
+    });
+  }, [nodes, mapElements, carSettings]);
+
+  function saveLevel() {
+    console.log(index.current, Levels[index.current]);
+    if (Levels[index.current]) {
+      setLevels((levels) => {
+        const updatedLevels = [...levels];
+        updatedLevels[index.current] = newLevel;
+        saveFileAsync("custom_levels.json", JSON.stringify([updatedLevels]));
+        return updatedLevels;
+      });
+
+      return;
+    }
+
+    setLevels((levels) => {
+      index.current = levels.length;
+      const updatedLevels = [...levels, newLevel];
+      saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
+      return updatedLevels;
+    });
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -67,6 +159,12 @@ export default function NewLevel() {
               <TouchableOpacity
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => {}}
+              >
+                <Cog6ToothIcon color={"white"} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                onPress={saveLevel}
               >
                 <Cog6ToothIcon color={"white"} />
               </TouchableOpacity>
