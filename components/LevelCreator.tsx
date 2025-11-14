@@ -1,3 +1,4 @@
+import { overlaps } from "@/lib/canvasHelper";
 import {
   CarSettings,
   MapElement,
@@ -19,28 +20,22 @@ import { runOnJS } from "react-native-worklets";
 import CameraView from "./CameraView";
 import { useSFX } from "./SFXProvider";
 
-const overlaps = (
-  worldX: number,
-  worldY: number,
-  nodes: NodeData[],
-  excludeIndex: number = -1
+export const overlapsStaticCar = (
+  x: number,
+  y: number,
+  carSettings: CarSettings
 ) => {
   "worklet";
-  let result: number | undefined = undefined;
-  for (let i = 0; i < nodes.length; i++) {
-    if (i === excludeIndex) continue;
-
-    const n = nodes[i];
-
-    const distance = Math.sqrt(
-      Math.pow(worldX - n.x, 2) + Math.pow(worldY - n.y, 2)
-    );
-    if (distance < n.r) {
-      result = i;
-      break;
-    }
+  if (
+    x >= carSettings.startTransform.x - carSettings.width / 2 &&
+    x <= carSettings.startTransform.x + carSettings.width / 2 &&
+    y >= carSettings.startTransform.y - carSettings.height / 2 &&
+    y <= carSettings.startTransform.y + carSettings.height / 2
+  ) {
+    return true;
   }
-  return result;
+
+  return false;
 };
 
 export default function LevelCreator({
@@ -121,7 +116,12 @@ export default function LevelCreator({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
-      const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
+      const nodeIndex = overlaps(
+        worldX,
+        worldY,
+        sharedNodes.value,
+        cameraTransform.value
+      );
 
       if (nodeIndex !== undefined) {
         selectedNode.value = nodeIndex;
@@ -226,6 +226,12 @@ export default function LevelCreator({
     const worldY =
       (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
+    if (overlapsStaticCar(worldX, worldY, carSettings)) {
+      runOnJS(sfx.playSound)("error");
+      runOnJS(setMenu)(menu == "car" ? "none" : "car");
+      return;
+    }
+
     if (mode == "create") {
       const newElement: MapElement = {
         x: worldX - 50,
@@ -237,7 +243,12 @@ export default function LevelCreator({
       };
       runOnJS(addElement)(newElement);
     } else if (mode == "delete") {
-      const nodeIndex = overlaps(worldX, worldY, sharedNodes.value);
+      const nodeIndex = overlaps(
+        worldX,
+        worldY,
+        sharedNodes.value,
+        cameraTransform.value
+      );
 
       if (nodeIndex !== undefined) {
         runOnJS(removeNode)(nodeIndex);
