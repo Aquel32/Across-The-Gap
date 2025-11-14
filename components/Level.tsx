@@ -102,6 +102,8 @@ export default function Level({
           setConnections={setConnections}
           mode={mode}
           setMode={setMode}
+          menu={menu}
+          setMenu={setMenu}
           running={running}
           selectedMaterial={selectedMaterial}
           mapElements={MAP_ELEMENTS}

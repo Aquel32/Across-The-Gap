@@ -1,9 +1,14 @@
-import { overlaps, overlapsConnection } from "@/lib/canvasHelper";
+import {
+  overlaps,
+  overlapsConnection,
+  overlapsStaticCar,
+} from "@/lib/canvasHelper";
 import {
   CarSettings,
   Connection,
   MapElement,
   Material,
+  Menus,
   Modes,
   NodeData,
 } from "@/lib/types";
@@ -32,6 +37,7 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
+import CarMenu from "./CarMenu";
 import NumericInput from "./NumericInput";
 import { useSFX } from "./SFXProvider";
 
@@ -47,6 +53,8 @@ export default function Editor({
   setConnections,
   mode,
   setMode,
+  menu,
+  setMenu,
   running,
   selectedMaterial,
   mapElements,
@@ -61,6 +69,8 @@ export default function Editor({
   setConnections: React.Dispatch<React.SetStateAction<Connection[]>>;
   mode: Modes;
   setMode: React.Dispatch<React.SetStateAction<Modes>>;
+  menu: Menus;
+  setMenu: React.Dispatch<React.SetStateAction<Menus>>;
   running: boolean;
   selectedMaterial: Material;
   mapElements: MapElement[];
@@ -508,6 +518,17 @@ export default function Editor({
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
     "worklet";
+    const worldX =
+      (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale;
+    const worldY =
+      (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
+
+    if (overlapsStaticCar(worldX, worldY, carSettings)) {
+      runOnJS(sfx.playSound)("error");
+      runOnJS(setMenu)(menu == "car" ? "none" : "car");
+      return;
+    }
+
     if (mode !== "delete" || running) return;
 
     const connectionIndex = overlapsConnection(
@@ -653,6 +674,8 @@ export default function Editor({
           </View>
         </View>
       )}
+
+      {menu == "car" && <CarMenu carSettings={carSettings} setMenu={setMenu} />}
     </View>
   );
 }

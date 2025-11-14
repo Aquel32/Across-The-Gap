@@ -1,4 +1,4 @@
-import { overlaps } from "@/lib/canvasHelper";
+import { overlaps, overlapsStaticCar } from "@/lib/canvasHelper";
 import {
   CarSettings,
   MapElement,
@@ -19,24 +19,6 @@ import {
 import { runOnJS } from "react-native-worklets";
 import CameraView from "./CameraView";
 import { useSFX } from "./SFXProvider";
-
-export const overlapsStaticCar = (
-  x: number,
-  y: number,
-  carSettings: CarSettings
-) => {
-  "worklet";
-  if (
-    x >= carSettings.startTransform.x - carSettings.width / 2 &&
-    x <= carSettings.startTransform.x + carSettings.width / 2 &&
-    y >= carSettings.startTransform.y - carSettings.height / 2 &&
-    y <= carSettings.startTransform.y + carSettings.height / 2
-  ) {
-    return true;
-  }
-
-  return false;
-};
 
 export default function LevelCreator({
   nodes,

@@ -63,7 +63,7 @@ export default function Customs() {
                 width={20}
                 height={20}
               />
-              <Text>{level.carSettings.acceleration}m/s</Text>
+              <Text>{level.carSettings.acceleration.toFixed(1)}m/s</Text>
             </View>
           </View>
         </Button>

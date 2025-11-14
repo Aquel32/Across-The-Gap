@@ -94,3 +94,21 @@ export const overlapsConnection = (
 
   return result;
 };
+
+export const overlapsStaticCar = (
+  x: number,
+  y: number,
+  carSettings: CarSettings
+) => {
+  "worklet";
+  if (
+    x >= carSettings.startTransform.x - carSettings.width / 2 &&
+    x <= carSettings.startTransform.x + carSettings.width / 2 &&
+    y >= carSettings.startTransform.y - carSettings.height / 2 &&
+    y <= carSettings.startTransform.y + carSettings.height / 2
+  ) {
+    return true;
+  }
+
+  return false;
+};

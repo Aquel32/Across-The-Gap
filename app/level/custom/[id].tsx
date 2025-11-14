@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import CarMenu from "@/components/CarMenu";
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
 import { Materials } from "@/lib/materials";
@@ -32,7 +33,6 @@ import {
   PlayIcon,
   PuzzlePieceIcon,
   TrashIcon,
-  XMarkIcon,
 } from "react-native-heroicons/outline";
 import Modal from "react-native-modal";
 
@@ -100,6 +100,8 @@ export default function NewLevel() {
   const [budget, setBudget] = useState<number>(DEFAULT_LEVEL.budget);
   const [newLevel, setNewLevel] = useState<LevelData>(DEFAULT_LEVEL);
 
+  const [changesMade, setChangesMade] = useState<boolean>(false);
+
   useEffect(() => {
     async function loadLevels() {
       const data = await loadFileAsync("custom_levels.json");
@@ -108,11 +110,15 @@ export default function NewLevel() {
       const parsedLevels = JSON.parse(data) as LevelData[];
       setLevels(parsedLevels);
 
-      if (!parsedLevels[index.current]) return;
+      if (!parsedLevels[index.current]) {
+        setChangesMade(true);
+        return;
+      }
       setNodes(parsedLevels[index.current].nodes);
       setMapElements(parsedLevels[index.current].mapElements);
       setCarSettings(parsedLevels[index.current].carSettings);
       setBudget(parsedLevels[index.current].budget);
+      setTimeout(() => setChangesMade(false), 100);
     }
     loadLevels();
   }, []);
@@ -126,6 +132,7 @@ export default function NewLevel() {
       connections: newLevel.connections,
       endCollision: newLevel.endCollision,
     });
+    setChangesMade(true);
   }, [nodes, mapElements, carSettings, budget]);
 
   function saveLevel() {
@@ -136,7 +143,7 @@ export default function NewLevel() {
         saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
         return updatedLevels;
       });
-
+      setChangesMade(false);
       return;
     }
 
@@ -146,6 +153,7 @@ export default function NewLevel() {
       saveFileAsync("custom_levels.json", JSON.stringify(updatedLevels));
       return updatedLevels;
     });
+    setChangesMade(false);
   }
 
   function deleteLevel() {
@@ -169,10 +177,11 @@ export default function NewLevel() {
     setSelectedMaterial(Materials.ROAD);
     setMode("create");
     setBudget(DEFAULT_LEVEL.budget);
+    setChangesMade(true);
   }
 
   function backToCustoms() {
-    if (!Levels[index.current]) {
+    if (changesMade) {
       setNotSavedModalVisible(true);
       return;
     }
@@ -392,6 +401,10 @@ export default function NewLevel() {
               <Text className="text-black w-12">{budget}$</Text>
             </Button>
 
+            <Text className="text-black">
+              {changesMade ? "Unsaved changes" : "Level saved"}
+            </Text>
+
             {menu == "money" && (
               <View className="p-3 bg-gray-300 rounded-lg">
                 <Slider
@@ -409,55 +422,11 @@ export default function NewLevel() {
           </View>
 
           {menu == "car" && (
-            <View className="absolute w-full h-full flex items-center justify-center">
-              <View className="bg-gray-300 rounded-lg p-10 relative">
-                <Text className="font-bold text-center mb-4">CAR SETTINGS</Text>
-                <View className="flex flex-row items-center justify-between">
-                  <Text className="text-black w-32 text-right">MASS</Text>
-                  <Slider
-                    value={carSettings.mass}
-                    onValueChange={(e) =>
-                      setCarSettings({ ...carSettings, mass: e })
-                    }
-                    step={1}
-                    style={{ width: 200, height: 3 }}
-                    minimumValue={1}
-                    maximumValue={30}
-                    minimumTrackTintColor="#FFFFFF"
-                    maximumTrackTintColor="#000000"
-                  />
-                  <Text className="text-black w-12">{carSettings.mass}t</Text>
-                </View>
-                <View className="flex flex-row items-center justify-between">
-                  <Text className="text-black w-32 text-right">
-                    ACCELERATION
-                  </Text>
-                  <Slider
-                    value={carSettings.acceleration}
-                    onValueChange={(e) =>
-                      setCarSettings({ ...carSettings, acceleration: e })
-                    }
-                    step={0.1}
-                    style={{ width: 200, height: 3 }}
-                    minimumValue={0.1}
-                    maximumValue={2}
-                    minimumTrackTintColor="#FFFFFF"
-                    maximumTrackTintColor="#000000"
-                  />
-                  <Text className="text-black w-12">
-                    {carSettings.acceleration.toFixed(1)}m/s
-                  </Text>
-                </View>
-                <Button
-                  className="bg-amber-500 p-1 rounded mt-5 absolute bottom-0 right-0"
-                  onPress={() => setMenu("none")}
-                  hapticStyle={"Light"}
-                  sound="success"
-                >
-                  <XMarkIcon color={"white"} />
-                </Button>
-              </View>
-            </View>
+            <CarMenu
+              carSettings={carSettings}
+              setCarSettings={setCarSettings}
+              setMenu={setMenu}
+            />
           )}
 
           <View style={{ flex: 1 }} className="absolute">
