@@ -1,5 +1,11 @@
 import { Circle, SkPoint } from "@shopify/react-native-skia";
-import { CarSettings, Connection, NodeData } from "./types";
+import {
+  CameraBounds,
+  CarSettings,
+  Connection,
+  MapElement,
+  NodeData,
+} from "./types";
 
 export const overlaps = (
   x: number,
@@ -134,4 +140,21 @@ export const overlapsRectangle = (
 
 export function EndMarker({ position }: { position: SkPoint }) {
   return <Circle cx={position.x} cy={position.y} r={10} color="orange" />;
+}
+
+export function CalculateBounds(mapElements: MapElement[]) {
+  const bounds: CameraBounds = {
+    minX: 0,
+    maxX: 0,
+    minY: -400,
+    maxY: 0,
+  };
+
+  mapElements.forEach((elem) => {
+    bounds.minX = Math.min(bounds.minX, elem.x);
+    bounds.maxX = Math.max(bounds.maxX, elem.x + elem.width);
+    bounds.maxY = Math.max(bounds.maxY, elem.y + elem.height);
+  });
+
+  return bounds;
 }

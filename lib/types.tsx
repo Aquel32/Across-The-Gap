@@ -76,3 +76,18 @@ export type Menus =
   | "none"
   | "money"
   | "car";
+
+export interface CameraBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  minScale?: number;
+  maxScale?: number;
+}
+
+export type CameraTransform = {
+  translateX: number;
+  translateY: number;
+  scale: number;
+};

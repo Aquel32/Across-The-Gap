@@ -1,4 +1,4 @@
-import { EndMarker } from "@/lib/canvasHelper";
+import { CalculateBounds, EndMarker } from "@/lib/canvasHelper";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
@@ -45,6 +45,8 @@ export default function Simulation({
   const brokenBeams = useSharedValue<number[]>([]);
   const timePassed = useSharedValue<number>(0);
   const maxForce = useSharedValue<number>(0);
+
+  const bounds = CalculateBounds(mapElements);
 
   const carData = useSharedValue<{
     body: { position: SkPoint; angle: number };
@@ -425,7 +427,7 @@ export default function Simulation({
 
   return (
     <View style={{ flex: 1 }}>
-      <CameraView>
+      <CameraView bounds={bounds}>
         {mapElements.map((elem, index) => (
           <Rect
             key={index}

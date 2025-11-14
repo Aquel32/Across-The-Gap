@@ -1,4 +1,5 @@
 import {
+  CalculateBounds,
   EndMarker,
   overlaps,
   overlapsConnection,
@@ -83,6 +84,10 @@ export default function Editor({
   endCollision: { x: number; y: number; width: number; height: number };
 }) {
   const sfx = useSFX();
+
+  const bounds = CalculateBounds(mapElements);
+
+  console.log("Camera bounds:", bounds);
 
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -556,6 +561,7 @@ export default function Editor({
         otherGestures={composedGesture}
         enableTransform={enableCameraTransform}
         transform={cameraTransform}
+        bounds={bounds}
       >
         {mapElements.map((elem, index) => (
           <Rect
