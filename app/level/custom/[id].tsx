@@ -11,6 +11,7 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
+import Slider from "@react-native-community/slider";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
@@ -95,6 +96,7 @@ export default function NewLevel() {
     DEFAULT_LEVEL.mapElements
   );
   const [carSettings, setCarSettings] = useState(DEFAULT_LEVEL.carSettings);
+  const [budget, setBudget] = useState<number>(DEFAULT_LEVEL.budget);
   const [newLevel, setNewLevel] = useState<LevelData>(DEFAULT_LEVEL);
 
   useEffect(() => {
@@ -109,6 +111,7 @@ export default function NewLevel() {
       setNodes(parsedLevels[index.current].nodes);
       setMapElements(parsedLevels[index.current].mapElements);
       setCarSettings(parsedLevels[index.current].carSettings);
+      setBudget(parsedLevels[index.current].budget);
     }
     loadLevels();
   }, []);
@@ -118,11 +121,11 @@ export default function NewLevel() {
       nodes: nodes,
       mapElements: mapElements,
       carSettings: carSettings,
-      budget: newLevel.budget,
+      budget: budget,
       connections: newLevel.connections,
       endCollision: newLevel.endCollision,
     });
-  }, [nodes, mapElements, carSettings]);
+  }, [nodes, mapElements, carSettings, budget]);
 
   function saveLevel() {
     if (Levels[index.current]) {
@@ -164,6 +167,7 @@ export default function NewLevel() {
     setCarSettings(DEFAULT_LEVEL.carSettings);
     setSelectedMaterial(Materials.ROAD);
     setMode("create");
+    setBudget(DEFAULT_LEVEL.budget);
   }
 
   function backToCustoms() {
@@ -377,10 +381,30 @@ export default function NewLevel() {
           </View>
 
           <View className="w-full absolute top-0 justify-center items-center">
-            <View className="p-2 px-5 bg-gray-300 rounded-b-lg flex flex-row items-center gap-1">
+            <Button
+              className={`flex flex-row items-center gap-2 py-2 px-5 w-34 bg-gray-300 ${menu == "money" ? "" : "rounded-b-lg"} `}
+              onPress={() =>
+                setMenu((prev) => (prev === "money" ? "none" : "money"))
+              }
+            >
               <BanknotesIcon color={"green"} width={20} height={20} />
-              <Text className="text-center text-black">{newLevel.budget}$</Text>
-            </View>
+              <Text className="text-black w-12">{budget}$</Text>
+            </Button>
+
+            {menu == "money" && (
+              <View className="p-3 bg-gray-300 rounded-lg">
+                <Slider
+                  value={budget}
+                  onValueChange={(e) => setBudget(e)}
+                  step={1000}
+                  style={{ width: 200, height: 40 }}
+                  minimumValue={1000}
+                  maximumValue={20000}
+                  minimumTrackTintColor="#FFFFFF"
+                  maximumTrackTintColor="#000000"
+                />
+              </View>
+            )}
           </View>
 
           <View style={{ flex: 1 }} className="absolute">

@@ -131,14 +131,16 @@ export default function Level({
 
           {menu === "settings" && (
             <View className="absolute bottom-12 flex flex-col gap-2">
-              <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={() => router.back()}
-                hapticStyle={"Heavy"}
-                sound="success"
-              >
-                <ArrowLeftEndOnRectangleIcon color={"white"} />
-              </Button>
+              {parentTesting !== true && (
+                <Button
+                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  onPress={() => router.back()}
+                  hapticStyle={"Heavy"}
+                  sound="success"
+                >
+                  <ArrowLeftEndOnRectangleIcon color={"white"} />
+                </Button>
+              )}
               <Button
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setClearLevelModalVisible(true)}

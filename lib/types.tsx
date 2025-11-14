@@ -64,4 +64,11 @@ export type Modes =
   | "resize"
   | "rotate"
   | "none";
-export type Menus = "mode" | "tools" | "materials" | "settings" | "none";
+export type Menus =
+  | "mode"
+  | "tools"
+  | "materials"
+  | "settings"
+  | "none"
+  | "money"
+  | "car";
