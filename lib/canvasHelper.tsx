@@ -1,3 +1,4 @@
+import { Circle, SkPoint } from "@shopify/react-native-skia";
 import { CarSettings, Connection, NodeData } from "./types";
 
 export const overlaps = (
@@ -112,3 +113,25 @@ export const overlapsStaticCar = (
 
   return false;
 };
+
+export const overlapsRectangle = (
+  x: number,
+  y: number,
+  rect: { x: number; y: number; width: number; height: number }
+) => {
+  "worklet";
+  if (
+    x >= rect.x &&
+    x <= rect.x + rect.width &&
+    y >= rect.y &&
+    y <= rect.y + rect.height
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+export function EndMarker({ position }: { position: SkPoint }) {
+  return <Circle cx={position.x} cy={position.y} r={10} color="orange" />;
+}

@@ -133,6 +133,7 @@ export default function Level({
           budget={budget}
           setBudget={setBudget}
           closeMenus={closeMenus}
+          endCollision={END_COLLISION}
         />
       )}
       <View className="flex flex-row w-full justify-between items-center px-10 py-1">

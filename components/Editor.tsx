@@ -1,4 +1,5 @@
 import {
+  EndMarker,
   overlaps,
   overlapsConnection,
   overlapsStaticCar,
@@ -62,6 +63,7 @@ export default function Editor({
   budget,
   setBudget,
   closeMenus,
+  endCollision,
 }: {
   nodes: NodeData[];
   connections: Connection[];
@@ -78,6 +80,7 @@ export default function Editor({
   budget: number;
   setBudget: React.Dispatch<React.SetStateAction<number>>;
   closeMenus: () => void;
+  endCollision: { x: number; y: number; width: number; height: number };
 }) {
   const sfx = useSFX();
 
@@ -605,6 +608,8 @@ export default function Editor({
         {temporaryChainNodes.map((node, index) => (
           <Circle key={index} cx={node.x} cy={node.y} r={13} color="orange" />
         ))}
+
+        <EndMarker position={endCollision} />
       </CameraView>
 
       <View className="w-full absolute top-0 justify-center items-center">

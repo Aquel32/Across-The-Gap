@@ -1,4 +1,8 @@
-import { overlaps, overlapsStaticCar } from "@/lib/canvasHelper";
+import {
+  overlaps,
+  overlapsRectangle,
+  overlapsStaticCar,
+} from "@/lib/canvasHelper";
 import {
   CarSettings,
   MapElement,
@@ -26,6 +30,8 @@ export default function LevelCreator({
   carSettings,
   mapElements,
   setMapElements,
+  endCollision,
+  setEndCollision,
   mode,
   menu,
   setMenu,
@@ -37,6 +43,8 @@ export default function LevelCreator({
   carSettings: CarSettings;
   mapElements: MapElement[];
   setMapElements: React.Dispatch<React.SetStateAction<MapElement[]>>;
+  endCollision: SkRect;
+  setEndCollision: React.Dispatch<React.SetStateAction<SkRect>>;
   mode: Modes;
   menu: Menus;
   setMenu: React.Dispatch<React.SetStateAction<Menus>>;
@@ -61,8 +69,24 @@ export default function LevelCreator({
     sharedNodes.value = [...nodes];
   }, [nodes]);
 
+  const sharedEndCollision = useSharedValue<SkRect>({
+    x: endCollision.x,
+    y: endCollision.y,
+    width: endCollision.width,
+    height: endCollision.height,
+  });
+  useEffect(() => {
+    sharedEndCollision.value = {
+      x: endCollision.x,
+      y: endCollision.y,
+      width: endCollision.width,
+      height: endCollision.height,
+    };
+  }, [endCollision]);
+
   const selectedElement = useSharedValue<number | undefined>(undefined);
   const selectedNode = useSharedValue<number | undefined>(undefined);
+  const selectedEnd = useSharedValue<boolean>(false);
 
   function addNode(newNode: NodeData) {
     sfx.playSound("click");
@@ -98,6 +122,13 @@ export default function LevelCreator({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
+      if (overlapsRectangle(worldX, worldY, endCollision)) {
+        if (mode == "move") {
+          selectedEnd.value = true;
+        }
+        return;
+      }
+
       const nodeIndex = overlaps(
         worldX,
         worldY,
@@ -132,16 +163,23 @@ export default function LevelCreator({
     })
     .onChange((e) => {
       "worklet";
-      if (
-        selectedElement.value === undefined &&
-        selectedNode.value === undefined
-      )
-        return;
-
       const worldX =
         (e.x - cameraTransform.value.translateX) / cameraTransform.value.scale;
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
+
+      if (selectedEnd.value) {
+        if (mode == "move") {
+          enableCameraTransform.value = false;
+          sharedEndCollision.value = {
+            x: worldX - endCollision.width / 2,
+            y: worldY - endCollision.height / 2,
+            width: endCollision.width,
+            height: endCollision.height,
+          };
+        }
+        return;
+      }
 
       if (mode == "move" && selectedElement.value !== undefined) {
         const elem = sharedMapElements.value[selectedElement.value!];
@@ -193,10 +231,14 @@ export default function LevelCreator({
     .onEnd((e) => {
       "worklet";
       enableCameraTransform.value = true;
+
       if (selectedElement.value !== undefined) {
         runOnJS(setMapElements)(sharedMapElements.value);
       } else if (selectedNode.value !== undefined) {
         runOnJS(setNodes)(sharedNodes.value);
+      } else if (selectedEnd.value) {
+        runOnJS(setEndCollision)(sharedEndCollision.value);
+        selectedEnd.value = false;
       }
     });
 
@@ -271,7 +313,7 @@ export default function LevelCreator({
         transform={cameraTransform}
       >
         {mapElements.map((elem, index) => (
-          <DynamicRect
+          <DynamicMapElement
             key={index}
             sharedMapElements={sharedMapElements}
             index={index}
@@ -283,6 +325,8 @@ export default function LevelCreator({
         ))}
 
         <Car {...carSettings} />
+
+        <DynamicRect sharedRect={sharedEndCollision} />
       </CameraView>
     </View>
   );
@@ -330,7 +374,15 @@ function Car(carSettings: CarSettings) {
   );
 }
 
-function DynamicRect({
+function DynamicRect({ sharedRect }: { sharedRect: SharedValue<SkRect> }) {
+  const rect = useDerivedValue(() => {
+    return sharedRect.value;
+  }, [sharedRect]);
+
+  return <Rect rect={rect} color={"orange"} />;
+}
+
+function DynamicMapElement({
   sharedMapElements,
   index,
 }: {

@@ -1,3 +1,4 @@
+import { EndMarker } from "@/lib/canvasHelper";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
 import Matter, { Events, Vector } from "matter-js";
@@ -460,6 +461,7 @@ export default function Simulation({
           />
         ))}
         <PhysicsBasedCar carData={carData} carSettings={carSettings} />
+        <EndMarker position={endCollision} />
       </CameraView>
     </View>
   );

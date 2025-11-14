@@ -97,6 +97,7 @@ export default function NewLevel() {
     DEFAULT_LEVEL.mapElements
   );
   const [carSettings, setCarSettings] = useState(DEFAULT_LEVEL.carSettings);
+  const [endCollision, setEndCollision] = useState(DEFAULT_LEVEL.endCollision);
   const [budget, setBudget] = useState<number>(DEFAULT_LEVEL.budget);
   const [newLevel, setNewLevel] = useState<LevelData>(DEFAULT_LEVEL);
 
@@ -118,6 +119,7 @@ export default function NewLevel() {
       setMapElements(parsedLevels[index.current].mapElements);
       setCarSettings(parsedLevels[index.current].carSettings);
       setBudget(parsedLevels[index.current].budget);
+      setEndCollision(parsedLevels[index.current].endCollision);
       setTimeout(() => setChangesMade(false), 100);
     }
     loadLevels();
@@ -130,10 +132,10 @@ export default function NewLevel() {
       carSettings: carSettings,
       budget: budget,
       connections: newLevel.connections,
-      endCollision: newLevel.endCollision,
+      endCollision: endCollision,
     });
     setChangesMade(true);
-  }, [nodes, mapElements, carSettings, budget]);
+  }, [nodes, mapElements, carSettings, budget, endCollision]);
 
   function saveLevel() {
     if (Levels[index.current]) {
@@ -177,6 +179,7 @@ export default function NewLevel() {
     setSelectedMaterial(Materials.ROAD);
     setMode("create");
     setBudget(DEFAULT_LEVEL.budget);
+    setEndCollision(DEFAULT_LEVEL.endCollision);
     setChangesMade(true);
   }
 
@@ -212,6 +215,8 @@ export default function NewLevel() {
             carSettings={carSettings}
             mapElements={mapElements}
             setMapElements={setMapElements}
+            endCollision={endCollision}
+            setEndCollision={setEndCollision}
             mode={mode}
             menu={menu}
             setMenu={setMenu}

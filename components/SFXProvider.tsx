@@ -49,7 +49,6 @@ export function SFXProvider({ children }: { children: ReactNode }) {
   const [volume, setVolume] = useState<number>(0.1);
 
   useEffect(() => {
-    console.log(volume);
     Object.values(players).forEach((player) => {
       player.volume = volume;
       player.muted = volume === 0;
