@@ -26,7 +26,7 @@ export default function Menu() {
           <View className="flex flex-row gap-2">
             <Button
               className="bg-gray-500 px-4 py-2 rounded items-center"
-              onPress={() => {}}
+              onPress={() => router.push("/options")}
               hapticStyle={"Heavy"}
               sound="error"
             >

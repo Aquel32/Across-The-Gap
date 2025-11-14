@@ -1,12 +1,14 @@
 import { useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 export type SoundName = "click" | "success" | "error";
 
 interface SFXContextType {
   playSound: (name: SoundName) => void;
   playHaptic: (style: "Heavy" | "Medium" | "Light" | "Rigid" | "Soft") => void;
+  volume: number;
+  setVolume: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const soundFiles: Record<SoundName, any> = {
@@ -29,9 +31,10 @@ export function SFXProvider({ children }: { children: ReactNode }) {
     const sound = players[name];
     if (sound) {
       try {
+        sound.volume = volume;
         await sound.seekTo(0);
         await sound.play();
-      } catch (error) {}
+      } catch (error) { }
     }
   }
 
@@ -39,8 +42,10 @@ export function SFXProvider({ children }: { children: ReactNode }) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle[style]);
   }
 
+  const [volume, setVolume] = useState<number>(0.1);
+
   return (
-    <SFXContext.Provider value={{ playSound, playHaptic }}>
+    <SFXContext.Provider value={{ playSound, playHaptic, volume, setVolume }}>
       {children}
     </SFXContext.Provider>
   );

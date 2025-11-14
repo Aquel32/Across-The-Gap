@@ -17,6 +17,10 @@ export default function RootLayout() {
             name="level/custom/[id]"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="options"
+            options={{ headerShown: false }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </SFXProvider>
