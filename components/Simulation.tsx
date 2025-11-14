@@ -18,12 +18,14 @@ export default function Simulation({
   mapElements,
   endCollision,
   carSettings,
+  onEnd,
 }: {
   nodes: NodeData[];
   connections: Connection[];
   mapElements: MapElement[];
   endCollision: { x: number; y: number; width: number; height: number };
   carSettings: CarSettings;
+  onEnd: () => void;
 }) {
   const [engine] = useState(() =>
     Matter.Engine.create({ gravity: { x: 0, y: 1 } })
@@ -251,7 +253,8 @@ export default function Simulation({
           (pair.bodyB.label === "endCollision" &&
             pair.bodyA.label === "carPart")
         ) {
-          console.log("Reached the end!");
+          onEnd();
+          return;
         }
 
         let beamBody: Matter.Body | null = null;

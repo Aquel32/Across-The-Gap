@@ -54,6 +54,10 @@ export interface LevelData {
   budget: number;
 }
 
+export interface LevelTake {
+  done: boolean;
+}
+
 export type Modes =
   | "move"
   | "create"

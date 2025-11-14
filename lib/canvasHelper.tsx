@@ -1,4 +1,4 @@
-import { Connection, NodeData } from "./types";
+import { CarSettings, Connection, NodeData } from "./types";
 
 export const overlaps = (
   x: number,

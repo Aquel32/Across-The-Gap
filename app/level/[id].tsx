@@ -3,25 +3,18 @@ import { useLocalSearchParams } from "expo-router";
 import Levels from "@/assets/levels.json";
 import Level from "@/components/Level";
 import { Materials } from "@/lib/materials";
-import { Connection, MapElement, NodeData } from "@/lib/types";
+import { loadFileAsync, saveFileAsync } from "@/lib/storage";
+import { Connection, LevelTake, MapElement, NodeData } from "@/lib/types";
+import { useEffect, useState } from "react";
 
 export default function LevelScreen() {
   const params = useLocalSearchParams<{ id: string }>();
 
-  const level = Levels[Number(params.id) - 1];
+  const index = Number(params.id) - 1;
+  const level = Levels[index];
 
-  const nodes: NodeData[] = level.nodes;
-  const connections: Connection[] = [];
-
-  // level.connections.forEach((conn) => {
-  //   const material = (Materials as any)[conn.material];
-
-  //   connections.push({
-  //     from: conn.from,
-  //     to: conn.to,
-  //     material: material,
-  //   });
-  // });
+  const [nodes, setNodes] = useState<NodeData[]>(level.nodes);
+  const [connections, setConnections] = useState<Connection[]>([]);
 
   const mapElements: MapElement[] = [];
   level.mapElements.forEach((elem) => {
@@ -36,6 +29,32 @@ export default function LevelScreen() {
     });
   });
 
+  const [takesData, setTakesData] = useState<LevelTake[]>(
+    Levels.map(() => ({ nodes: [], connections: [], done: false }))
+  );
+
+  async function loadLevels() {
+    const data = await loadFileAsync("level_takes.json");
+
+    if (data === "") return;
+    setTakesData(JSON.parse(data) as LevelTake[]);
+  }
+
+  useEffect(() => {
+    loadLevels();
+  }, []);
+
+  function saveTake(takeNodes: NodeData[], takeConnections: Connection[]) {
+    setTakesData((takes) => {
+      const updatedTakes = [...takes];
+      updatedTakes[index] = {
+        done: true,
+      };
+      saveFileAsync("level_takes.json", JSON.stringify(updatedTakes));
+      return updatedTakes;
+    });
+  }
+
   return (
     <Level
       INITIAL_NODES={nodes}
@@ -44,6 +63,7 @@ export default function LevelScreen() {
       END_COLLISION={level.endCollision}
       CAR_SETTINGS={level.carSettings}
       BUDGET={level.budget}
+      saveTake={saveTake}
     />
   );
 }

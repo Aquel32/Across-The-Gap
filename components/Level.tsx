@@ -40,6 +40,7 @@ export default function Level({
   BUDGET,
   parentTesting,
   setParentTesting,
+  saveTake,
 }: {
   INITIAL_NODES: NodeData[];
   INITIAL_CONNECTIONS: Connection[];
@@ -49,6 +50,7 @@ export default function Level({
   BUDGET: number;
   parentTesting?: boolean;
   setParentTesting?: React.Dispatch<React.SetStateAction<boolean>>;
+  saveTake?: (nodes: NodeData[], connections: Connection[]) => void;
 }) {
   const [menu, setMenu] = useState<Menus>("none");
   const [mode, setMode] = useState<Modes>("create");
@@ -78,11 +80,30 @@ export default function Level({
     closeMenus();
   }
 
+  function onEnd() {
+    setRunning(false);
+    setEndModalVisible(true);
+  }
+
+  function acceptEnding() {
+    if (parentTesting && setParentTesting) {
+      setRunning(false);
+      return;
+    }
+
+    if (saveTake) {
+      saveTake(nodes, connections);
+    }
+
+    router.back();
+  }
+
   useEffect(() => {
     setMenu("none");
   }, [mode, running]);
 
   const [clearLevelModalVisible, setClearLevelModalVisible] = useState(false);
+  const [endModalVisible, setEndModalVisible] = useState(false);
 
   return (
     <View style={{ flex: 1 }}>
@@ -93,6 +114,7 @@ export default function Level({
           mapElements={MAP_ELEMENTS}
           endCollision={END_COLLISION}
           carSettings={CAR_SETTINGS}
+          onEnd={onEnd}
         />
       ) : (
         <Editor
@@ -305,6 +327,29 @@ export default function Level({
                 sound="success"
               >
                 <Text>TAK</Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          isVisible={endModalVisible}
+          animationIn="slideInUp"
+          animationOut="slideOutDown"
+          backdropColor="transparent"
+        >
+          <View className="bg-white p-5 rounded-lg flex items-center">
+            <Text>UKOŃCZYŁEŚ POZIOM</Text>
+            <View className="flex flex-row gap-5 m-10">
+              <Button
+                className="bg-green-500 px-4 py-2 rounded"
+                onPress={() => {
+                  acceptEnding();
+                  setEndModalVisible(false);
+                }}
+                hapticStyle="Heavy"
+                sound="success"
+              >
+                <Text>ZAKOŃCZ</Text>
               </Button>
             </View>
           </View>
