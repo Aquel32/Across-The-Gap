@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeftEndOnRectangleIcon,
   BanknotesIcon,
+  PlusIcon,
   RocketLaunchIcon,
   TruckIcon,
 } from "react-native-heroicons/outline";
@@ -36,7 +37,7 @@ export default function Customs() {
   return (
     <View className="w-full h-full flex flex-row gap-5 justify-center items-center">
       <View className="w-full h-full flex justify-center items-center">
-        <View className="flex flex-row justify-center items-center h-full ">
+        <View className="flex flex-row justify-center items-center">
           <SafeAreaProvider>
             <SafeAreaView className="w-[60%] ml-[20%]" edges={[]}>
               <ScrollView
@@ -63,7 +64,7 @@ export default function Customs() {
                     hapticStyle={"Heavy"}
                     sound="click"
                   >
-                    <Text className="text-2xl">Level {index + 1}</Text>
+                    <Text className="text-2xl">Custom {index + 1}</Text>
                     <View className="m-2">
                       <View className="flex flex-row gap-1 items-center">
                         <BanknotesIcon color={"green"} width={20} height={20} />
@@ -86,35 +87,32 @@ export default function Customs() {
                     </View>
                   </Button>
                 ))}
-
-                <Button
-                  onPress={() =>
-                    router.push({
-                      pathname: "/level/custom/[id]",
-                      params: { id: "new" },
-                    })
-                  }
-                  className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
-                  hapticStyle={"Heavy"}
-                  sound="click"
-                >
-                  <Text className="text-2xl">Create Level</Text>
-                </Button>
               </ScrollView>
             </SafeAreaView>
           </SafeAreaProvider>
         </View>
-      </View>
 
-      <View className="flex flex-row w-full justify-between items-center px-10 py-1 absolute bottom-0">
-        <View className="flex flex-row justify-start gap-3 w-40">
+        <View className="flex flex-row items-center justify-between w-[60%] mt-4">
           <Button
-            className={`bg-gray-500 px-4 py-2 rounded`}
+            className="bg-gray-500 px-10 py-2 rounded items-center"
             onPress={() => router.back()}
             hapticStyle={"Heavy"}
-            sound="click"
+            sound="error"
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
+          </Button>
+          <Button
+            className="bg-green-500 px-10 py-2 rounded items-center"
+            onPress={() =>
+              router.push({
+                pathname: "/level/custom/[id]",
+                params: { id: "new" },
+              })
+            }
+            hapticStyle={"Heavy"}
+            sound="error"
+          >
+            <PlusIcon color={"white"} />
           </Button>
         </View>
       </View>

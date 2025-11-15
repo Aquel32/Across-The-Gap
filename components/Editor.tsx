@@ -14,6 +14,7 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import {
   Text as CanvasText,
@@ -26,12 +27,9 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
-import {
-  ArrowPathRoundedSquareIcon,
-  PlusIcon,
-} from "react-native-heroicons/outline";
+import { PlusIcon } from "react-native-heroicons/outline";
 import BanknotesIcon from "react-native-heroicons/outline/BanknotesIcon";
 import {
   runOnJS,
@@ -39,6 +37,7 @@ import {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
+import Button from "./Button";
 import CameraView from "./CameraView";
 import CarMenu from "./CarMenu";
 import { useSFX } from "./SFXProvider";
@@ -353,7 +352,7 @@ export default function Editor({
       lastX = newX;
       lastY = newY;
     }
-    lastPrice.value = price;
+    //lastPrice.value = price;
     setTemporaryChainNodes(newTemporaryNodes);
   }
 
@@ -651,6 +650,8 @@ export default function Editor({
         runOnJS(setTemporaryChainNodes)([]);
         lastPrice.value = 0;
       }
+      line.p1.value = vec(0, 0);
+      line.p2.value = vec(0, 0);
     });
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
@@ -748,6 +749,7 @@ export default function Editor({
         <TemporaryChainPreview
           temporaryChainNodes={temporaryChainNodes}
           origin={temporaryChainsOrigin}
+          selectedMaterial={selectedMaterial}
         />
 
         <EndMarker position={endCollision} />
@@ -761,8 +763,8 @@ export default function Editor({
       </View>
 
       {(mode == "chain" || mode == "arch") && (
-        <View className="absolute right-0 top-[30%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
-          <View className="p-2 px-5  flex flex-row items-center gap-1">
+        <View className="absolute right-0 bottom-[0%] justify-center items-center bg-gray-300 pb-2 pr-2 rounded-tl-xl">
+          <View className="flex flex-row items-center gap-1 ">
             <Slider
               value={MAX_CHAIN_SEGMENT_LENGTH.current}
               onValueChange={(newValue) => {
@@ -783,9 +785,14 @@ export default function Editor({
               minimumTrackTintColor="#FFFFFF"
               maximumTrackTintColor="#000000"
             />
+            <MaterialCommunityIcons
+              name="map-marker-distance"
+              size={24}
+              color="white"
+            />
           </View>
           {mode == "arch" && (
-            <View className="p-2 px-5  flex flex-row items-center gap-1 ">
+            <View className="  flex flex-row items-center gap-1">
               <Slider
                 value={ARCH_HEIGHT.current}
                 onValueChange={(newValue) => {
@@ -806,23 +813,35 @@ export default function Editor({
                 minimumTrackTintColor="#FFFFFF"
                 maximumTrackTintColor="#000000"
               />
+              <MaterialCommunityIcons
+                name="angle-acute"
+                size={24}
+                color="white"
+              />
             </View>
           )}
           <View className="flex flex-row gap-5">
-            <TouchableOpacity onPress={() => createChain()}>
+            <Button
+              className="bg-green-500 p-2 rounded-xl"
+              onPress={() => createChain()}
+              disabled={lastPrice.value > budget || generatingChain == false}
+            >
               <PlusIcon color={"white"} />
-            </TouchableOpacity>
-            <TouchableOpacity
+            </Button>
+            <Button
+              className="bg-red-500 p-2 rounded-xl"
               onPress={() => {
-                sfx.playHaptic("Soft");
                 setGeneratingChain(false);
                 setTemporaryChainNodes([]);
                 line.p2.value = { x: 0, y: 0 };
                 line.p1.value = { x: 0, y: 0 };
               }}
+              disabled={lastPrice.value > budget || generatingChain == false}
+              sound="click"
+              hapticStyle="Light"
             >
-              <ArrowPathRoundedSquareIcon color={"white"} />
-            </TouchableOpacity>
+              <MaterialIcons name="cancel" size={24} color="white" />
+            </Button>
           </View>
         </View>
       )}
@@ -924,9 +943,11 @@ function CurrentPriceIndicator({
 function TemporaryChainPreview({
   origin,
   temporaryChainNodes,
+  selectedMaterial,
 }: {
   origin: { x: number; y: number } | null;
   temporaryChainNodes: { x: number; y: number; value: number }[];
+  selectedMaterial: Material;
 }) {
   return (
     <>
@@ -935,7 +956,7 @@ function TemporaryChainPreview({
           p1={origin}
           p2={temporaryChainNodes[0]}
           strokeWidth={10}
-          color="gray"
+          color={selectedMaterial.color}
           style={"stroke"}
         />
       )}
@@ -949,7 +970,7 @@ function TemporaryChainPreview({
                 p1={node}
                 p2={nextNode}
                 strokeWidth={10}
-                color="gray"
+                color={selectedMaterial.color}
                 style={"stroke"}
               />
             )}

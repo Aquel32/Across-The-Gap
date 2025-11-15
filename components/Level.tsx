@@ -10,18 +10,15 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
+import { FontAwesome, FontAwesome6, Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import {
   ArrowLeftEndOnRectangleIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
-  BoltSlashIcon,
-  CakeIcon,
-  ChevronUpIcon,
   CursorArrowRippleIcon,
-  EllipsisHorizontalIcon,
   LinkIcon,
   PauseIcon,
   PlayIcon,
@@ -180,7 +177,7 @@ export default function Level({
 
         <View className="flex flex-row gap-1">
           <Button
-            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("move")}
             disabled={running}
             hapticStyle={"Heavy"}
@@ -189,7 +186,7 @@ export default function Level({
             <CursorArrowRippleIcon color={"white"} />
           </Button>
           <Button
-            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("create")}
             disabled={running}
             hapticStyle={"Heavy"}
@@ -198,31 +195,33 @@ export default function Level({
             <LinkIcon color={"white"} />
           </Button>
           <Button
-            className={`bg-[#c1121f] px-4 py-2 rounded items-center`}
+            className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("delete")}
             disabled={running}
             hapticStyle={"Heavy"}
             sound="success"
           >
-            <BoltSlashIcon color={"white"} />
+            <FontAwesome name="unlink" size={24} color="white" />
           </Button>
           <Button
-            className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+            className={`bg-[#e9c46a] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("arch")}
             disabled={running}
             hapticStyle={"Heavy"}
             sound="success"
           >
-            <ChevronUpIcon color={"white"} />
+            <View>
+              <FontAwesome6 name="bezier-curve" size={24} color="white" />
+            </View>
           </Button>
           <Button
-            className={`bg-[#e9c46a] px-4 py-2 rounded items-center`}
+            className={`bg-[#e9c46a] px-2 rounded items-center justify-center`}
             onPress={() => setMode("chain")}
             disabled={running}
             hapticStyle={"Heavy"}
             sound="success"
           >
-            <EllipsisHorizontalIcon color={"white"} />
+            <Ionicons name="analytics-outline" size={38} color="white" />
           </Button>
           <View className="flex flex-row gap-3 relative">
             <Button
@@ -244,28 +243,38 @@ export default function Level({
             {menu === "materials" && (
               <View className="absolute bottom-12 flex flex-col gap-2">
                 <Button
-                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.ROAD)}
                   hapticStyle={"Heavy"}
                   sound="success"
                 >
-                  <CakeIcon color={Materials.ROAD.color} />
+                  <FontAwesome
+                    name="road"
+                    size={24}
+                    color={Materials.ROAD.color}
+                  />
                 </Button>
                 <Button
-                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.STEEL)}
                   hapticStyle={"Heavy"}
                   sound="success"
                 >
-                  <CakeIcon color={Materials.STEEL.color} />
+                  <Image
+                    source={require("@/assets/images/steel.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
                 </Button>
                 <Button
-                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.WOOD)}
                   hapticStyle={"Heavy"}
                   sound="success"
                 >
-                  <CakeIcon color={Materials.WOOD.color} />
+                  <Image
+                    source={require("@/assets/images/wood.png")}
+                    style={{ width: 24, height: 24 }}
+                  />
                 </Button>
               </View>
             )}
@@ -275,7 +284,7 @@ export default function Level({
         <View className="flex flex-row gap-3 w-40 justify-end">
           {parentTesting && setParentTesting && (
             <Button
-              className={`bg-[#588157] px-4 py-2 rounded`}
+              className={`bg-amber-500 px-4 py-2 rounded`}
               onPress={() => setParentTesting((r) => !r)}
               disabled={running}
               hapticStyle={"Heavy"}
@@ -308,7 +317,7 @@ export default function Level({
           backdropColor="transparent"
         >
           <View className="bg-white p-5 rounded-lg flex items-center">
-            <Text>CZY NAPEWNO WYCZYŚCIĆ POZIOM?</Text>
+            <Text>Are you sure you want to clear level?</Text>
             <View className="flex flex-row gap-5 m-10">
               <Button
                 className="bg-red-500 px-4 py-2 rounded"
@@ -316,7 +325,7 @@ export default function Level({
                 hapticStyle="Heavy"
                 sound="error"
               >
-                <Text>NIE</Text>
+                <Text>No</Text>
               </Button>
               <Button
                 className="bg-green-500 px-4 py-2 rounded"
@@ -327,7 +336,7 @@ export default function Level({
                 hapticStyle="Heavy"
                 sound="success"
               >
-                <Text>TAK</Text>
+                <Text>Yes</Text>
               </Button>
             </View>
           </View>
@@ -339,7 +348,7 @@ export default function Level({
           backdropColor="transparent"
         >
           <View className="bg-white p-5 rounded-lg flex items-center">
-            <Text>UKOŃCZYŁEŚ POZIOM</Text>
+            <Text>YOU HAVE COMPLETED THE LEVEL</Text>
             <View className="flex flex-row gap-5 m-10">
               <Button
                 className="bg-green-500 px-4 py-2 rounded"
@@ -350,7 +359,7 @@ export default function Level({
                 hapticStyle="Heavy"
                 sound="success"
               >
-                <Text>ZAKOŃCZ</Text>
+                <Text>FINISH</Text>
               </Button>
             </View>
           </View>

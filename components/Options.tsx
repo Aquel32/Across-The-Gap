@@ -20,7 +20,7 @@ export default function Options() {
     <View className="">
       <View className="flex flex-col items-center justify-center">
         <View>
-          <Text>VOLUME</Text>
+          <Text className="ml-4 font-bold">SFX Volume</Text>
           <Slider
             value={sfx.volume}
             onValueChange={(e) => sfx.setVolume(e)}
@@ -32,10 +32,23 @@ export default function Options() {
             maximumTrackTintColor="#000000"
           />
         </View>
-        <View className="flex flex-col items-center gap-3">
-          <Text>RESET STORAGE</Text>
+        <View>
+          <Text className="ml-4 font-bold">Music Volume</Text>
+          <Slider
+            value={sfx.volume}
+            onValueChange={(e) => sfx.setVolume(e)}
+            step={0.05}
+            style={{ width: 200, height: 40 }}
+            minimumValue={0}
+            maximumValue={1}
+            minimumTrackTintColor="#FFFFFF"
+            maximumTrackTintColor="#000000"
+          />
+        </View>
+        <View className="flex flex-row items-center gap-3 bg-gray-300 px-4 py-2 rounded mt-3">
+          <Text className="w-20">RESET{"\n"}STORAGE</Text>
           <Button
-            className="bg-amber-500 px-4 py-2 rounded"
+            className="bg-red-500 px-4 py-2 rounded"
             onPress={() => changeResetDataModalState(true)}
             hapticStyle={"Light"}
             sound="click"
@@ -53,26 +66,28 @@ export default function Options() {
           backdropColor="transparent"
         >
           <View className="bg-white p-5 rounded-lg flex items-center">
-            <Text>CZY NAPEWNO CHCESZ USUNĄĆ WSZYSTKIE DANE?</Text>
-            <Text>(nie da się cofnąć)</Text>
+            <Text className="text-xl">
+              Are you sure you want to reset all data?
+            </Text>
+            <Text className="font-bold">This action cannot be undone.</Text>
             <View className="flex flex-row gap-5 m-10">
               <Button
-                className="bg-red-500 px-4 py-2 rounded"
+                className="bg-green-500 px-4 py-2 rounded"
                 onPress={() => changeResetDataModalState(false)}
                 hapticStyle="Heavy"
                 sound="error"
               >
-                <Text>NIE</Text>
+                <Text>No</Text>
               </Button>
               <Button
-                className="bg-green-500 px-4 py-2 rounded"
+                className="bg-red-500 px-4 py-2 rounded"
                 onPress={() => {
                   resetData();
                 }}
                 hapticStyle="Heavy"
                 sound="success"
               >
-                <Text>TAK</Text>
+                <Text>Yes</Text>
               </Button>
             </View>
           </View>

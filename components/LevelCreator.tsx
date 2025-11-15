@@ -84,6 +84,8 @@ export default function LevelCreator({
     };
   }, [endCollision]);
 
+  const dragOffset = useSharedValue({ x: 0, y: 0 });
+
   const selectedElement = useSharedValue<number | undefined>(undefined);
   const selectedNode = useSharedValue<number | undefined>(undefined);
   const selectedEnd = useSharedValue<boolean>(false);
@@ -125,17 +127,22 @@ export default function LevelCreator({
       if (overlapsRectangle(worldX, worldY, endCollision)) {
         if (mode == "move") {
           selectedEnd.value = true;
+          dragOffset.value = {
+            x: worldX - sharedEndCollision.value.x,
+            y: worldY - sharedEndCollision.value.y,
+          };
         }
         return;
       }
 
       const nodeIndex = overlaps(
-        worldX,
-        worldY,
+        e.x,
+        e.y,
         sharedNodes.value,
         cameraTransform.value
       );
 
+      console.log("NODE", nodeIndex);
       if (nodeIndex !== undefined) {
         selectedNode.value = nodeIndex;
         runOnJS(sfx.playSound)("click");
@@ -158,6 +165,10 @@ export default function LevelCreator({
         enableCameraTransform.value = true;
         return;
       }
+      dragOffset.value = {
+        x: worldX - sharedMapElements.value[elementIndex].x,
+        y: worldY - sharedMapElements.value[elementIndex].y,
+      };
       selectedElement.value = elementIndex;
       runOnJS(sfx.playSound)("click");
     })
@@ -171,11 +182,12 @@ export default function LevelCreator({
       if (selectedEnd.value) {
         if (mode == "move") {
           enableCameraTransform.value = false;
+
           sharedEndCollision.value = {
-            x: worldX - endCollision.width / 2,
-            y: worldY - endCollision.height / 2,
-            width: endCollision.width,
-            height: endCollision.height,
+            x: worldX - dragOffset.value.x,
+            y: worldY - dragOffset.value.y,
+            width: sharedEndCollision.value.width,
+            height: sharedEndCollision.value.height,
           };
         }
         return;
@@ -186,8 +198,8 @@ export default function LevelCreator({
         const newElements = [...mapElements];
         newElements[selectedElement.value!] = {
           ...elem,
-          x: worldX - elem.width / 2,
-          y: worldY - elem.height / 2,
+          x: worldX - dragOffset.value.x,
+          y: worldY - dragOffset.value.y,
         };
         sharedMapElements.value = newElements;
       } else if (mode == "move" && selectedNode.value !== undefined) {

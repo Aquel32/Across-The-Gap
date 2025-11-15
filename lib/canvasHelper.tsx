@@ -7,6 +7,7 @@ import {
   NodeData,
 } from "./types";
 
+const NODES_OVERLAP_SNAP_DISTANCE = 10;
 export const overlaps = (
   x: number,
   y: number,
@@ -31,7 +32,8 @@ export const overlaps = (
     const distance = Math.sqrt(
       Math.pow(worldX - n.x, 2) + Math.pow(worldY - n.y, 2)
     );
-    if (distance < n.r) {
+
+    if (distance < n.r + NODES_OVERLAP_SNAP_DISTANCE) {
       result = i;
       break;
     }

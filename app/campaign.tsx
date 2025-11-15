@@ -53,7 +53,8 @@ export default function Campaign() {
 
   return (
     <View className="w-full h-full flex justify-center items-center">
-      <View className="flex flex-row justify-center items-center h-full ">
+      <Text className="text-4xl font-medium mb-4">CAMPAIGN</Text>
+      <View className="flex flex-row justify-center items-center">
         <SafeAreaProvider>
           <SafeAreaView className="w-[60%] ml-[20%]" edges={[]}>
             <ScrollView
@@ -116,17 +117,16 @@ export default function Campaign() {
         </SafeAreaProvider>
       </View>
 
-      <View className="flex flex-row w-full justify-between items-center px-10 py-1 absolute bottom-0">
-        <View className="flex flex-row justify-start gap-3 w-40">
-          <Button
-            className={`bg-gray-500 px-4 py-2 rounded`}
-            onPress={() => router.back()}
-            hapticStyle={"Heavy"}
-            sound="click"
-          >
-            <ArrowLeftEndOnRectangleIcon color={"white"} />
-          </Button>
-        </View>
+      <View className="flex flex-row items-center justify-between w-[60%] mt-4">
+        <Button
+          className="bg-gray-500 px-10 py-2 rounded items-center"
+          onPress={() => router.back()}
+          hapticStyle={"Heavy"}
+          sound="error"
+        >
+          <ArrowLeftEndOnRectangleIcon color={"white"} />
+        </Button>
+        <Text>Progress: {((completed / Levels.length) * 100).toFixed(0)}%</Text>
       </View>
     </View>
   );

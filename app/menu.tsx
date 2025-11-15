@@ -11,7 +11,7 @@ export default function Menu() {
   return (
     <>
       <View className="w-full h-full flex justify-center items-center">
-        <Text className="text-5xl">Across The Gap</Text>
+        <Text className="text-4xl font-medium">Across The Gap</Text>
 
         <View className="mt-10 flex flex-col gap-2">
           <Button

@@ -12,22 +12,18 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
+import { AntDesign, FontAwesome, Foundation } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import {
-  ArchiveBoxArrowDownIcon,
-  ArchiveBoxXMarkIcon,
   ArrowLeftEndOnRectangleIcon,
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
-  AtSymbolIcon,
   BanknotesIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
-  BoltSlashIcon,
-  CakeIcon,
   CursorArrowRippleIcon,
   PauseIcon,
   PlayIcon,
@@ -252,20 +248,20 @@ export default function NewLevel() {
                     <ArrowLeftEndOnRectangleIcon color={"white"} />
                   </Button>
                   <Button
-                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    className={`bg-[#2b2d42] px-4 py-2 rounded items-center`}
                     onPress={() => saveLevel()}
                     hapticStyle={"Heavy"}
                     sound="click"
                   >
-                    <ArchiveBoxArrowDownIcon color={"white"} />
+                    <FontAwesome name="save" size={24} color="white" />
                   </Button>
                   <Button
-                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    className={`bg-[#2b2d42] px-4 py-2 rounded items-center`}
                     onPress={() => setDeleteLevelModalVisible(true)}
                     hapticStyle={"Heavy"}
                     sound="click"
                   >
-                    <ArchiveBoxXMarkIcon color={"white"} />
+                    <Foundation name="page-delete" size={24} color="white" />
                   </Button>
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
@@ -281,7 +277,7 @@ export default function NewLevel() {
 
             <View className="flex flex-row justify-center gap-1">
               <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
                 hapticStyle={"Heavy"}
                 sound="success"
@@ -289,15 +285,23 @@ export default function NewLevel() {
                 <PuzzlePieceIcon color={"white"} />
               </Button>
               <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("arch")}
                 hapticStyle={"Heavy"}
                 sound="success"
               >
-                <AtSymbolIcon color={"white"} />
+                <AntDesign name="sisternode" size={24} color="white" />
               </Button>
               <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                className={`bg-[#c1121f] px-4 py-2 rounded`}
+                onPress={() => setMode("delete")}
+                hapticStyle={"Heavy"}
+                sound="success"
+              >
+                <FontAwesome name="remove" size={24} color="white" />
+              </Button>
+              <Button
+                className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("move")}
                 hapticStyle={"Heavy"}
                 sound="success"
@@ -305,7 +309,7 @@ export default function NewLevel() {
                 <CursorArrowRippleIcon color={"white"} />
               </Button>
               <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("resize")}
                 hapticStyle={"Heavy"}
                 sound="success"
@@ -313,20 +317,12 @@ export default function NewLevel() {
                 <ArrowTopRightOnSquareIcon color={"white"} />
               </Button>
               <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("rotate")}
                 hapticStyle={"Heavy"}
                 sound="success"
               >
                 <ArrowPathIcon color={"white"} />
-              </Button>
-              <Button
-                className={`bg-[#2b2d42] px-4 py-2 rounded`}
-                onPress={() => setMode("delete")}
-                hapticStyle={"Heavy"}
-                sound="success"
-              >
-                <BoltSlashIcon color={"white"} />
               </Button>
               <View className="flex flex-row gap-3 relative">
                 <Button
@@ -349,28 +345,38 @@ export default function NewLevel() {
                 {menu === "materials" && (
                   <View className="absolute bottom-12 flex flex-col gap-2">
                     <Button
-                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.ROAD)}
                       hapticStyle={"Heavy"}
                       sound="success"
                     >
-                      <CakeIcon color={Materials.ROAD.color} />
+                      <FontAwesome
+                        name="road"
+                        size={24}
+                        color={Materials.ROAD.color}
+                      />
                     </Button>
                     <Button
-                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.STEEL)}
                       hapticStyle={"Heavy"}
                       sound="success"
                     >
-                      <CakeIcon color={Materials.STEEL.color} />
+                      <Image
+                        source={require("@/assets/images/steel.png")}
+                        style={{ width: 24, height: 24 }}
+                      />
                     </Button>
                     <Button
-                      className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                      className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.WOOD)}
                       hapticStyle={"Heavy"}
                       sound="success"
                     >
-                      <CakeIcon color={Materials.WOOD.color} />
+                      <Image
+                        source={require("@/assets/images/wood.png")}
+                        style={{ width: 24, height: 24 }}
+                      />
                     </Button>
                   </View>
                 )}
@@ -442,7 +448,7 @@ export default function NewLevel() {
               backdropColor="transparent"
             >
               <View className="bg-white p-5 rounded-lg flex items-center">
-                <Text>CZY NAPEWNO CHCESZ WYCZYŚCIĆ POZIOM?</Text>
+                <Text>Are you sure you want to clear level?</Text>
                 <View className="flex flex-row gap-5 m-10">
                   <Button
                     className="bg-red-500 px-4 py-2 rounded"
@@ -450,7 +456,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="error"
                   >
-                    <Text>NIE</Text>
+                    <Text>No</Text>
                   </Button>
                   <Button
                     className="bg-green-500 px-4 py-2 rounded"
@@ -461,7 +467,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="success"
                   >
-                    <Text>TAK</Text>
+                    <Text>Yes</Text>
                   </Button>
                 </View>
               </View>
@@ -473,7 +479,7 @@ export default function NewLevel() {
               backdropColor="transparent"
             >
               <View className="bg-white p-5 rounded-lg flex items-center">
-                <Text>CZY NAPEWNO CHCESZ USUNĄĆ POZIOM?</Text>
+                <Text>Are you sure you want to delete level?</Text>
                 <View className="flex flex-row gap-5 m-10">
                   <Button
                     className="bg-red-500 px-4 py-2 rounded"
@@ -481,7 +487,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="error"
                   >
-                    <Text>NIE</Text>
+                    <Text>No</Text>
                   </Button>
                   <Button
                     className="bg-green-500 px-4 py-2 rounded"
@@ -492,7 +498,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="success"
                   >
-                    <Text>TAK</Text>
+                    <Text>Yes</Text>
                   </Button>
                 </View>
               </View>
@@ -504,7 +510,9 @@ export default function NewLevel() {
               backdropColor="transparent"
             >
               <View className="bg-white p-5 rounded-lg flex items-center">
-                <Text>CZY NAPEWNO CHCESZ OPUŚCIĆ POZIOM BEZ ZAPISU?</Text>
+                <Text>
+                  Are you sure you want to leave level without saving?
+                </Text>
                 <View className="flex flex-row gap-5 m-10">
                   <Button
                     className="bg-red-500 px-4 py-2 rounded"
@@ -512,7 +520,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="error"
                   >
-                    <Text>NIE</Text>
+                    <Text>No</Text>
                   </Button>
                   <Button
                     className="bg-green-500 px-4 py-2 rounded"
@@ -523,7 +531,7 @@ export default function NewLevel() {
                     hapticStyle="Heavy"
                     sound="success"
                   >
-                    <Text>TAK</Text>
+                    <Text>Yes</Text>
                   </Button>
                 </View>
               </View>

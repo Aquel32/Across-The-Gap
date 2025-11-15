@@ -3,7 +3,7 @@ import { Material } from "./types";
 export const Materials: { [key: string]: Material } = {
   ROAD: {
     name: "Road",
-    color: "red",
+    color: "black",
     stiffness: 1,
     durability: 2000,
     collideWithCar: true,
@@ -12,7 +12,7 @@ export const Materials: { [key: string]: Material } = {
   },
   STEEL: {
     name: "Steel",
-    color: "green",
+    color: "gray",
     stiffness: 1,
     durability: 3000,
     lengthPenaltyFactor: 0.4,
@@ -20,7 +20,7 @@ export const Materials: { [key: string]: Material } = {
   },
   WOOD: {
     name: "Wood",
-    color: "blue",
+    color: "brown",
     stiffness: 0.2,
     durability: 0.5,
     lengthPenaltyFactor: 0.1,
