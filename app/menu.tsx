@@ -17,7 +17,6 @@ export default function Menu() {
           <Button
             className={`bg-green-500 px-4 py-2 rounded items-center`}
             onPress={() => router.push("/campaign")}
-            hapticStyle={"Light"}
             sound="click"
           >
             <PlayIcon color={"white"} />
@@ -27,8 +26,7 @@ export default function Menu() {
             <Button
               className="bg-gray-500 px-4 py-2 rounded items-center"
               onPress={() => router.push("/options")}
-              hapticStyle={"Heavy"}
-              sound="error"
+              sound="click"
             >
               <Cog6ToothIcon color={"white"} />
             </Button>
@@ -36,7 +34,6 @@ export default function Menu() {
             <Button
               className="bg-amber-500 px-4 py-2 rounded"
               onPress={() => router.push("/customs")}
-              hapticStyle={"Light"}
               sound="click"
             >
               <PencilSquareIcon color={"white"} />

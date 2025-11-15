@@ -263,7 +263,8 @@ export default function LevelCreator({
       (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
     if (overlapsStaticCar(worldX, worldY, carSettings)) {
-      runOnJS(sfx.playSound)("error");
+      runOnJS(sfx.playSound)("click");
+      runOnJS(sfx.playHaptic)("Soft");
       runOnJS(setMenu)(menu == "car" ? "none" : "car");
       return;
     }

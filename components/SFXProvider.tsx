@@ -7,19 +7,22 @@ import {
   useEffect,
   useState,
 } from "react";
-export type SoundName = "click" | "success" | "error";
+export type SoundName = "click" | "success" | "error" | "song";
 
 interface SFXContextType {
   playSound: (name: SoundName) => void;
   playHaptic: (style: "Heavy" | "Medium" | "Light" | "Rigid" | "Soft") => void;
-  volume: number;
-  setVolume: React.Dispatch<React.SetStateAction<number>>;
+  sfxVolume: number;
+  setSfxVolume: React.Dispatch<React.SetStateAction<number>>;
+  musicVolume: number;
+  setMusicVolume: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const soundFiles: Record<SoundName, any> = {
   click: require("@/assets/sounds/click.wav"),
   success: require("@/assets/sounds/success.wav"),
   error: require("@/assets/sounds/error.wav"),
+  song: require("@/assets/sounds/song.mp3"),
 };
 
 const SFXContext = createContext<SFXContextType | undefined>(undefined);
@@ -35,7 +38,7 @@ export function SFXProvider({ children }: { children: ReactNode }) {
     const sound = players[name];
     if (sound) {
       try {
-        sound.volume = volume;
+        sound.volume = sfxVolume;
         await sound.seekTo(0);
         await sound.play();
       } catch (error) {}
@@ -46,17 +49,37 @@ export function SFXProvider({ children }: { children: ReactNode }) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle[style]);
   }
 
-  const [volume, setVolume] = useState<number>(0.1);
+  const [sfxVolume, setSfxVolume] = useState<number>(0.5);
+  const [musicVolume, setMusicVolume] = useState<number>(0.5);
+
+  useEffect(() => {
+    players.song.loop = true;
+    players.song.play();
+  }, []);
+
+  useEffect(() => {
+    players.song.volume = musicVolume;
+    players.song.muted = musicVolume === 0;
+  }, [musicVolume]);
 
   useEffect(() => {
     Object.values(players).forEach((player) => {
-      player.volume = volume;
-      player.muted = volume === 0;
+      player.volume = sfxVolume;
+      player.muted = sfxVolume === 0;
     });
-  }, [volume]);
+  }, [sfxVolume]);
 
   return (
-    <SFXContext.Provider value={{ playSound, playHaptic, volume, setVolume }}>
+    <SFXContext.Provider
+      value={{
+        playSound,
+        playHaptic,
+        sfxVolume,
+        setSfxVolume,
+        musicVolume,
+        setMusicVolume,
+      }}
+    >
       {children}
     </SFXContext.Provider>
   );

@@ -61,7 +61,7 @@ export default function Customs() {
                       })
                     }
                     className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
-                    hapticStyle={"Heavy"}
+                    hapticStyle={"Soft"}
                     sound="click"
                   >
                     <Text className="text-2xl">Custom {index + 1}</Text>
@@ -96,8 +96,7 @@ export default function Customs() {
           <Button
             className="bg-gray-500 px-10 py-2 rounded items-center"
             onPress={() => router.back()}
-            hapticStyle={"Heavy"}
-            sound="error"
+            sound="click"
           >
             <ArrowLeftEndOnRectangleIcon color={"white"} />
           </Button>
@@ -109,8 +108,8 @@ export default function Customs() {
                 params: { id: "new" },
               })
             }
-            hapticStyle={"Heavy"}
-            sound="error"
+            hapticStyle={"Soft"}
+            sound="click"
           >
             <PlusIcon color={"white"} />
           </Button>

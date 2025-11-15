@@ -1,5 +1,6 @@
 import { saveFileAsync } from "@/lib/storage";
 import Slider from "@react-native-community/slider";
+import { router } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { TrashIcon } from "react-native-heroicons/outline";
@@ -13,6 +14,7 @@ export default function Options() {
   const [resetDataModalState, changeResetDataModalState] = useState(false);
   function resetData() {
     saveFileAsync("custom_levels.json", "[]");
+    saveFileAsync("level_takes.json", "[]");
     changeResetDataModalState(false);
   }
 
@@ -22,8 +24,11 @@ export default function Options() {
         <View>
           <Text className="ml-4 font-bold">SFX Volume</Text>
           <Slider
-            value={sfx.volume}
-            onValueChange={(e) => sfx.setVolume(e)}
+            value={sfx.sfxVolume}
+            onValueChange={(e) => {
+              sfx.setSfxVolume(e);
+              sfx.playHaptic("Soft");
+            }}
             step={0.05}
             style={{ width: 200, height: 40 }}
             minimumValue={0}
@@ -35,8 +40,11 @@ export default function Options() {
         <View>
           <Text className="ml-4 font-bold">Music Volume</Text>
           <Slider
-            value={sfx.volume}
-            onValueChange={(e) => sfx.setVolume(e)}
+            value={sfx.musicVolume}
+            onValueChange={(e) => {
+              sfx.setMusicVolume(e);
+              sfx.playHaptic("Soft");
+            }}
             step={0.05}
             style={{ width: 200, height: 40 }}
             minimumValue={0}
@@ -50,7 +58,7 @@ export default function Options() {
           <Button
             className="bg-red-500 px-4 py-2 rounded"
             onPress={() => changeResetDataModalState(true)}
-            hapticStyle={"Light"}
+            hapticStyle={"Heavy"}
             sound="click"
           >
             <TrashIcon color={"white"} />
@@ -74,8 +82,8 @@ export default function Options() {
               <Button
                 className="bg-green-500 px-4 py-2 rounded"
                 onPress={() => changeResetDataModalState(false)}
-                hapticStyle="Heavy"
-                sound="error"
+                hapticStyle="Light"
+                sound="click"
               >
                 <Text>No</Text>
               </Button>
@@ -83,6 +91,7 @@ export default function Options() {
                 className="bg-red-500 px-4 py-2 rounded"
                 onPress={() => {
                   resetData();
+                  router.back();
                 }}
                 hapticStyle="Heavy"
                 sound="success"

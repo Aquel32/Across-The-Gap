@@ -141,8 +141,7 @@ export default function Level({
               setMenu((prev) => (prev === "settings" ? "none" : "settings"))
             }
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             {menu === "settings" ? (
               <BarsArrowDownIcon color={"white"} />
@@ -157,8 +156,8 @@ export default function Level({
                 <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
                   onPress={() => router.back()}
-                  hapticStyle={"Heavy"}
-                  sound="success"
+                  hapticStyle={"Soft"}
+                  sound="click"
                 >
                   <ArrowLeftEndOnRectangleIcon color={"white"} />
                 </Button>
@@ -167,7 +166,7 @@ export default function Level({
                 className={`bg-[#2b2d42] px-4 py-2 rounded`}
                 onPress={() => setClearLevelModalVisible(true)}
                 hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <TrashIcon color={"white"} />
               </Button>
@@ -180,8 +179,7 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("move")}
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             <CursorArrowRippleIcon color={"white"} />
           </Button>
@@ -189,8 +187,7 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("create")}
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             <LinkIcon color={"white"} />
           </Button>
@@ -198,8 +195,7 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("delete")}
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             <FontAwesome name="unlink" size={24} color="white" />
           </Button>
@@ -207,8 +203,7 @@ export default function Level({
             className={`bg-[#e9c46a] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("arch")}
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             <View>
               <FontAwesome6 name="bezier-curve" size={24} color="white" />
@@ -218,8 +213,7 @@ export default function Level({
             className={`bg-[#e9c46a] px-2 rounded items-center justify-center`}
             onPress={() => setMode("chain")}
             disabled={running}
-            hapticStyle={"Heavy"}
-            sound="success"
+            sound="click"
           >
             <Ionicons name="analytics-outline" size={38} color="white" />
           </Button>
@@ -230,8 +224,7 @@ export default function Level({
                 setMenu((prev) => (prev === "materials" ? "none" : "materials"))
               }
               disabled={running}
-              hapticStyle={"Heavy"}
-              sound="success"
+              sound="click"
             >
               {menu === "materials" ? (
                 <BarsArrowDownIcon color={"white"} />
@@ -245,8 +238,7 @@ export default function Level({
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.ROAD)}
-                  hapticStyle={"Heavy"}
-                  sound="success"
+                  sound="click"
                 >
                   <FontAwesome
                     name="road"
@@ -257,8 +249,7 @@ export default function Level({
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.STEEL)}
-                  hapticStyle={"Heavy"}
-                  sound="success"
+                  sound="click"
                 >
                   <Image
                     source={require("@/assets/images/steel.png")}
@@ -268,8 +259,7 @@ export default function Level({
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.WOOD)}
-                  hapticStyle={"Heavy"}
-                  sound="success"
+                  sound="click"
                 >
                   <Image
                     source={require("@/assets/images/wood.png")}

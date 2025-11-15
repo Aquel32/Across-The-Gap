@@ -3,6 +3,7 @@ import Slider from "@react-native-community/slider";
 import { Text, View } from "react-native";
 import { XMarkIcon } from "react-native-heroicons/outline";
 import Button from "./Button";
+import { useSFX } from "./SFXProvider";
 
 export default function CarMenu({
   carSettings,
@@ -13,6 +14,8 @@ export default function CarMenu({
   setCarSettings?: React.Dispatch<React.SetStateAction<CarSettings>>;
   setMenu: React.Dispatch<React.SetStateAction<Menus>>;
 }) {
+  const sfx = useSFX();
+
   return (
     <View className="absolute w-full h-full flex items-center justify-center">
       <View className="bg-gray-300 rounded-lg p-10 relative">
@@ -21,9 +24,12 @@ export default function CarMenu({
           <Text className="text-black w-32 text-right">MASS</Text>
           <Slider
             value={carSettings.mass}
-            onValueChange={(e) =>
-              setCarSettings && setCarSettings({ ...carSettings, mass: e })
-            }
+            onValueChange={(e) => {
+              if (setCarSettings) {
+                setCarSettings({ ...carSettings, mass: e });
+              }
+              sfx.playHaptic("Soft");
+            }}
             step={1}
             style={{ width: 200, height: 3 }}
             minimumValue={1}
@@ -38,10 +44,12 @@ export default function CarMenu({
           <Text className="text-black w-32 text-right">ACCELERATION</Text>
           <Slider
             value={carSettings.acceleration}
-            onValueChange={(e) =>
-              setCarSettings &&
-              setCarSettings({ ...carSettings, acceleration: e })
-            }
+            onValueChange={(e) => {
+              if (setCarSettings) {
+                setCarSettings({ ...carSettings, acceleration: e });
+              }
+              sfx.playHaptic("Soft");
+            }}
             step={0.1}
             style={{ width: 200, height: 3 }}
             minimumValue={0.1}
@@ -58,7 +66,7 @@ export default function CarMenu({
           className="bg-amber-500 p-1 rounded mt-5 absolute bottom-0 right-0"
           onPress={() => setMenu("none")}
           hapticStyle={"Light"}
-          sound="success"
+          sound="click"
         >
           <XMarkIcon color={"white"} />
         </Button>

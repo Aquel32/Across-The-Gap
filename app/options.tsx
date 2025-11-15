@@ -13,8 +13,7 @@ export default function OptionsScreen() {
         <Button
           className="bg-gray-500 px-10 py-2 rounded items-center"
           onPress={() => router.back()}
-          hapticStyle={"Heavy"}
-          sound="error"
+          sound="click"
         >
           <ArrowLeftEndOnRectangleIcon color={"white"} />
         </Button>

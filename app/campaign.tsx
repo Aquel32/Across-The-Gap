@@ -33,7 +33,7 @@ export default function Campaign() {
 
       result.forEach((take, index) => {
         if (take.done) {
-          setCompleted((last) => index + 2);
+          setCompleted((last) => index + 1);
         }
       });
 
@@ -78,10 +78,10 @@ export default function Campaign() {
                       params: { id: String(index + 1) },
                     })
                   }
-                  hapticStyle={"Heavy"}
+                  hapticStyle={"Soft"}
                   sound="click"
                   className="bg-gray-300 w-40 h-40 rounded items-center justify-center"
-                  disabled={index >= completed}
+                  disabled={index > completed}
                 >
                   <Text className="text-2xl">Level {index + 1}</Text>
                   <View className="m-2">
@@ -107,7 +107,7 @@ export default function Campaign() {
                   {takesData[index].done && (
                     <Text className="text-green-600 font-bold">COMPLETED</Text>
                   )}
-                  {index >= completed && (
+                  {index > completed && (
                     <Text className="text-red-600 font-bold">LOCKED</Text>
                   )}
                 </Button>
@@ -121,8 +121,7 @@ export default function Campaign() {
         <Button
           className="bg-gray-500 px-10 py-2 rounded items-center"
           onPress={() => router.back()}
-          hapticStyle={"Heavy"}
-          sound="error"
+          sound="click"
         >
           <ArrowLeftEndOnRectangleIcon color={"white"} />
         </Button>

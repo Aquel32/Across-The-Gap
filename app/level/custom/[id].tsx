@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import CarMenu from "@/components/CarMenu";
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
+import { useSFX } from "@/components/SFXProvider";
 import { Materials } from "@/lib/materials";
 import { loadFileAsync, saveFileAsync } from "@/lib/storage";
 import {
@@ -78,6 +79,7 @@ const DEFAULT_LEVEL: LevelData = {
 };
 
 export default function NewLevel() {
+  const sfx = useSFX();
   const [Levels, setLevels] = useState<LevelData[]>([]);
 
   const params = useLocalSearchParams<{ id: string }>();
@@ -227,7 +229,6 @@ export default function NewLevel() {
                 onPress={() =>
                   setMenu((prev) => (prev === "settings" ? "none" : "settings"))
                 }
-                hapticStyle={"Heavy"}
                 sound="click"
               >
                 {menu === "settings" ? (
@@ -242,7 +243,7 @@ export default function NewLevel() {
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => backToCustoms()}
-                    hapticStyle={"Heavy"}
+                    hapticStyle={"Soft"}
                     sound="click"
                   >
                     <ArrowLeftEndOnRectangleIcon color={"white"} />
@@ -251,7 +252,7 @@ export default function NewLevel() {
                     className={`bg-[#2b2d42] px-4 py-2 rounded items-center`}
                     onPress={() => saveLevel()}
                     hapticStyle={"Heavy"}
-                    sound="click"
+                    sound="success"
                   >
                     <FontAwesome name="save" size={24} color="white" />
                   </Button>
@@ -279,48 +280,42 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <PuzzlePieceIcon color={"white"} />
               </Button>
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("arch")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <AntDesign name="sisternode" size={24} color="white" />
               </Button>
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("delete")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <FontAwesome name="remove" size={24} color="white" />
               </Button>
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("move")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <CursorArrowRippleIcon color={"white"} />
               </Button>
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("resize")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <ArrowTopRightOnSquareIcon color={"white"} />
               </Button>
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("rotate")}
-                hapticStyle={"Heavy"}
-                sound="success"
+                sound="click"
               >
                 <ArrowPathIcon color={"white"} />
               </Button>
@@ -333,7 +328,7 @@ export default function NewLevel() {
                     )
                   }
                   hapticStyle={"Heavy"}
-                  sound="success"
+                  sound="click"
                 >
                   {menu === "materials" ? (
                     <BarsArrowDownIcon color={"white"} />
@@ -347,8 +342,7 @@ export default function NewLevel() {
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.ROAD)}
-                      hapticStyle={"Heavy"}
-                      sound="success"
+                      sound="click"
                     >
                       <FontAwesome
                         name="road"
@@ -359,8 +353,7 @@ export default function NewLevel() {
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.STEEL)}
-                      hapticStyle={"Heavy"}
-                      sound="success"
+                      sound="click"
                     >
                       <Image
                         source={require("@/assets/images/steel.png")}
@@ -370,8 +363,7 @@ export default function NewLevel() {
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.WOOD)}
-                      hapticStyle={"Heavy"}
-                      sound="success"
+                      sound="click"
                     >
                       <Image
                         source={require("@/assets/images/wood.png")}
@@ -407,6 +399,7 @@ export default function NewLevel() {
               onPress={() =>
                 setMenu((prev) => (prev === "money" ? "none" : "money"))
               }
+              sound="click"
             >
               <BanknotesIcon color={"green"} width={20} height={20} />
               <Text className="text-black w-12">{budget}$</Text>
@@ -420,7 +413,10 @@ export default function NewLevel() {
               <View className="p-3 bg-gray-300 rounded-lg">
                 <Slider
                   value={budget}
-                  onValueChange={(e) => setBudget(e)}
+                  onValueChange={(e) => {
+                    setBudget(e);
+                    sfx.playHaptic("Soft");
+                  }}
                   step={1000}
                   style={{ width: 200, height: 40 }}
                   minimumValue={1000}
