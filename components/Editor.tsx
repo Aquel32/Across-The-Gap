@@ -14,6 +14,7 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
+import Slider from "@react-native-community/slider";
 import {
   Text as CanvasText,
   Circle,
@@ -40,7 +41,6 @@ import {
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
 import CarMenu from "./CarMenu";
-import NumericInput from "./NumericInput";
 import { useSFX } from "./SFXProvider";
 
 const calculatePrice = (length: number, material: Material) => {
@@ -113,6 +113,10 @@ export default function Editor({
   const [temporaryChainNodes, setTemporaryChainNodes] = useState<
     { x: number; y: number; value: number }[]
   >([]);
+  const [temporaryChainsOrigin, setTemporaryChainsOrigin] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
   const ARCH_HEIGHT = useRef(30);
@@ -281,9 +285,8 @@ export default function Editor({
   }
 
   function generateChainPreview(from: number, toX: number, toY: number) {
-    setTemporaryChainNodes([]);
-
     const fromNode = nodes[from];
+    setTemporaryChainsOrigin({ x: fromNode.x, y: fromNode.y });
 
     const finalPosition = { x: toX, y: toY };
 
@@ -310,6 +313,7 @@ export default function Editor({
 
     let price = 0;
     let archStep = -Math.floor(segments / 2) + 1;
+    const newTemporaryNodes: { x: number; y: number; value: number }[] = [];
     for (let i = 1; i <= segments; i++) {
       const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
       const chordY = fromNode.y + i * segmentLength * Math.sin(angle);
@@ -343,16 +347,14 @@ export default function Editor({
       }
       price += value;
 
-      setTemporaryChainNodes((current) => [
-        ...current,
-        { x: newX, y: newY, value: value },
-      ]);
+      newTemporaryNodes.push({ x: newX, y: newY, value: value });
       archStep++;
 
       lastX = newX;
       lastY = newY;
     }
     lastPrice.value = price;
+    setTemporaryChainNodes(newTemporaryNodes);
   }
 
   const line = {
@@ -743,9 +745,10 @@ export default function Editor({
           isGeneratingChain={generatingChain}
         />
 
-        {temporaryChainNodes.map((node, index) => (
-          <Circle key={index} cx={node.x} cy={node.y} r={13} color="orange" />
-        ))}
+        <TemporaryChainPreview
+          temporaryChainNodes={temporaryChainNodes}
+          origin={temporaryChainsOrigin}
+        />
 
         <EndMarker position={endCollision} />
       </CameraView>
@@ -760,12 +763,9 @@ export default function Editor({
       {(mode == "chain" || mode == "arch") && (
         <View className="absolute right-0 top-[30%] justify-center items-center rounded-l-lg bg-gray-300 py-4">
           <View className="p-2 px-5  flex flex-row items-center gap-1">
-            <NumericInput
-              min={60}
-              max={300}
-              step={10}
-              defaultValue={MAX_CHAIN_SEGMENT_LENGTH.current}
-              onChange={(newValue) => {
+            <Slider
+              value={MAX_CHAIN_SEGMENT_LENGTH.current}
+              onValueChange={(newValue) => {
                 MAX_CHAIN_SEGMENT_LENGTH.current = newValue;
                 sfx.playHaptic("Soft");
                 if (generatingChain == true) {
@@ -776,16 +776,19 @@ export default function Editor({
                   );
                 }
               }}
+              step={5}
+              style={{ width: 200, height: 40 }}
+              minimumValue={60}
+              maximumValue={200}
+              minimumTrackTintColor="#FFFFFF"
+              maximumTrackTintColor="#000000"
             />
           </View>
           {mode == "arch" && (
-            <View className="p-2 px-5  flex flex-row items-center gap-1">
-              <NumericInput
-                min={-100}
-                max={100}
-                step={5}
-                defaultValue={ARCH_HEIGHT.current}
-                onChange={(newValue) => {
+            <View className="p-2 px-5  flex flex-row items-center gap-1 ">
+              <Slider
+                value={ARCH_HEIGHT.current}
+                onValueChange={(newValue) => {
                   ARCH_HEIGHT.current = newValue;
                   sfx.playHaptic("Soft");
                   if (generatingChain == true) {
@@ -796,6 +799,12 @@ export default function Editor({
                     );
                   }
                 }}
+                step={5}
+                style={{ width: 200, height: 40 }}
+                minimumValue={-150}
+                maximumValue={150}
+                minimumTrackTintColor="#FFFFFF"
+                maximumTrackTintColor="#000000"
               />
             </View>
           )}
@@ -909,5 +918,45 @@ function CurrentPriceIndicator({
       color="black"
       opacity={opacity}
     />
+  );
+}
+
+function TemporaryChainPreview({
+  origin,
+  temporaryChainNodes,
+}: {
+  origin: { x: number; y: number } | null;
+  temporaryChainNodes: { x: number; y: number; value: number }[];
+}) {
+  return (
+    <>
+      {origin && temporaryChainNodes.length > 0 && (
+        <Line
+          p1={origin}
+          p2={temporaryChainNodes[0]}
+          strokeWidth={10}
+          color="gray"
+          style={"stroke"}
+        />
+      )}
+      {temporaryChainNodes.map((node, index) => {
+        const nextNode = temporaryChainNodes[index + 1] ?? undefined;
+
+        return (
+          <Group key={index}>
+            {nextNode !== undefined && (
+              <Line
+                p1={node}
+                p2={nextNode}
+                strokeWidth={10}
+                color="gray"
+                style={"stroke"}
+              />
+            )}
+            <Circle cx={node.x} cy={node.y} r={13} color="orange" />
+          </Group>
+        );
+      })}
+    </>
   );
 }
