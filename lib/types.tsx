@@ -9,6 +9,7 @@ export interface Connection {
   from: number;
   to: number;
   material: Material;
+  value?: number;
 }
 
 export interface MapElement {

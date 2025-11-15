@@ -87,8 +87,6 @@ export default function Editor({
 
   const bounds = CalculateBounds(mapElements);
 
-  console.log("Camera bounds:", bounds);
-
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
     translateX: number;
@@ -109,10 +107,11 @@ export default function Editor({
   useEffect(() => {
     setGeneratingChain(false);
     setTemporaryChainNodes([]);
+    lastPrice.value = 0;
   }, [mode]);
 
   const [temporaryChainNodes, setTemporaryChainNodes] = useState<
-    { x: number; y: number }[]
+    { x: number; y: number; value: number }[]
   >([]);
 
   const MAX_CHAIN_SEGMENT_LENGTH = useRef(100);
@@ -138,7 +137,7 @@ export default function Editor({
     line.p2.value = { x: 0, y: 0 };
   }, [generatingChain]);
 
-  function addConnection(from: number, to: number) {
+  function addConnection(from: number, to: number, value: number) {
     setConnections((conns) => {
       if (from === to) return conns;
       if (
@@ -150,20 +149,18 @@ export default function Editor({
         return conns;
       }
 
-      console.log("Connecting node", from, "to", to);
-      return [...conns, { from, to, material: selectedMaterial }];
+      console.log("Connecting node", from, "to", to, "with value", value);
+      return [...conns, { from, to, material: selectedMaterial, value: value }];
     });
+
+    setBudget((prev) => prev - value);
+
     sfx.playSound("click");
     sfx.playHaptic("Light");
   }
 
-  function addNode(fromIndex: number, newNode: NodeData) {
+  function addNode(newNode: NodeData) {
     setNodes((currentNodes) => {
-      const newIndex = currentNodes.length;
-      setConnections((currentConns) => [
-        ...currentConns,
-        { from: fromIndex, to: newIndex, material: selectedMaterial },
-      ]);
       console.log("Adding node at", newNode.x, newNode.y);
       return [...currentNodes, newNode];
     });
@@ -177,10 +174,6 @@ export default function Editor({
       sfx.playHaptic("Heavy");
       return;
     }
-
-    setMode("create");
-    setGeneratingChain(false);
-    setTemporaryChainNodes([]);
 
     const fromNode = nodes[chainData.value.from];
 
@@ -237,20 +230,24 @@ export default function Editor({
         y: newY,
         r: 13,
       };
-      addNode(lastNodeIndex, newNode);
-      lastNodeIndex = nodes.length + i - 1;
+      addNode(newNode);
+      const newIndex = nodes.length + i - 1;
+      addConnection(lastNodeIndex, newIndex, temporaryChainNodes[i - 1].value);
+      lastNodeIndex = newIndex;
     }
 
     if (chainData.value.to !== undefined) {
-      setConnections((currentConns) => [
-        ...currentConns,
-        {
-          from: lastNodeIndex,
-          to: chainData.value.to!,
-          material: selectedMaterial,
-        },
-      ]);
+      addConnection(
+        lastNodeIndex,
+        chainData.value.to,
+        temporaryChainNodes[segments].value
+      );
     }
+
+    setMode("create");
+    setGeneratingChain(false);
+    setTemporaryChainNodes([]);
+    lastPrice.value = 0;
   }
 
   function generateChainPreview(from: number, toX: number, toY: number) {
@@ -261,8 +258,7 @@ export default function Editor({
     const finalPosition = { x: toX, y: toY };
 
     const distance = Math.sqrt(
-      Math.pow(fromNode.x - finalPosition.x, 2) +
-        Math.pow(fromNode.y - finalPosition.y, 2)
+      Math.pow(fromNode.x - toX, 2) + Math.pow(fromNode.y - toY, 2)
     );
 
     let segments = Math.max(
@@ -279,6 +275,10 @@ export default function Editor({
     const perpAngleX = Math.sin(angle);
     const perpAngleY = -Math.cos(angle);
 
+    let lastX = fromNode.x;
+    let lastY = fromNode.y;
+
+    let price = 0;
     let archStep = -Math.floor(segments / 2) + 1;
     for (let i = 1; i <= segments; i++) {
       const chordX = fromNode.x + i * segmentLength * Math.cos(angle);
@@ -292,9 +292,32 @@ export default function Editor({
 
       const newX = chordX + heightFromArch * perpAngleX;
       const newY = chordY + heightFromArch * perpAngleY;
-      setTemporaryChainNodes((current) => [...current, { x: newX, y: newY }]);
+
+      let value = 0;
+      if (i - 1 == -1) {
+        const distanceFromPrevious = Math.sqrt(
+          Math.pow(fromNode.x - newX, 2) + Math.pow(fromNode.y - newY, 2)
+        );
+
+        value = calculatePrice(distanceFromPrevious, selectedMaterial);
+      } else {
+        const distanceFromPrevious = Math.sqrt(
+          Math.pow(lastX - newX, 2) + Math.pow(lastY - newY, 2)
+        );
+        value = calculatePrice(distanceFromPrevious, selectedMaterial);
+      }
+      price += value;
+
+      setTemporaryChainNodes((current) => [
+        ...current,
+        { x: newX, y: newY, value: value },
+      ]);
       archStep++;
+
+      lastX = newX;
+      lastY = newY;
     }
+    lastPrice.value = price;
   }
 
   const line = {
@@ -326,19 +349,7 @@ export default function Editor({
     nodesToCheck.push(connections[connectionIndex].from);
     nodesToCheck.push(connections[connectionIndex].to);
 
-    const distance = Math.sqrt(
-      Math.pow(
-        nodes[connections[connectionIndex].from].x -
-          nodes[connections[connectionIndex].to].x,
-        2
-      ) +
-        Math.pow(
-          nodes[connections[connectionIndex].from].y -
-            nodes[connections[connectionIndex].to].y,
-          2
-        )
-    );
-    setBudget(budget + calculatePrice(distance, selectedMaterial));
+    setBudget((prev) => prev + connections[connectionIndex].value!);
 
     setConnections((currentConns) => {
       const newConnections = currentConns.filter(
@@ -420,7 +431,7 @@ export default function Editor({
       const worldY =
         (e.y - cameraTransform.value.translateY) / cameraTransform.value.scale;
 
-      if (mode == "create" || mode == "chain" || mode == "arch") {
+      if (mode == "create") {
         line.p2.value = vec(worldX, worldY);
         const distance = Math.sqrt(
           Math.pow(worldX - line.p1.value.x, 2) +
@@ -429,8 +440,7 @@ export default function Editor({
         lastPrice.value = calculatePrice(distance, selectedMaterial);
       }
 
-      if (mode == "create") {
-      } else if (mode == "move") {
+      if (mode == "move") {
         if (nodes[selectedNode.value].isStatic) return;
         const newX = worldX;
         const newY = worldY;
@@ -467,11 +477,10 @@ export default function Editor({
         lastPrice.value = 0;
         line.p1.value = vec(0, 0);
         line.p2.value = vec(0, 0);
+        runOnJS(sfx.playSound)("error");
+        runOnJS(sfx.playHaptic)("Heavy");
         return;
       }
-
-      runOnJS(setBudget)(budget - lastPrice.value);
-      lastPrice.value = 0;
 
       const targetIndex = overlaps(
         e.x,
@@ -481,15 +490,9 @@ export default function Editor({
         fromIndex
       );
 
-      if (mode != "chain" && mode != "arch") {
-        runOnJS(setTemporaryChainNodes)([]);
-        line.p1.value = vec(0, 0);
-        line.p2.value = vec(0, 0);
-      }
-
       if (mode == "create") {
         if (targetIndex !== undefined) {
-          runOnJS(addConnection)(fromIndex, targetIndex);
+          runOnJS(addConnection)(fromIndex, targetIndex, lastPrice.value);
         } else {
           const newNode: NodeData = {
             x: worldX,
@@ -497,7 +500,12 @@ export default function Editor({
             r: 13,
           };
           sharedNodes.value = [...sharedNodes.value, newNode];
-          runOnJS(addNode)(fromIndex, newNode);
+          runOnJS(addNode)(newNode);
+          runOnJS(addConnection)(
+            fromIndex,
+            sharedNodes.value.length - 1,
+            lastPrice.value
+          );
         }
       } else if (mode == "move") {
         if (targetIndex !== undefined) {
@@ -507,7 +515,7 @@ export default function Editor({
           connsToUpdate.forEach((conn) => {
             const otherNodeIndex =
               conn.from === fromIndex ? conn.to : conn.from;
-            runOnJS(addConnection)(otherNodeIndex, targetIndex);
+            runOnJS(addConnection)(otherNodeIndex, targetIndex, 0);
           });
 
           runOnJS(deleteNode)(fromIndex);
@@ -521,6 +529,13 @@ export default function Editor({
         chainData.value.tox = worldX;
         chainData.value.toy = worldY;
         chainData.value.to = targetIndex ? targetIndex : undefined;
+      }
+
+      if (mode != "chain" && mode != "arch") {
+        runOnJS(setTemporaryChainNodes)([]);
+        line.p1.value = vec(0, 0);
+        line.p2.value = vec(0, 0);
+        lastPrice.value = 0;
       }
     });
 
