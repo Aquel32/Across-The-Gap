@@ -137,26 +137,43 @@ export default function Editor({
     line.p2.value = { x: 0, y: 0 };
   }, [generatingChain]);
 
-  function addConnection(from: number, to: number, value: number) {
+  function addConnection(
+    from: number,
+    to: number,
+    value: number,
+    dontTakeFromBudget?: boolean,
+    returnIfDuplicate?: boolean
+  ) {
     setConnections((conns) => {
       if (from === to) return conns;
-      if (
-        conns.some(
-          (c) =>
-            (c.from === from && c.to === to) || (c.from === to && c.to === from)
-        )
-      ) {
-        return conns;
+
+      const index = conns.findIndex(
+        (c) =>
+          (c.from === from && c.to === to) || (c.from === to && c.to === from)
+      );
+
+      if (index !== -1) {
+        const newConns = [...conns];
+        newConns[index] = {
+          ...newConns[index],
+          value,
+        };
+        if (returnIfDuplicate == true) {
+          setBudget((prev) => prev + value);
+        }
+        dontTakeFromBudget = true;
+        return newConns;
       }
 
       console.log("Connecting node", from, "to", to, "with value", value);
       return [...conns, { from, to, material: selectedMaterial, value: value }];
     });
 
-    setBudget((prev) => prev - value);
-
     sfx.playSound("click");
     sfx.playHaptic("Light");
+
+    if (dontTakeFromBudget === true) return;
+    setBudget((prev) => prev - value);
   }
 
   function addNode(newNode: NodeData) {
@@ -169,6 +186,19 @@ export default function Editor({
   }
 
   function createChain() {
+    if (lastPrice.value > budget) {
+      lastPrice.value = 0;
+      line.p1.value = vec(0, 0);
+      line.p2.value = vec(0, 0);
+
+      setTemporaryChainNodes([]);
+      setGeneratingChain(false);
+
+      runOnJS(sfx.playSound)("error");
+      runOnJS(sfx.playHaptic)("Heavy");
+      return;
+    }
+
     if (generatingChain == false) {
       sfx.playSound("error");
       sfx.playHaptic("Heavy");
@@ -293,6 +323,11 @@ export default function Editor({
       const newX = chordX + heightFromArch * perpAngleX;
       const newY = chordY + heightFromArch * perpAngleY;
 
+      if (i == Math.round(segments / 2)) {
+        line.p1.value = vec(newX, newY);
+        line.p2.value = vec(newX, newY);
+      }
+
       let value = 0;
       if (i - 1 == -1) {
         const distanceFromPrevious = Math.sqrt(
@@ -332,9 +367,13 @@ export default function Editor({
     });
 
     setConnections((currentConns) => {
-      const filtered = currentConns.filter(
-        (conn) => conn.from !== nodeIndex && conn.to !== nodeIndex
-      );
+      const filtered = currentConns.filter((conn, i) => {
+        if (conn.from !== nodeIndex && conn.to !== nodeIndex) {
+          return true;
+        }
+        setBudget((prev) => prev + currentConns[i].value!);
+        return false;
+      });
 
       return filtered.map((conn) => ({
         ...conn,
@@ -381,6 +420,88 @@ export default function Editor({
 
     sfx.playSound("click");
     sfx.playHaptic("Light");
+  }
+
+  function moveNode(nodeIndex: number, newX: number, newY: number) {
+    "worklet";
+
+    const connsToUpdate = connections.filter(
+      (conn) => conn.from === nodeIndex || conn.to === nodeIndex
+    );
+    const vals = connsToUpdate.map((c) => c.value);
+
+    let totalValueDifference = 0;
+    connsToUpdate.forEach((conn, i) => {
+      const otherNodeIndex = conn.from === nodeIndex ? conn.to : conn.from;
+
+      const newDistance = Math.sqrt(
+        Math.pow(sharedNodes.value[otherNodeIndex].x - newX, 2) +
+          Math.pow(sharedNodes.value[otherNodeIndex].y - newY, 2)
+      );
+      const newValue = calculatePrice(newDistance, conn.material);
+      const valueDifference = newValue - conn.value!;
+      totalValueDifference += valueDifference;
+
+      vals[i] = newValue;
+    });
+
+    if (budget - totalValueDifference < 0) {
+      runOnJS(sfx.playSound)("error");
+      runOnJS(sfx.playHaptic)("Heavy");
+      return;
+    }
+
+    connsToUpdate.forEach((conn, i) => {
+      const otherNodeIndex = conn.from === nodeIndex ? conn.to : conn.from;
+      runOnJS(addConnection)(otherNodeIndex, nodeIndex, vals[i]!, true, false);
+    });
+
+    runOnJS(setBudget)(budget - totalValueDifference);
+
+    const newNodes = [...nodes];
+    newNodes[nodeIndex] = {
+      ...newNodes[nodeIndex],
+      x: newX,
+      y: newY,
+    };
+    runOnJS(setNodes)(newNodes);
+  }
+
+  function mergeNodes(targetIndex: number, fromIndex: number) {
+    "worklet";
+    const connsToUpdate = connections.filter(
+      (conn) => conn.from === fromIndex || conn.to === fromIndex
+    );
+
+    connsToUpdate.forEach((conn) => {
+      const otherNodeIndex = conn.from === fromIndex ? conn.to : conn.from;
+
+      const newDistance = Math.sqrt(
+        Math.pow(
+          sharedNodes.value[otherNodeIndex].x -
+            sharedNodes.value[targetIndex].x,
+          2
+        ) +
+          Math.pow(
+            sharedNodes.value[otherNodeIndex].y -
+              sharedNodes.value[targetIndex].y,
+            2
+          )
+      );
+      const newValue = calculatePrice(newDistance, conn.material);
+      const valueDifference = conn.value! - newValue;
+
+      conn.value = newValue;
+
+      runOnJS(addConnection)(
+        otherNodeIndex,
+        targetIndex,
+        newValue,
+        false,
+        true
+      );
+    });
+    runOnJS(deleteNode)(fromIndex);
   }
 
   const selectedNode = useSharedValue<number | null>(null);
@@ -442,15 +563,9 @@ export default function Editor({
 
       if (mode == "move") {
         if (nodes[selectedNode.value].isStatic) return;
-        const newX = worldX;
-        const newY = worldY;
-        const newNodes = [...nodes];
-        newNodes[selectedNode.value] = {
-          ...newNodes[selectedNode.value],
-          x: newX,
-          y: newY,
-        };
-        runOnJS(setNodes)(newNodes);
+
+        moveNode(selectedNode.value, worldX, worldY);
+
         // calculate refund
       } else if (mode == "chain" || mode == "arch") {
         runOnJS(setGeneratingChain)(true);
@@ -492,7 +607,15 @@ export default function Editor({
 
       if (mode == "create") {
         if (targetIndex !== undefined) {
-          runOnJS(addConnection)(fromIndex, targetIndex, lastPrice.value);
+          //here calculate distance from fromIndex to targetIndex
+          const fromNode = sharedNodes.value[fromIndex];
+          const toNode = sharedNodes.value[targetIndex];
+          const distance = Math.sqrt(
+            Math.pow(toNode.x - fromNode.x, 2) +
+              Math.pow(toNode.y - fromNode.y, 2)
+          );
+          const price = calculatePrice(distance, selectedMaterial);
+          runOnJS(addConnection)(fromIndex, targetIndex, price);
         } else {
           const newNode: NodeData = {
             x: worldX,
@@ -509,16 +632,7 @@ export default function Editor({
         }
       } else if (mode == "move") {
         if (targetIndex !== undefined) {
-          const connsToUpdate = connections.filter(
-            (conn) => conn.from === fromIndex || conn.to === fromIndex
-          );
-          connsToUpdate.forEach((conn) => {
-            const otherNodeIndex =
-              conn.from === fromIndex ? conn.to : conn.from;
-            runOnJS(addConnection)(otherNodeIndex, targetIndex, 0);
-          });
-
-          runOnJS(deleteNode)(fromIndex);
+          mergeNodes(targetIndex, fromIndex);
         }
         if (nodes[fromIndex].isStatic !== true) {
           runOnJS(sfx.playSound)("click");
@@ -533,8 +647,6 @@ export default function Editor({
 
       if (mode != "chain" && mode != "arch") {
         runOnJS(setTemporaryChainNodes)([]);
-        line.p1.value = vec(0, 0);
-        line.p2.value = vec(0, 0);
         lastPrice.value = 0;
       }
     });
@@ -561,6 +673,9 @@ export default function Editor({
       sharedConnections.value,
       cameraTransform.value
     );
+
+    line.p1.value = vec(0, 0);
+    line.p2.value = vec(0, 0);
 
     if (connectionIndex !== undefined) {
       runOnJS(deleteConnection)(connectionIndex);
@@ -624,6 +739,8 @@ export default function Editor({
           price={lastPrice}
           font={lastPriceTextFont}
           line={line}
+          selectedNode={selectedNode}
+          isGeneratingChain={generatingChain}
         />
 
         {temporaryChainNodes.map((node, index) => (
@@ -752,6 +869,8 @@ function CurrentPriceIndicator({
   price,
   font,
   line,
+  selectedNode,
+  isGeneratingChain,
 }: {
   price: SharedValue<number>;
   font: SkFont;
@@ -759,6 +878,8 @@ function CurrentPriceIndicator({
     p1: SharedValue<{ x: number; y: number }>;
     p2: SharedValue<{ x: number; y: number }>;
   };
+  selectedNode: SharedValue<number | null>;
+  isGeneratingChain: boolean;
 }) {
   const priceText = useDerivedValue(() => {
     return price.value.toString() + "$";
@@ -773,8 +894,11 @@ function CurrentPriceIndicator({
   }, [line]);
 
   const opacity = useDerivedValue(() => {
-    return price.value > 0 ? 1 : 0;
-  }, [price]);
+    return price.value > 0 &&
+      (isGeneratingChain === true || selectedNode.value !== null)
+      ? 1
+      : 0;
+  }, [price, isGeneratingChain, selectedNode]);
 
   return (
     <CanvasText
