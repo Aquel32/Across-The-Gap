@@ -39,7 +39,7 @@ import {
 } from "react-native-reanimated";
 import Button from "./Button";
 import CameraView from "./CameraView";
-import CarMenu from "./CarMenu";
+import LevelSettings from "./LevelSettings";
 import { useSFX } from "./SFXProvider";
 
 const calculatePrice = (length: number, material: Material) => {
@@ -352,7 +352,7 @@ export default function Editor({
       lastX = newX;
       lastY = newY;
     }
-    //lastPrice.value = price;
+    lastPrice.value = price;
     setTemporaryChainNodes(newTemporaryNodes);
   }
 
@@ -663,7 +663,7 @@ export default function Editor({
 
     if (overlapsStaticCar(worldX, worldY, carSettings)) {
       runOnJS(sfx.playSound)("click");
-      runOnJS(setMenu)(menu == "car" ? "none" : "car");
+      runOnJS(setMenu)(menu == "levelSettings" ? "none" : "levelSettings");
       return;
     }
 
@@ -744,6 +744,7 @@ export default function Editor({
           line={line}
           selectedNode={selectedNode}
           isGeneratingChain={generatingChain}
+          budget={budget}
         />
 
         <TemporaryChainPreview
@@ -784,6 +785,7 @@ export default function Editor({
               maximumValue={200}
               minimumTrackTintColor="#FFFFFF"
               maximumTrackTintColor="#000000"
+              disabled={lastPrice.value > budget || !generatingChain}
             />
             <MaterialCommunityIcons
               name="map-marker-distance"
@@ -812,6 +814,7 @@ export default function Editor({
                 maximumValue={150}
                 minimumTrackTintColor="#FFFFFF"
                 maximumTrackTintColor="#000000"
+                disabled={lastPrice.value > budget || !generatingChain}
               />
               <MaterialCommunityIcons
                 name="angle-acute"
@@ -835,8 +838,9 @@ export default function Editor({
                 setTemporaryChainNodes([]);
                 line.p2.value = { x: 0, y: 0 };
                 line.p1.value = { x: 0, y: 0 };
+                lastPrice.value = 0;
               }}
-              disabled={lastPrice.value > budget || generatingChain == false}
+              disabled={generatingChain == false}
               sound="click"
               hapticStyle="Light"
             >
@@ -846,7 +850,13 @@ export default function Editor({
         </View>
       )}
 
-      {menu == "car" && <CarMenu carSettings={carSettings} setMenu={setMenu} />}
+      {menu == "levelSettings" && (
+        <LevelSettings
+          carSettings={carSettings}
+          budget={budget}
+          setMenu={setMenu}
+        />
+      )}
     </View>
   );
 }
@@ -899,6 +909,7 @@ function CurrentPriceIndicator({
   line,
   selectedNode,
   isGeneratingChain,
+  budget,
 }: {
   price: SharedValue<number>;
   font: SkFont;
@@ -908,6 +919,7 @@ function CurrentPriceIndicator({
   };
   selectedNode: SharedValue<number | null>;
   isGeneratingChain: boolean;
+  budget: number;
 }) {
   const priceText = useDerivedValue(() => {
     return price.value.toString() + "$";
@@ -928,13 +940,17 @@ function CurrentPriceIndicator({
       : 0;
   }, [price, isGeneratingChain, selectedNode]);
 
+  const color = useDerivedValue(() => {
+    return price.value < budget ? "black" : "red";
+  }, [price, budget]);
+
   return (
     <CanvasText
       x={midPointX}
       y={midPointY}
       text={priceText}
       font={font}
-      color="black"
+      color={color}
       opacity={opacity}
     />
   );

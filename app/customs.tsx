@@ -51,6 +51,14 @@ export default function Customs() {
                 }}
                 persistentScrollbar={true}
               >
+                {Levels.length === 0 && (
+                  <View className="w-120 h-40 items-center justify-center">
+                    <Text className="text-lg text-gray-500">
+                      No custom levels found. Create one by pressing the "+"
+                      button
+                    </Text>
+                  </View>
+                )}
                 {Levels.map((level, index) => (
                   <Button
                     key={index}

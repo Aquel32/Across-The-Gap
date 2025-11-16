@@ -37,22 +37,6 @@ export default function Options() {
             maximumTrackTintColor="#000000"
           />
         </View>
-        <View>
-          <Text className="ml-4 font-bold">Music Volume</Text>
-          <Slider
-            value={sfx.musicVolume}
-            onValueChange={(e) => {
-              sfx.setMusicVolume(e);
-              sfx.playHaptic("Soft");
-            }}
-            step={0.05}
-            style={{ width: 200, height: 40 }}
-            minimumValue={0}
-            maximumValue={1}
-            minimumTrackTintColor="#FFFFFF"
-            maximumTrackTintColor="#000000"
-          />
-        </View>
         <View className="flex flex-row items-center gap-3 bg-gray-300 px-4 py-2 rounded mt-3">
           <Text className="w-20">RESET{"\n"}STORAGE</Text>
           <Button

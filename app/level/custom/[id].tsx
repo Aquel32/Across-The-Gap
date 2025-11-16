@@ -1,7 +1,7 @@
 import Button from "@/components/Button";
-import CarMenu from "@/components/CarMenu";
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
+import LevelSettings from "@/components/LevelSettings";
 import { useSFX } from "@/components/SFXProvider";
 import { Materials } from "@/lib/materials";
 import { loadFileAsync, saveFileAsync } from "@/lib/storage";
@@ -14,7 +14,6 @@ import {
   NodeData,
 } from "@/lib/types";
 import { AntDesign, FontAwesome, Foundation } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -25,6 +24,7 @@ import {
   BanknotesIcon,
   BarsArrowDownIcon,
   BarsArrowUpIcon,
+  Cog6ToothIcon,
   CursorArrowRippleIcon,
   PauseIcon,
   PlayIcon,
@@ -249,6 +249,14 @@ export default function NewLevel() {
                     <ArrowLeftEndOnRectangleIcon color={"white"} />
                   </Button>
                   <Button
+                    className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                    onPress={() => setMenu("levelSettings")}
+                    hapticStyle={"Soft"}
+                    sound="click"
+                  >
+                    <Cog6ToothIcon color={"white"} />
+                  </Button>
+                  <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded items-center`}
                     onPress={() => saveLevel()}
                     hapticStyle={"Heavy"}
@@ -395,9 +403,11 @@ export default function NewLevel() {
 
           <View className="w-full absolute top-0 justify-center items-center">
             <Button
-              className={`flex flex-row items-center gap-2 py-2 px-5 w-34 bg-gray-300 ${menu == "money" ? "" : "rounded-b-lg"} `}
+              className={`flex flex-row items-center gap-2 py-2 px-5 w-34 bg-gray-300 ${menu == "levelSettings" ? "" : "rounded-b-lg"} `}
               onPress={() =>
-                setMenu((prev) => (prev === "money" ? "none" : "money"))
+                setMenu((prev) =>
+                  prev === "levelSettings" ? "none" : "levelSettings"
+                )
               }
               sound="click"
             >
@@ -408,30 +418,14 @@ export default function NewLevel() {
             <Text className="text-black">
               {changesMade ? "Unsaved changes" : "Level saved"}
             </Text>
-
-            {menu == "money" && (
-              <View className="p-3 bg-gray-300 rounded-lg">
-                <Slider
-                  value={budget}
-                  onValueChange={(e) => {
-                    setBudget(e);
-                    sfx.playHaptic("Soft");
-                  }}
-                  step={1000}
-                  style={{ width: 200, height: 40 }}
-                  minimumValue={1000}
-                  maximumValue={20000}
-                  minimumTrackTintColor="#FFFFFF"
-                  maximumTrackTintColor="#000000"
-                />
-              </View>
-            )}
           </View>
 
-          {menu == "car" && (
-            <CarMenu
+          {menu == "levelSettings" && (
+            <LevelSettings
               carSettings={carSettings}
               setCarSettings={setCarSettings}
+              budget={budget}
+              setBudget={setBudget}
               setMenu={setMenu}
             />
           )}

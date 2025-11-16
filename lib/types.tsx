@@ -75,8 +75,7 @@ export type Menus =
   | "materials"
   | "settings"
   | "none"
-  | "money"
-  | "car";
+  | "levelSettings";
 
 export interface CameraBounds {
   minX: number;

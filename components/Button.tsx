@@ -36,7 +36,7 @@ export default function Button({
 
   return (
     <TouchableOpacity
-      className={className}
+      className={`${className} ${disabled ? "opacity-50" : ""}`}
       onPress={handlePress}
       disabled={disabled}
     >

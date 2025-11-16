@@ -265,7 +265,7 @@ export default function LevelCreator({
     if (overlapsStaticCar(worldX, worldY, carSettings)) {
       runOnJS(sfx.playSound)("click");
       runOnJS(sfx.playHaptic)("Soft");
-      runOnJS(setMenu)(menu == "car" ? "none" : "car");
+      runOnJS(setMenu)(menu == "levelSettings" ? "none" : "levelSettings");
       return;
     }
 
@@ -281,8 +281,8 @@ export default function LevelCreator({
       runOnJS(addElement)(newElement);
     } else if (mode == "delete") {
       const nodeIndex = overlaps(
-        worldX,
-        worldY,
+        e.x,
+        e.y,
         sharedNodes.value,
         cameraTransform.value
       );
