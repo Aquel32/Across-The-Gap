@@ -1,50 +1,64 @@
-# Welcome to your Expo app 👋
+# Across The Gap
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**A 2D physics-based bridge-building game inspired by *Poly Bridge***
 
-## Get started
+---
 
-1. Install dependencies
+### Gameplay
 
-   ```bash
-   npm install
-   ```
+https://github.com/user-attachments/assets/6f8758d7-c0c5-41d5-9cf8-6f2ae4acfbff
 
-2. Start the app
+> *A brief video showing the editor, the building process, and a successful (or unsuccessful) simulation.*
 
-   ```bash
-   npx expo start
-   ```
+## ✨ Core Features
 
-In the output, you'll find options to open the app in a
+* **🌉 Physics-Based Simulation:** Built on the `matter-js` physics engine to accurately simulate forces, stress, and structural integrity.
+* **🏗️ Build Tools:** Players aren't just limited to simple links. They can use:
+    * **Chain Tool:** Rapidly build a series of connected segments.
+    * **Arch Tool:** Create structurally-sound arches with a defined height.
+    * **Move & Delete:** Full control to edit and refine the design.
+* **🔩 Resource Management:**
+    * Build with different **materials** (like Wood, Steel, and Road), each with unique durability, cost, and weight.
+    * All construction is constrained by a level-specific **budget**.
+* **🎮 Custom Level Editor:** The game includes a level editor (`LevelCreator`) where customs levels can be built.
+    * Place, move, resize, and rotate static map elements.
+    * Define anchor points for the player to build from.
+    * Set the car's properties and the level's goal.
+* **🎥 Dynamic 2D Camera:** A gesture-controlled camera (`CameraView`) supporting smooth panning and pinch-to-zoom, with bounds clamped to the level's size.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠️ Tech Stack
 
-## Get a fresh project
+* **Core:** `React Native`, `Expo`, `TypeScript`
+* **Physics:** `matter-js`
+* **Rendering:** `react-native-skia`
+* **Gestures & Animations:** `react-native-gesture-handler` & `react-native-reanimated`
+* **Styling:** `Nativewind`
+* **Audio:** `expo-audio` & `expo-haptics`
+* **Data Persistence:** `expo-file-system`
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🚀 How to Run
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This project is built using the Expo managed workflow and can be run locally without any native SDK setup (no Xcode or Android Studio required).
 
-## Learn more
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Aquel32/Across-The-Gap
+    cd Across-The-Gap
+    ```
 
-To learn more about developing your project with Expo, look at the following resources:
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3.  **Run the project:**
+    ```bash
+    npx expo start
+    ```
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+4.  **Open on your device:**
+    * Scan the QR code printed in the terminal using the **Expo Go** app on your iOS or Android device.
