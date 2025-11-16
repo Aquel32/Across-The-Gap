@@ -33,7 +33,7 @@ export const DEFAULT_LEVEL: LevelData = {
       material: Materials.GRASS,
     },
   ],
-  endCollision: { x: 950, y: 100, width: 100, height: 100 },
+  endCollision: { x: 775, y: 40, width: 100, height: 100 },
   carSettings: {
     startTransform: { x: 50, y: 100, angle: 0 },
     width: 140,
@@ -41,7 +41,7 @@ export const DEFAULT_LEVEL: LevelData = {
     mass: 12,
     acceleration: 0.3,
     wheelRadius: 13,
-    wheelOffsetY: -8,
+    wheelOffsetY: -5.5,
     wheelOffsetX: 16,
   },
   budget: 13000,

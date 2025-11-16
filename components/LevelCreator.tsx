@@ -13,7 +13,13 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
-import { Circle, Group, Rect, SkRect } from "@shopify/react-native-skia";
+import {
+  Circle,
+  Group,
+  LinearGradient,
+  Rect,
+  SkRect,
+} from "@shopify/react-native-skia";
 import React, { useEffect } from "react";
 import { View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
@@ -398,7 +404,18 @@ function DynamicMapElement({
 
   return (
     <Group transform={transform}>
-      <Rect rect={rect} color={color} />
+      <Rect rect={rect} color={color}>
+        {elementData.value.material.gradientColors && (
+          <LinearGradient
+            start={{ x: rect.value.x + rect.value.width / 2, y: rect.value.y }}
+            end={{
+              x: rect.value.x + rect.value.width / 2,
+              y: rect.value.y + rect.value.height,
+            }}
+            colors={elementData.value.material.gradientColors}
+          />
+        )}
+      </Rect>
     </Group>
   );
 }

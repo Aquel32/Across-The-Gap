@@ -1,3 +1,4 @@
+import { useSFX } from "@/contexts/SFXProvider";
 import {
   CalculateBounds,
   EndMarker,
@@ -39,6 +40,8 @@ export default function Simulation({
   carSettings: CarSettings;
   onEnd: () => void;
 }) {
+  const sfx = useSFX();
+
   const [engine] = useState(() =>
     Matter.Engine.create({ gravity: { x: 0, y: 1 } })
   );
@@ -46,6 +49,7 @@ export default function Simulation({
 
   const nodePositions = useSharedValue(nodes.map((n) => vec(n.x, n.y)));
   const nodeBodies = useRef<Matter.Body[]>([]);
+  const crashed = useRef<boolean>(false);
 
   const connectionsConstraints = useRef<Matter.Constraint[]>([]);
   const connectionsBodies = useRef<Matter.Body[]>([]);
@@ -234,14 +238,12 @@ export default function Simulation({
         {
           angle: elem.angle,
           isStatic: true,
+          isSensor: elem.material.sensorForCar === true,
           collisionFilter: {
-            category:
-              elem.material.collideWithCar === true
-                ? carCollisionFilter
-                : undefined,
+            category: carCollisionFilter,
             group: mapGroup,
           },
-          label: "mapElement",
+          label: "mapElement " + elem.material.name,
         }
       );
       Matter.World.add(world, body);
@@ -269,31 +271,48 @@ export default function Simulation({
       x: 0,
       y: 0,
     }));
+
+    function checkCollision(pair: Matter.Pair, labelA: string, labelB: string) {
+      return (
+        (pair.bodyA.label === labelA && pair.bodyB.label === labelB) ||
+        (pair.bodyB.label === labelA && pair.bodyA.label === labelB)
+      );
+    }
+
+    const onCollisionStart = (event: Matter.IEventCollision<Matter.Engine>) => {
+      event.pairs.forEach((pair) => {
+        if (checkCollision(pair, "endCollision", "carPart")) {
+          onEnd();
+          sfx.playSound("win");
+          sfx.stopSound("engine");
+          sfx.stopSound("skid");
+          crashed.current = true;
+          return;
+        } else if (checkCollision(pair, "carPart", "mapElement Water")) {
+          sfx.playSound("waterSplash");
+          sfx.stopSound("engine");
+          sfx.stopSound("skid");
+          crashed.current = true;
+          return;
+        }
+      });
+    };
+
     const onCollisionActive = (
       event: Matter.IEventCollision<Matter.Engine>
     ) => {
       event.pairs.forEach((pair) => {
-        if (
-          (pair.bodyA.label === "endCollision" &&
-            pair.bodyB.label === "carPart") ||
-          (pair.bodyB.label === "endCollision" &&
-            pair.bodyA.label === "carPart")
-        ) {
-          onEnd();
-          return;
-        }
-
         let beamBody: Matter.Body | null = null;
         let carPart: Matter.Body | null = null;
         if (
           pair.bodyA.label === "carPart" &&
-          pair.bodyB.label !== "mapElement"
+          !pair.bodyB.label.startsWith("mapElement")
         ) {
           beamBody = pair.bodyB;
           carPart = pair.bodyA;
         } else if (
           pair.bodyB.label === "carPart" &&
-          pair.bodyA.label !== "mapElement"
+          !pair.bodyA.label.startsWith("mapElement")
         ) {
           beamBody = pair.bodyA;
           carPart = pair.bodyB;
@@ -394,12 +413,14 @@ export default function Simulation({
       internalConstraintsForces.value = forces;
     };
 
+    Matter.Events.on(engine, "collisionStart", onCollisionStart);
     Matter.Events.on(engine, "collisionActive", onCollisionActive);
     Matter.Events.on(engine, "beforeUpdate", onBeforeUpdate);
     Matter.Events.on(engine, "afterUpdate", onAfterUpdate);
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
+
       timePassed.value++;
       const newPositions = nodeBodies.current.map((node) => {
         return vec(node.position.x, node.position.y);
@@ -416,6 +437,14 @@ export default function Simulation({
         });
         Matter.Body.setAngle(beamBody, angle);
       });
+
+      if (!crashed.current) {
+        if (carBody.rearWheel.angularSpeed > 0.1) {
+          sfx.playSound("engine", true);
+        } else {
+          sfx.playSound("skid", true);
+        }
+      }
 
       Matter.Body.setAngularVelocity(
         carBody.rearWheel,
@@ -453,9 +482,13 @@ export default function Simulation({
       Matter.Events.off(engine, "collisionActive", onCollisionActive);
       Matter.Events.off(engine, "beforeUpdate", onBeforeUpdate);
       Matter.Events.off(engine, "afterUpdate", onAfterUpdate);
+      Matter.Events.off(engine, "collisionStart", onCollisionStart);
 
       Matter.World.clear(world, false);
       Matter.Engine.clear(engine);
+
+      sfx.stopSound("engine");
+      sfx.stopSound("skid");
     };
   }, []);
 

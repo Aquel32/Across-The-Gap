@@ -33,7 +33,6 @@ export const Materials: { [key: string]: Material } = {
     durability: 0,
     lengthPenaltyFactor: 0,
     pricePerUnit: 0,
-    collideWithCar: true,
   },
   WATER: {
     name: "Water",
@@ -43,6 +42,7 @@ export const Materials: { [key: string]: Material } = {
     lengthPenaltyFactor: 0,
     pricePerUnit: 0,
     gradientColors: ["#0089D9", "#030166"],
+    sensorForCar: true,
   },
   INVISIBLE: {
     name: "Invisible",
@@ -51,6 +51,5 @@ export const Materials: { [key: string]: Material } = {
     durability: 0,
     lengthPenaltyFactor: 0,
     pricePerUnit: 0,
-    collideWithCar: true,
   },
 };

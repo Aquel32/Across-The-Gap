@@ -7,10 +7,18 @@ import {
   useEffect,
   useState,
 } from "react";
-export type SoundName = "click" | "success" | "error";
+export type SoundName =
+  | "click"
+  | "success"
+  | "error"
+  | "win"
+  | "waterSplash"
+  | "engine"
+  | "skid";
 
 interface SFXContextType {
-  playSound: (name: SoundName) => void;
+  playSound: (name: SoundName, dontRunIfPlaying?: boolean) => void;
+  stopSound: (name: SoundName) => void;
   playHaptic: (style: "Heavy" | "Medium" | "Light" | "Rigid" | "Soft") => void;
   sfxVolume: number;
   setSfxVolume: React.Dispatch<React.SetStateAction<number>>;
@@ -20,6 +28,10 @@ const soundFiles: Record<SoundName, any> = {
   click: require("@/assets/sounds/click.wav"),
   success: require("@/assets/sounds/success.wav"),
   error: require("@/assets/sounds/error.wav"),
+  win: require("@/assets/sounds/win.mp3"),
+  waterSplash: require("@/assets/sounds/waterSplash.mp3"),
+  engine: require("@/assets/sounds/engine.wav"),
+  skid: require("@/assets/sounds/skid.wav"),
 };
 
 const SFXContext = createContext<SFXContextType | undefined>(undefined);
@@ -31,13 +43,24 @@ export default function SFXProvider({ children }: { children: ReactNode }) {
     })
   ) as Record<SoundName, ReturnType<typeof useAudioPlayer>>;
 
-  async function playSound(name: SoundName) {
+  async function playSound(name: SoundName, dontRunIfPlaying = false) {
+    const sound = players[name];
+    if (sound) {
+      try {
+        sound.volume = sfxVolume;
+        if (sound.playing && dontRunIfPlaying) return;
+        await sound.seekTo(0);
+        await sound.play();
+      } catch (error) {}
+    }
+  }
+  async function stopSound(name: SoundName) {
     const sound = players[name];
     if (sound) {
       try {
         sound.volume = sfxVolume;
         await sound.seekTo(0);
-        await sound.play();
+        await sound.pause();
       } catch (error) {}
     }
   }
@@ -59,6 +82,7 @@ export default function SFXProvider({ children }: { children: ReactNode }) {
     <SFXContext.Provider
       value={{
         playSound,
+        stopSound,
         playHaptic,
         sfxVolume,
         setSfxVolume,
