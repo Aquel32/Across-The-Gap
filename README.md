@@ -10,25 +10,25 @@ https://github.com/user-attachments/assets/6f8758d7-c0c5-41d5-9cf8-6f2ae4acfbff
 
 > *A brief video showing the editor, the building process, and a successful (or unsuccessful) simulation.*
 
-## ✨ Core Features
+##  Core Features
 
-* **🌉 Physics-Based Simulation:** Built on the `matter-js` physics engine to accurately simulate forces, stress, and structural integrity.
-* **🏗️ Build Tools:** Players aren't just limited to simple links. They can use:
+* **Physics-Based Simulation:** Built on the `matter-js` physics engine to accurately simulate forces, stress, and structural integrity.
+* **Build Tools:** Players aren't just limited to simple links. They can use:
     * **Chain Tool:** Rapidly build a series of connected segments.
     * **Arch Tool:** Create structurally-sound arches with a defined height.
     * **Move & Delete:** Full control to edit and refine the design.
-* **🔩 Resource Management:**
+* **Resource Management:**
     * Build with different **materials** (like Wood, Steel, and Road), each with unique durability, cost, and weight.
     * All construction is constrained by a level-specific **budget**.
-* **🎮 Custom Level Editor:** The game includes a level editor (`LevelCreator`) where customs levels can be built.
+* **Custom Level Editor:** The game includes a level editor (`LevelCreator`) where customs levels can be built.
     * Place, move, resize, and rotate static map elements.
     * Define anchor points for the player to build from.
     * Set the car's properties and the level's goal.
-* **🎥 Dynamic 2D Camera:** A gesture-controlled camera (`CameraView`) supporting smooth panning and pinch-to-zoom, with bounds clamped to the level's size.
+* **Dynamic 2D Camera:** A gesture-controlled camera (`CameraView`) supporting smooth panning and pinch-to-zoom, with bounds clamped to the level's size.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Core:** `React Native`, `Expo`, `TypeScript`
 * **Physics:** `matter-js`
@@ -40,7 +40,7 @@ https://github.com/user-attachments/assets/6f8758d7-c0c5-41d5-9cf8-6f2ae4acfbff
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 This project is built using the Expo managed workflow and can be run locally without any native SDK setup (no Xcode or Android Studio required).
 
