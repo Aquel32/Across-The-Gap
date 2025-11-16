@@ -24,7 +24,7 @@ const soundFiles: Record<SoundName, any> = {
 
 const SFXContext = createContext<SFXContextType | undefined>(undefined);
 
-export function SFXProvider({ children }: { children: ReactNode }) {
+export default function SFXProvider({ children }: { children: ReactNode }) {
   const players = Object.fromEntries(
     Object.entries(soundFiles).map(([name, file]) => {
       return [name, useAudioPlayer(file)];

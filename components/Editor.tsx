@@ -4,6 +4,8 @@ import {
   overlaps,
   overlapsConnection,
   overlapsStaticCar,
+  StaticCar,
+  StaticMapElementRenderer,
 } from "@/lib/canvasHelper";
 import {
   CarSettings,
@@ -20,12 +22,9 @@ import {
   Text as CanvasText,
   Circle,
   Group,
-  Image,
   Line,
   matchFont,
-  Rect,
   SkFont,
-  useImage,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
@@ -39,10 +38,11 @@ import {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
-import Button from "./Button";
-import CameraView from "./CameraView";
+import { useSFX } from "../contexts/SFXProvider";
 import LevelSettings from "./LevelSettings";
-import { useSFX } from "./SFXProvider";
+import BackgroundImage from "./Parts/BackgroundImage";
+import Button from "./Parts/Button";
+import CameraView from "./Parts/CameraView";
 
 const calculatePrice = (length: number, material: Material) => {
   "worklet";
@@ -86,7 +86,7 @@ export default function Editor({
 }) {
   const sfx = useSFX();
 
-  const bounds = CalculateBounds(mapElements);
+  const [bounds] = useState(CalculateBounds(mapElements));
 
   const enableCameraTransform = useSharedValue<boolean>(true);
   const cameraTransform = useSharedValue<{
@@ -698,17 +698,10 @@ export default function Editor({
         transform={cameraTransform}
         bounds={bounds}
       >
+        <BackgroundImage bounds={bounds} />
+
         {mapElements.map((elem, index) => (
-          <Rect
-            key={index}
-            rect={{
-              x: elem.x,
-              y: elem.y,
-              width: elem.width,
-              height: elem.height,
-            }}
-            color={elem.material.color}
-          />
+          <StaticMapElementRenderer key={index} elem={elem} />
         ))}
 
         <Line
@@ -738,7 +731,7 @@ export default function Editor({
           <Circle key={i} cx={node.x} cy={node.y} r={node.r} color="orange" />
         ))}
 
-        <Car {...carSettings} />
+        <StaticCar {...carSettings} />
 
         <CurrentPriceIndicator
           price={lastPrice}
@@ -755,7 +748,7 @@ export default function Editor({
           selectedMaterial={selectedMaterial}
         />
 
-        <EndMarker position={endCollision} />
+        <EndMarker rect={endCollision} />
       </CameraView>
 
       <View className="w-full absolute top-0 justify-center items-center">
@@ -860,56 +853,6 @@ export default function Editor({
         />
       )}
     </View>
-  );
-}
-
-function Car(carSettings: CarSettings) {
-  const carBodyImage = useImage(require("@/assets/images/body.png"));
-  const carWheelImage = useImage(require("@/assets/images/wheel.png"));
-
-  const rectBody = {
-    x: -carSettings.width / 2,
-    y: -carSettings.height / 2,
-    width: carSettings.width,
-    height: carSettings.height,
-  };
-
-  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelOffsetX + 1;
-  const frontWheel_cx =
-    carSettings.width / 2 -
-    2 * carSettings.wheelRadius -
-    carSettings.wheelOffsetX;
-  const wheels_cy =
-    carSettings.height / 2 - carSettings.wheelRadius + carSettings.wheelOffsetY;
-  return (
-    <Group
-      transform={[
-        {
-          translateX: carSettings.startTransform.x,
-        },
-        {
-          translateY: carSettings.startTransform.y,
-        },
-      ]}
-    >
-      <Image
-        image={carWheelImage}
-        fit="contain"
-        x={frontWheel_cx}
-        y={wheels_cy}
-        width={carSettings.wheelRadius * 2}
-        height={carSettings.wheelRadius * 2}
-      />
-      <Image
-        image={carWheelImage}
-        fit="contain"
-        x={rearWheel_cx}
-        y={wheels_cy}
-        width={carSettings.wheelRadius * 2}
-        height={carSettings.wheelRadius * 2}
-      />
-      <Image image={carBodyImage} fit="contain" rect={rectBody} />
-    </Group>
   );
 }
 

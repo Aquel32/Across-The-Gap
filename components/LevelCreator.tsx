@@ -1,7 +1,9 @@
 import {
+  EndMarker,
   overlaps,
   overlapsRectangle,
   overlapsStaticCar,
+  StaticCar,
 } from "@/lib/canvasHelper";
 import {
   CarSettings,
@@ -21,8 +23,9 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 import { runOnJS } from "react-native-worklets";
-import CameraView from "./CameraView";
-import { useSFX } from "./SFXProvider";
+import { useSFX } from "../contexts/SFXProvider";
+import BackgroundImage from "./Parts/BackgroundImage";
+import CameraView from "./Parts/CameraView";
 
 export default function LevelCreator({
   nodes,
@@ -164,6 +167,7 @@ export default function LevelCreator({
         enableCameraTransform.value = true;
         return;
       }
+
       dragOffset.value = {
         x: worldX - sharedMapElements.value[elementIndex].x,
         y: worldY - sharedMapElements.value[elementIndex].y,
@@ -213,7 +217,7 @@ export default function LevelCreator({
       }
 
       if (selectedNode.value !== undefined) return;
-
+      if (selectedElement.value === undefined) return;
       if (mode == "resize") {
         const elem = sharedMapElements.value[selectedElement.value!];
         const newWidth = Math.max(10, worldX - elem.x);
@@ -241,6 +245,7 @@ export default function LevelCreator({
     })
     .onEnd((e) => {
       "worklet";
+
       enableCameraTransform.value = true;
 
       if (selectedElement.value !== undefined) {
@@ -249,8 +254,8 @@ export default function LevelCreator({
         runOnJS(setNodes)(sharedNodes.value);
       } else if (selectedEnd.value) {
         runOnJS(setEndCollision)(sharedEndCollision.value);
-        selectedEnd.value = false;
       }
+      selectedEnd.value = false;
     });
 
   const tapGesture = Gesture.Tap().onEnd((e) => {
@@ -323,7 +328,12 @@ export default function LevelCreator({
         otherGestures={composedGesture}
         enableTransform={enableCameraTransform}
         transform={cameraTransform}
+        bounds={{ minX: -300, minY: -1000, maxX: 2000, maxY: 1000 }}
       >
+        <BackgroundImage
+          bounds={{ minX: -300, minY: -1000, maxX: 2000, maxY: 1000 }}
+        />
+
         {mapElements.map((elem, index) => (
           <DynamicMapElement
             key={index}
@@ -336,62 +346,12 @@ export default function LevelCreator({
           <DynamicCircle key={i} sharedNodes={sharedNodes} index={i} />
         ))}
 
-        <Car {...carSettings} />
+        <StaticCar {...carSettings} />
 
-        <DynamicRect sharedRect={sharedEndCollision} />
+        <EndMarker sharedRect={sharedEndCollision} />
       </CameraView>
     </View>
   );
-}
-
-function Car(carSettings: CarSettings) {
-  const rectBody = {
-    x: -carSettings.width / 2,
-    y: -carSettings.height / 2,
-    width: carSettings.width,
-    height: carSettings.height,
-  };
-
-  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelRadius;
-  const frontWheel_cx = carSettings.width / 2 - carSettings.wheelRadius;
-  const wheels_cy = carSettings.height / 2 + carSettings.wheelOffsetY;
-
-  return (
-    <Group
-      transform={[
-        {
-          translateX: carSettings.startTransform.x,
-        },
-        {
-          translateY: carSettings.startTransform.y,
-        },
-      ]}
-    >
-      <Rect rect={rectBody} color="black" />
-
-      <Circle
-        cx={rearWheel_cx}
-        cy={wheels_cy}
-        r={carSettings.wheelRadius}
-        color="black"
-      />
-
-      <Circle
-        cx={frontWheel_cx}
-        cy={wheels_cy}
-        r={carSettings.wheelRadius}
-        color="black"
-      />
-    </Group>
-  );
-}
-
-function DynamicRect({ sharedRect }: { sharedRect: SharedValue<SkRect> }) {
-  const rect = useDerivedValue(() => {
-    return sharedRect.value;
-  }, [sharedRect]);
-
-  return <Rect rect={rect} color={"orange"} />;
 }
 
 function DynamicMapElement({

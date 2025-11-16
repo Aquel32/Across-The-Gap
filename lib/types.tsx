@@ -29,6 +29,7 @@ export interface Material {
   durability: number;
   lengthPenaltyFactor: number;
   pricePerUnit: number;
+  gradientColors?: string[];
 }
 
 export interface CarSettings {

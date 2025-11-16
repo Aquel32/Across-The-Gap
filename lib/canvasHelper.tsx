@@ -1,4 +1,13 @@
-import { Circle, SkPoint } from "@shopify/react-native-skia";
+import {
+  Group,
+  Image,
+  LinearGradient,
+  Rect,
+  SkRect,
+  useImage,
+} from "@shopify/react-native-skia";
+import { SharedValue, useDerivedValue } from "react-native-reanimated";
+import { NODES_OVERLAP_SNAP_DISTANCE } from "./defaultValues";
 import {
   CameraBounds,
   CarSettings,
@@ -7,7 +16,6 @@ import {
   NodeData,
 } from "./types";
 
-const NODES_OVERLAP_SNAP_DISTANCE = 10;
 export const overlaps = (
   x: number,
   y: number,
@@ -140,10 +148,6 @@ export const overlapsRectangle = (
   return false;
 };
 
-export function EndMarker({ position }: { position: SkPoint }) {
-  return <Circle cx={position.x} cy={position.y} r={10} color="orange" />;
-}
-
 export function CalculateBounds(mapElements: MapElement[]) {
   const bounds: CameraBounds = {
     minX: 0,
@@ -153,10 +157,152 @@ export function CalculateBounds(mapElements: MapElement[]) {
   };
 
   mapElements.forEach((elem) => {
+    if (elem.material.name === "Invisible") return;
+
     bounds.minX = Math.min(bounds.minX, elem.x);
     bounds.maxX = Math.max(bounds.maxX, elem.x + elem.width);
     bounds.maxY = Math.max(bounds.maxY, elem.y + elem.height);
   });
 
   return bounds;
+}
+
+export function EndMarker({
+  rect,
+  sharedRect,
+}: {
+  rect?: SkRect;
+  sharedRect?: SharedValue<SkRect>;
+}) {
+  const image = useImage(require("@/assets/images/marker.png"));
+
+  if (rect) {
+    return (
+      <Image
+        image={image}
+        x={rect.x}
+        y={rect.y}
+        width={rect.width}
+        height={rect.height}
+      />
+    );
+  }
+
+  if (sharedRect) {
+    const x = useDerivedValue(() => {
+      return sharedRect.value.x;
+    }, [sharedRect]);
+    const y = useDerivedValue(() => {
+      return sharedRect.value.y;
+    }, [sharedRect]);
+    const width = useDerivedValue(() => {
+      return sharedRect.value.width;
+    }, [sharedRect]);
+    const height = useDerivedValue(() => {
+      return sharedRect.value.height;
+    }, [sharedRect]);
+
+    return <Image image={image} x={x} y={y} width={width} height={height} />;
+  }
+
+  return <></>;
+}
+
+export function StaticMapElementRenderer({ elem }: { elem: MapElement }) {
+  const rect = {
+    x: elem.x,
+    y: elem.y,
+    width: elem.width,
+    height: elem.height,
+  };
+
+  return (
+    <Rect
+      rect={rect}
+      color={elem.material.color}
+      transform={[{ rotate: elem.angle }]}
+    >
+      {elem.material.gradientColors && (
+        <LinearGradient
+          start={{ x: rect.x + rect.width / 2, y: rect.y }}
+          end={{ x: rect.x + rect.width / 2, y: rect.y + rect.height }}
+          colors={elem.material.gradientColors}
+        />
+      )}
+    </Rect>
+  );
+}
+export function DynamicElementRenderer({ elem }: { elem: MapElement }) {
+  const rect = {
+    x: elem.x,
+    y: elem.y,
+    width: elem.width,
+    height: elem.height,
+  };
+
+  return (
+    <Rect
+      rect={rect}
+      color={elem.material.color}
+      transform={[{ rotate: elem.angle }]}
+    >
+      {elem.material.gradientColors && (
+        <LinearGradient
+          start={{ x: rect.x + rect.width / 2, y: rect.y }}
+          end={{ x: rect.x + rect.width / 2, y: rect.y + rect.height }}
+          colors={elem.material.gradientColors}
+        />
+      )}
+    </Rect>
+  );
+}
+
+export function StaticCar(carSettings: CarSettings) {
+  const carBodyImage = useImage(require("@/assets/images/body.png"));
+  const carWheelImage = useImage(require("@/assets/images/wheel.png"));
+
+  const rectBody = {
+    x: -carSettings.width / 2,
+    y: -carSettings.height / 2,
+    width: carSettings.width,
+    height: carSettings.height,
+  };
+
+  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelOffsetX + 1;
+  const frontWheel_cx =
+    carSettings.width / 2 -
+    2 * carSettings.wheelRadius -
+    carSettings.wheelOffsetX;
+  const wheels_cy =
+    carSettings.height / 2 - carSettings.wheelRadius + carSettings.wheelOffsetY;
+  return (
+    <Group
+      transform={[
+        {
+          translateX: carSettings.startTransform.x,
+        },
+        {
+          translateY: carSettings.startTransform.y,
+        },
+      ]}
+    >
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={frontWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
+      />
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={rearWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
+      />
+      <Image image={carBodyImage} fit="contain" rect={rectBody} />
+    </Group>
+  );
 }

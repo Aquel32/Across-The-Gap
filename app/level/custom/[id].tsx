@@ -1,8 +1,7 @@
-import Button from "@/components/Button";
 import Level from "@/components/Level";
 import LevelCreator from "@/components/LevelCreator";
 import LevelSettings from "@/components/LevelSettings";
-import { useSFX } from "@/components/SFXProvider";
+import Button from "@/components/Parts/Button";
 import { DEFAULT_LEVEL } from "@/lib/defaultValues";
 import { Materials } from "@/lib/materials";
 import { loadFileAsync, saveFileAsync } from "@/lib/storage";
@@ -41,7 +40,6 @@ import {
 import Modal from "react-native-modal";
 
 export default function NewLevel() {
-  const sfx = useSFX();
   const [Levels, setLevels] = useState<LevelData[]>([]);
 
   const params = useLocalSearchParams<{ id: string }>();
@@ -296,7 +294,7 @@ export default function NewLevel() {
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("rotate")}
                 selected={mode === "rotate"}
-                selectedColor="bg-[#c7a248]"
+                selectedColor="bg-yellow-600"
                 sound="click"
               >
                 <ArrowPathIcon color={"white"} />

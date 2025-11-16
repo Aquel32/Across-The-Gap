@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 
-import Button from "@/components/Button";
+import Button from "@/components/Parts/Button";
 import { loadFileAsync } from "@/lib/storage";
 import { LevelData } from "@/lib/types";
 import { router, useFocusEffect } from "expo-router";
@@ -14,7 +14,7 @@ import {
 } from "react-native-heroicons/outline";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-export default function Customs() {
+export default function CustomsScreen() {
   const [Levels, setLevels] = useState<LevelData[]>([]);
 
   async function loadLevels() {

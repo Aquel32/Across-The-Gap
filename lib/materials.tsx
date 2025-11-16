@@ -8,7 +8,7 @@ export const Materials: { [key: string]: Material } = {
     durability: 2000,
     collideWithCar: true,
     lengthPenaltyFactor: 0.45,
-    pricePerUnit: 1,
+    pricePerUnit: 2,
   },
   STEEL: {
     name: "Steel",
@@ -16,15 +16,15 @@ export const Materials: { [key: string]: Material } = {
     stiffness: 1,
     durability: 3000,
     lengthPenaltyFactor: 0.4,
-    pricePerUnit: 1,
+    pricePerUnit: 3,
   },
   WOOD: {
     name: "Wood",
     color: "brown",
     stiffness: 0.2,
-    durability: 0.5,
-    lengthPenaltyFactor: 0.1,
-    pricePerUnit: 5,
+    durability: 2000,
+    lengthPenaltyFactor: 0.5,
+    pricePerUnit: 1,
   },
   GRASS: {
     name: "Grass",
@@ -33,6 +33,7 @@ export const Materials: { [key: string]: Material } = {
     durability: 0,
     lengthPenaltyFactor: 0,
     pricePerUnit: 0,
+    collideWithCar: true,
   },
   WATER: {
     name: "Water",
@@ -41,5 +42,15 @@ export const Materials: { [key: string]: Material } = {
     durability: 0,
     lengthPenaltyFactor: 0,
     pricePerUnit: 0,
+    gradientColors: ["#0089D9", "#030166"],
+  },
+  INVISIBLE: {
+    name: "Invisible",
+    color: "transparent",
+    stiffness: 0,
+    durability: 0,
+    lengthPenaltyFactor: 0,
+    pricePerUnit: 0,
+    collideWithCar: true,
   },
 };

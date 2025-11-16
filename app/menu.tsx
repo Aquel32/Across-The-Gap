@@ -1,4 +1,4 @@
-import Button from "@/components/Button";
+import Button from "@/components/Parts/Button";
 import { router } from "expo-router";
 import { Text, View } from "react-native";
 import {
@@ -7,7 +7,7 @@ import {
   PlayIcon,
 } from "react-native-heroicons/outline";
 
-export default function Menu() {
+export default function MenuScreen() {
   return (
     <>
       <View className="w-full h-full flex justify-center items-center">
@@ -25,7 +25,7 @@ export default function Menu() {
           <View className="flex flex-row gap-2">
             <Button
               className="bg-gray-500 px-4 py-2 rounded items-center"
-              onPress={() => router.push("/options")}
+              onPress={() => router.push("/settings")}
               sound="click"
             >
               <Cog6ToothIcon color={"white"} />

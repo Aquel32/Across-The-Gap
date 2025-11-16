@@ -1,11 +1,14 @@
-import { CalculateBounds, EndMarker } from "@/lib/canvasHelper";
+import {
+  CalculateBounds,
+  EndMarker,
+  StaticMapElementRenderer,
+} from "@/lib/canvasHelper";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import {
   Circle,
   Group,
   Image,
   Line,
-  Rect,
   SkPoint,
   useImage,
   vec,
@@ -18,7 +21,8 @@ import {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
-import CameraView from "./CameraView";
+import BackgroundImage from "./Parts/BackgroundImage";
+import CameraView from "./Parts/CameraView";
 
 export default function Simulation({
   nodes,
@@ -231,7 +235,10 @@ export default function Simulation({
           angle: elem.angle,
           isStatic: true,
           collisionFilter: {
-            category: carCollisionFilter,
+            category:
+              elem.material.collideWithCar === true
+                ? carCollisionFilter
+                : undefined,
             group: mapGroup,
           },
           label: "mapElement",
@@ -455,18 +462,7 @@ export default function Simulation({
   return (
     <View style={{ flex: 1 }}>
       <CameraView bounds={bounds}>
-        {mapElements.map((elem, index) => (
-          <Rect
-            key={index}
-            rect={{
-              x: elem.x,
-              y: elem.y,
-              width: elem.width,
-              height: elem.height,
-            }}
-            color={elem.material.color}
-          />
-        ))}
+        <BackgroundImage bounds={bounds} />
 
         {connections.map((conn, index) => {
           return (
@@ -490,7 +486,12 @@ export default function Simulation({
           />
         ))}
         <PhysicsBasedCar carData={carData} carSettings={carSettings} />
-        <EndMarker position={endCollision} />
+
+        {mapElements.map((elem, index) => (
+          <StaticMapElementRenderer key={index} elem={elem} />
+        ))}
+
+        <EndMarker rect={endCollision} />
       </CameraView>
     </View>
   );

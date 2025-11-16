@@ -59,7 +59,7 @@ export default function LevelScreen() {
     loadLevels();
   }, []);
 
-  function saveTake(takeNodes: NodeData[], takeConnections: Connection[]) {
+  function saveTake() {
     setTakesData((takes) => {
       const updatedTakes = [...takes];
       updatedTakes[index] = {

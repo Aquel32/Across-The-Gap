@@ -46,3 +46,5 @@ export const DEFAULT_LEVEL: LevelData = {
   },
   budget: 13000,
 };
+
+export const NODES_OVERLAP_SNAP_DISTANCE = 10;

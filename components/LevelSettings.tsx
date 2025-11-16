@@ -2,8 +2,8 @@ import { CarSettings, Menus } from "@/lib/types";
 import Slider from "@react-native-community/slider";
 import { Text, View } from "react-native";
 import { XMarkIcon } from "react-native-heroicons/outline";
-import Button from "./Button";
-import { useSFX } from "./SFXProvider";
+import { useSFX } from "../contexts/SFXProvider";
+import Button from "./Parts/Button";
 
 export default function LevelSettings({
   carSettings,

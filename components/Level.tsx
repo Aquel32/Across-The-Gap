@@ -26,7 +26,7 @@ import {
   WrenchIcon,
 } from "react-native-heroicons/outline";
 import Modal from "react-native-modal";
-import Button from "./Button";
+import Button from "./Parts/Button";
 
 export default function Level({
   INITIAL_NODES,
@@ -47,7 +47,7 @@ export default function Level({
   BUDGET: number;
   parentTesting?: boolean;
   setParentTesting?: React.Dispatch<React.SetStateAction<boolean>>;
-  saveTake?: (nodes: NodeData[], connections: Connection[]) => void;
+  saveTake?: () => void;
 }) {
   const [menu, setMenu] = useState<Menus>("none");
   const [mode, setMode] = useState<Modes>("create");
@@ -89,7 +89,7 @@ export default function Level({
     }
 
     if (saveTake) {
-      saveTake(nodes, connections);
+      saveTake();
     }
 
     router.back();

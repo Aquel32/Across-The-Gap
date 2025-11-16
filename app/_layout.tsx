@@ -1,6 +1,6 @@
-import { SFXProvider } from "@/components/SFXProvider";
 import "../global.css";
 
+import SFXProvider from "@/contexts/SFXProvider";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
@@ -17,10 +17,7 @@ export default function RootLayout() {
             name="level/custom/[id]"
             options={{ headerShown: false }}
           />
-          <Stack.Screen
-            name="options"
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </SFXProvider>

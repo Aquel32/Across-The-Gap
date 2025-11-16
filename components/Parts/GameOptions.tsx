@@ -1,3 +1,4 @@
+import { useSFX } from "@/contexts/SFXProvider";
 import { saveFileAsync } from "@/lib/storage";
 import Slider from "@react-native-community/slider";
 import { router } from "expo-router";
@@ -6,9 +7,8 @@ import { Text, View } from "react-native";
 import { TrashIcon } from "react-native-heroicons/outline";
 import Modal from "react-native-modal";
 import Button from "./Button";
-import { useSFX } from "./SFXProvider";
 
-export default function Options() {
+export default function GameOptions() {
   const sfx = useSFX();
 
   const [resetDataModalState, changeResetDataModalState] = useState(false);

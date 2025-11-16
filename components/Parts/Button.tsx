@@ -1,5 +1,5 @@
+import { useSFX } from "@/contexts/SFXProvider";
 import { TouchableOpacity } from "react-native";
-import { useSFX } from "./SFXProvider";
 
 const soundFiles = {
   click: require("@/assets/sounds/click.wav"),
