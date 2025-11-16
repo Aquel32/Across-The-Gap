@@ -1,17 +1,24 @@
 import { CalculateBounds, EndMarker } from "@/lib/canvasHelper";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
-import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
+import {
+  Circle,
+  Group,
+  Image,
+  Line,
+  Rect,
+  SkPoint,
+  useImage,
+  vec,
+} from "@shopify/react-native-skia";
 import Matter, { Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
-import { Dimensions, View } from "react-native";
+import { View } from "react-native";
 import {
   SharedValue,
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import CameraView from "./CameraView";
-
-const { height, width } = Dimensions.get("window");
 
 export default function Simulation({
   nodes,
@@ -71,8 +78,8 @@ export default function Simulation({
     brokenBeams.value = [];
 
     const carCollisionFilter = 3;
-    const carGroup = 1;
-    const mapGroup = 2;
+    const carGroup = -1;
+    const mapGroup = -2;
 
     function createCar() {
       const frontWheel = Matter.Bodies.circle(
@@ -167,6 +174,8 @@ export default function Simulation({
         friction: 0.01,
         isStatic: node.isStatic ?? false,
         mass: 100,
+        collisionFilter: { group: carGroup },
+        label: "node",
       });
     });
     nodeBodies.current = initialBodies;
@@ -556,6 +565,8 @@ const PhysicsBasedCar = ({
   }>;
   carSettings: CarSettings;
 }) => {
+  const carBodyImage = useImage(require("@/assets/images/body.png"));
+  const carWheelImage = useImage(require("@/assets/images/wheel.png"));
   const rect = {
     x: -carSettings.width / 2,
     y: -carSettings.height / 2,
@@ -571,36 +582,53 @@ const PhysicsBasedCar = ({
     ];
   }, [carData]);
 
-  const frontCx = useDerivedValue(() => {
-    return carData.value.frontWheel.position.x;
-  }, [carData]);
+  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelOffsetX + 1;
+  const frontWheel_cx =
+    carSettings.width / 2 -
+    2 * carSettings.wheelRadius -
+    carSettings.wheelOffsetX;
+  const wheels_cy =
+    carSettings.height / 2 - carSettings.wheelRadius + carSettings.wheelOffsetY;
 
-  const frontCy = useDerivedValue(() => {
-    return carData.value.frontWheel.position.y;
-  }, [carData]);
+  const frontWheelRotate = useDerivedValue(() => {
+    return [{ rotate: carData.value.frontWheel.angle }];
+  });
+  const rearWheelRotate = useDerivedValue(() => {
+    return [{ rotate: carData.value.rearWheel.angle }];
+  });
 
-  const rearCx = useDerivedValue(() => {
-    return carData.value.rearWheel.position.x;
-  }, [carData]);
+  const frontWheelOrigin = {
+    x: frontWheel_cx + carSettings.wheelRadius,
+    y: wheels_cy + carSettings.wheelRadius,
+  };
+  const rearWheelOrigin = {
+    x: rearWheel_cx + carSettings.wheelRadius,
+    y: wheels_cy + carSettings.wheelRadius,
+  };
 
-  const rearCy = useDerivedValue(() => {
-    return carData.value.rearWheel.position.y;
-  }, [carData]);
   return (
-    <>
-      <Rect rect={rect} transform={rectTransform} />
-      <Circle
-        cx={frontCx}
-        cy={frontCy}
-        r={carSettings.wheelRadius}
-        color="black"
+    <Group transform={rectTransform}>
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={frontWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
+        transform={frontWheelRotate}
+        origin={frontWheelOrigin}
       />
-      <Circle
-        cx={rearCx}
-        cy={rearCy}
-        r={carSettings.wheelRadius}
-        color="black"
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={rearWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
+        transform={rearWheelRotate}
+        origin={rearWheelOrigin}
       />
-    </>
+      <Image image={carBodyImage} fit="contain" rect={rect} />
+    </Group>
   );
 };

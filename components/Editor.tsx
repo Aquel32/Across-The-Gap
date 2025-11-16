@@ -20,10 +20,12 @@ import {
   Text as CanvasText,
   Circle,
   Group,
+  Image,
   Line,
   matchFont,
   Rect,
   SkFont,
+  useImage,
   vec,
 } from "@shopify/react-native-skia";
 import React, { useEffect, useRef, useState } from "react";
@@ -862,6 +864,9 @@ export default function Editor({
 }
 
 function Car(carSettings: CarSettings) {
+  const carBodyImage = useImage(require("@/assets/images/body.png"));
+  const carWheelImage = useImage(require("@/assets/images/wheel.png"));
+
   const rectBody = {
     x: -carSettings.width / 2,
     y: -carSettings.height / 2,
@@ -869,10 +874,13 @@ function Car(carSettings: CarSettings) {
     height: carSettings.height,
   };
 
-  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelRadius;
-  const frontWheel_cx = carSettings.width / 2 - carSettings.wheelRadius;
-  const wheels_cy = carSettings.height / 2 + carSettings.wheelOffsetY;
-
+  const rearWheel_cx = -carSettings.width / 2 + carSettings.wheelOffsetX + 1;
+  const frontWheel_cx =
+    carSettings.width / 2 -
+    2 * carSettings.wheelRadius -
+    carSettings.wheelOffsetX;
+  const wheels_cy =
+    carSettings.height / 2 - carSettings.wheelRadius + carSettings.wheelOffsetY;
   return (
     <Group
       transform={[
@@ -884,21 +892,23 @@ function Car(carSettings: CarSettings) {
         },
       ]}
     >
-      <Rect rect={rectBody} color="black" />
-
-      <Circle
-        cx={rearWheel_cx}
-        cy={wheels_cy}
-        r={carSettings.wheelRadius}
-        color="black"
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={frontWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
       />
-
-      <Circle
-        cx={frontWheel_cx}
-        cy={wheels_cy}
-        r={carSettings.wheelRadius}
-        color="black"
+      <Image
+        image={carWheelImage}
+        fit="contain"
+        x={rearWheel_cx}
+        y={wheels_cy}
+        width={carSettings.wheelRadius * 2}
+        height={carSettings.wheelRadius * 2}
       />
+      <Image image={carBodyImage} fit="contain" rect={rectBody} />
     </Group>
   );
 }

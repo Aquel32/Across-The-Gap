@@ -39,6 +39,7 @@ export interface CarSettings {
   acceleration: number;
   wheelRadius: number;
   wheelOffsetY: number;
+  wheelOffsetX: number;
 }
 
 export interface LevelData {

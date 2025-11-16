@@ -2,9 +2,16 @@ import { useLocalSearchParams } from "expo-router";
 
 import Levels from "@/assets/levels.json";
 import Level from "@/components/Level";
+import { DEFAULT_LEVEL } from "@/lib/defaultValues";
 import { Materials } from "@/lib/materials";
 import { loadFileAsync, saveFileAsync } from "@/lib/storage";
-import { Connection, LevelTake, MapElement, NodeData } from "@/lib/types";
+import {
+  CarSettings,
+  Connection,
+  LevelTake,
+  MapElement,
+  NodeData,
+} from "@/lib/types";
 import { useEffect, useState } from "react";
 
 export default function LevelScreen() {
@@ -15,6 +22,14 @@ export default function LevelScreen() {
 
   const [nodes, setNodes] = useState<NodeData[]>(level.nodes);
   const [connections, setConnections] = useState<Connection[]>([]);
+  const [carSettings, setCarSettings] = useState<CarSettings>({
+    ...level.carSettings,
+    width: DEFAULT_LEVEL.carSettings.width,
+    height: DEFAULT_LEVEL.carSettings.height,
+    wheelRadius: DEFAULT_LEVEL.carSettings.wheelRadius,
+    wheelOffsetY: DEFAULT_LEVEL.carSettings.wheelOffsetY,
+    wheelOffsetX: DEFAULT_LEVEL.carSettings.wheelOffsetX,
+  });
 
   const mapElements: MapElement[] = [];
   level.mapElements.forEach((elem) => {
@@ -61,7 +76,7 @@ export default function LevelScreen() {
       INITIAL_CONNECTIONS={connections}
       MAP_ELEMENTS={mapElements}
       END_COLLISION={level.endCollision}
-      CAR_SETTINGS={level.carSettings}
+      CAR_SETTINGS={carSettings}
       BUDGET={level.budget}
       saveTake={saveTake}
     />
