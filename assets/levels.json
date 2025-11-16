@@ -1,103 +1,552 @@
-
 [
-    {
-        "nodes": [
-            { "x": 150, "y": 150, "r": 13, "isStatic": true },
-            { "x": 630, "y": 150, "r": 13, "isStatic": true }
-        ],
-        "connections": [
-        ],
-        "mapElements": [
-            { "x": -300, "y": 300, "width": 1300, "height": 100, "angle": 0, "material": "WATER" },
-            { "x": -300, "y": 150, "width": 450, "height": 250, "angle": 0, "material": "GRASS" },
-            { "x": 630, "y": 150, "width": 370, "height": 250, "angle": 0, "material": "GRASS" }
-        ],
-        "endCollision": { "x": 950, "y": 100, "width": 100, "height": 100 },
-        "carSettings": {
-            "startTransform": { "x": 50, "y": 100, "angle":0 },
-            "mass": 12,
-            "acceleration": 0.3
-        },
-        "budget": 13000
+  {
+    "nodes": [
+      {
+        "x": 152.8922576904297,
+        "y": 153.64518356323242,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 629.9850311279297,
+        "y": 155.85416793823242,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 387.28387546539307,
+        "y": 190.79883074760437,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -300,
+        "y": 300,
+        "width": 1300,
+        "height": 100,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -300,
+        "y": 150,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 630,
+        "y": 150,
+        "width": 370,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 374.5133361816406,
+        "y": 192.1136131286621,
+        "width": 25.244140625,
+        "height": 131.9921875,
+        "angle": 0,
+        "material": "STEEL"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 8,
+      "acceleration": 0.5,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
     },
-    {
-        "nodes": [
-            { "x": 150, "y": 150, "r": 13, "isStatic": true },
-            { "x": 630, "y": 150, "r": 13, "isStatic": true }
-        ],
-        "connections": [
-        ],
-        "mapElements": [
-            { "x": -300, "y": 300, "width": 1300, "height": 100, "angle": 0, "material": "WATER" },
-            { "x": -300, "y": 150, "width": 450, "height": 250, "angle": 0, "material": "GRASS" },
-            { "x": 630, "y": 150, "width": 370, "height": 250, "angle": 0, "material": "GRASS" }
-        ],
-        "endCollision": { "x": 950, "y": 100, "width": 100, "height": 100 },
-        "carSettings": {
-            "startTransform": { "x": 50, "y": 100, "angle":0 },
-            "mass": 12,
-            "acceleration": 0.3
-        },
-        "budget": 13000
-    },
-    {
-        "nodes": [
-            { "x": 150, "y": 150, "r": 13, "isStatic": true },
-            { "x": 630, "y": 150, "r": 13, "isStatic": true }
-        ],
-        "connections": [
-        ],
-        "mapElements": [
-            { "x": -300, "y": 300, "width": 1300, "height": 100, "angle": 0, "material": "WATER" },
-            { "x": -300, "y": 150, "width": 450, "height": 250, "angle": 0, "material": "GRASS" },
-            { "x": 630, "y": 150, "width": 370, "height": 250, "angle": 0, "material": "GRASS" }
-        ],
-        "endCollision": { "x": 950, "y": 100, "width": 100, "height": 100 },
-        "carSettings": {
-           "startTransform": { "x": 50, "y": 100, "angle":0 },
-            "mass": 12,
-            "acceleration": 0.3
-        },
-        "budget": 13000
-    },
-    {
-        "nodes": [
-            { "x": 150, "y": 150, "r": 13, "isStatic": true },
-            { "x": 630, "y": 150, "r": 13, "isStatic": true }
-        ],
-        "connections": [
-        ],
-        "mapElements": [
-            { "x": -300, "y": 300, "width": 1300, "height": 100, "angle": 0, "material": "WATER" },
-            { "x": -300, "y": 150, "width": 450, "height": 250, "angle": 0, "material": "GRASS" },
-            { "x": 630, "y": 150, "width": 370, "height": 250, "angle": 0, "material": "GRASS" }
-        ],
-        "endCollision": { "x": 950, "y": 100, "width": 100, "height": 100 },
-        "carSettings": {
-            "startTransform": { "x": 50, "y": 100, "angle":0 },
-            "mass": 12,
-            "acceleration": 0.3
-        },
-        "budget": 13000
-    },
-    {
-        "nodes": [
-            { "x": 150, "y": 150, "r": 13, "isStatic": true },
-            { "x": 630, "y": 150, "r": 13, "isStatic": true }
-        ],
-        "connections": [
-        ],
-        "mapElements": [
-            { "x": -300, "y": 300, "width": 1300, "height": 100, "angle": 0, "material": "WATER" },
-            { "x": -300, "y": 150, "width": 450, "height": 250, "angle": 0, "material": "GRASS" },
-            { "x": 630, "y": 150, "width": 370, "height": 250, "angle": 0, "material": "GRASS" }
-        ],
-        "endCollision": { "x": 950, "y": 100, "width": 100, "height": 100 },
-        "carSettings": {
-            "startTransform": { "x": 50, "y": 100, "angle":0 },
-            "mass": 12,
-            "acceleration": 0.3
-        },
-        "budget": 13000
+    "budget": 7000,
+    "connections": [],
+    "endCollision": {
+      "x": 775,
+      "y": 40,
+      "width": 100,
+      "height": 100
     }
+  },
+  {
+    "nodes": [
+      {
+        "x": 155.76862576376425,
+        "y": 155.1011695610766,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 320.0278043546316,
+        "y": 154.94163312407386,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 454.2246345444423,
+        "y": 158.4830452928405,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 614.4854799473849,
+        "y": 160.5706543862072,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -300,
+        "y": 300,
+        "width": 1099.6896667627093,
+        "height": 99.49312595310255,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -300,
+        "y": 150,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 322.46848491217236,
+        "y": 152.25396218830838,
+        "width": 131.52657404655127,
+        "height": 246.86733523082432,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 612.3223560066771,
+        "y": 156.70285340156258,
+        "width": 242.48774399499155,
+        "height": 242.31815228845676,
+        "angle": 0,
+        "material": "GRASS"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 12,
+      "acceleration": 0.3,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 7000,
+    "connections": [],
+    "endCollision": {
+      "x": 675.1657104492188,
+      "y": 43.387367248535156,
+      "width": 100,
+      "height": 100
+    }
+  },
+  {
+    "nodes": [
+      {
+        "x": 222.2252655029297,
+        "y": 148.1923828125,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 410.96154289304826,
+        "y": 122.1088025076431,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -175.82293261410837,
+        "y": 301.5577247215955,
+        "width": 903.1121405067,
+        "height": 95.08090887156533,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -232.25814819335938,
+        "y": 147.9117889404297,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 410.22904580766226,
+        "y": 118.56409462685397,
+        "width": 402.40809490388926,
+        "height": 278.89446149844446,
+        "angle": 0,
+        "material": "GRASS"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 14,
+      "acceleration": 0.5,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 6000,
+    "connections": [],
+    "endCollision": {
+      "x": 483.0357043043656,
+      "y": 6.789641892664967,
+      "width": 100,
+      "height": 100
+    }
+  },
+  {
+    "nodes": [
+      {
+        "x": 151.8505859375,
+        "y": 152.0006504058838,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 347.67139465754485,
+        "y": 213.02889391380194,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -300,
+        "y": 300,
+        "width": 919.4837143350125,
+        "height": 97.45843155268824,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -300,
+        "y": 150,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 345.6760275489544,
+        "y": 207.4203054492397,
+        "width": 299.08711566008753,
+        "height": 191.02212611522728,
+        "angle": 0,
+        "material": "GRASS"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 16,
+      "acceleration": 0.2,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 5000,
+    "connections": [],
+    "endCollision": {
+      "x": 447.5537414550781,
+      "y": 89.1826171875,
+      "width": 100,
+      "height": 100
+    }
+  },
+  {
+    "nodes": [
+      {
+        "x": 154.08333587646484,
+        "y": 156.01073265075684,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 346.0822584573483,
+        "y": 200.45952320814965,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 596.8610724125123,
+        "y": 200.3935516135633,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 875.9381484985352,
+        "y": 142.97525072097778,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -300,
+        "y": 300,
+        "width": 1300,
+        "height": 100,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -300,
+        "y": 150,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 349.2209277992558,
+        "y": 195.88806394341572,
+        "width": 246.7158871173355,
+        "height": 203.9592814835358,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 874.8550848890022,
+        "y": 138.34216420338848,
+        "width": 258.33914319358485,
+        "height": 262.89034501288813,
+        "angle": 0,
+        "material": "GRASS"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 12,
+      "acceleration": 0.3,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 11000,
+    "connections": [],
+    "endCollision": {
+      "x": 942.2353538660957,
+      "y": 18.68488089308093,
+      "width": 100,
+      "height": 100
+    }
+  },
+  {
+    "nodes": [
+      {
+        "x": 148.73348636805528,
+        "y": 154.2166242574557,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 556.7223281860352,
+        "y": 86.30306053161621,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 1143.1044171748092,
+        "y": 161.22566806961768,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 939.5126543104714,
+        "y": 86.04894306193749,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 353.35450744628906,
+        "y": 121.71907901763916,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -300,
+        "y": 300,
+        "width": 1643.3309316207412,
+        "height": 101.04550156100998,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -300,
+        "y": 150,
+        "width": 450,
+        "height": 250,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 559.9104666112473,
+        "y": 79.97019539776446,
+        "width": 384.52126838477074,
+        "height": 320.3177287667896,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 1142.1250966675123,
+        "y": 153.35780707225535,
+        "width": 330.3711261469432,
+        "height": 248.76286124312296,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 337.80045890808105,
+        "y": 128.1145830154419,
+        "width": 29.850587844848633,
+        "height": 183.79394912719727,
+        "angle": 0,
+        "material": "STEEL"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 12,
+      "acceleration": 0.3,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 12000,
+    "connections": [],
+    "endCollision": {
+      "x": 685.5163733884036,
+      "y": -37.15561482654431,
+      "width": 100,
+      "height": 100
+    }
+  },
+  {
+    "nodes": [
+      {
+        "x": 192.92892519151528,
+        "y": 152.0977915121981,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 583.3896446228027,
+        "y": 155.19889578223228,
+        "r": 13,
+        "isStatic": true
+      },
+      {
+        "x": 411.16889022798745,
+        "y": 155.95348899616366,
+        "r": 13,
+        "isStatic": true
+      }
+    ],
+    "mapElements": [
+      {
+        "x": -213.68441618296436,
+        "y": 181.41266442658798,
+        "width": 1005.6534502052623,
+        "height": 99.50092474141337,
+        "angle": 0,
+        "material": "WATER"
+      },
+      {
+        "x": -248.65427085331342,
+        "y": 148.56503964718053,
+        "width": 436.3391958762819,
+        "height": 133.57757637409833,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 586.1254333400367,
+        "y": 148.85249093162292,
+        "width": 334.51735647508985,
+        "height": 132.5064091961164,
+        "angle": 0,
+        "material": "GRASS"
+      },
+      {
+        "x": 394.7623095536559,
+        "y": 160.52548412231963,
+        "width": 31.675072172981004,
+        "height": 36.367995696796584,
+        "angle": 0,
+        "material": "STEEL"
+      }
+    ],
+    "carSettings": {
+      "startTransform": {
+        "x": 50,
+        "y": 100,
+        "angle": 0
+      },
+      "width": 140,
+      "height": 45,
+      "mass": 15,
+      "acceleration": 0.6,
+      "wheelRadius": 13,
+      "wheelOffsetY": -5.5,
+      "wheelOffsetX": 16
+    },
+    "budget": 14000,
+    "connections": [],
+    "endCollision": {
+      "x": 698.1604270871393,
+      "y": 28.81813337324303,
+      "width": 100,
+      "height": 100
+    }
+  }
 ]

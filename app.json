@@ -13,7 +13,12 @@
     },
     "android": {
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.aquel.AcrossTheGap"
     },
     "web": {
       "output": "static",
@@ -26,6 +31,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "819e9e2d-9cb1-406e-b63b-3e5e303f9f9c"
+      }
     }
   }
 }
