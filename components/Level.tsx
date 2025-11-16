@@ -102,6 +102,8 @@ export default function Level({
   const [clearLevelModalVisible, setClearLevelModalVisible] = useState(false);
   const [endModalVisible, setEndModalVisible] = useState(false);
 
+  const [ready, setReady] = useState(true);
+
   return (
     <View style={{ flex: 1 }}>
       {running ? (
@@ -179,8 +181,8 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("move")}
             disabled={running}
-            selected={mode === "move"}
-            selectedColor="bg-[#8b0000]"
+            selected={mode == "move"}
+            selectedColor="bg-red-900"
             sound="click"
           >
             <CursorArrowRippleIcon color={"white"} />
@@ -190,7 +192,7 @@ export default function Level({
             onPress={() => setMode("create")}
             disabled={running}
             selected={mode === "create"}
-            selectedColor="bg-[#8b0000]"
+            selectedColor="bg-red-900"
             sound="click"
           >
             <LinkIcon color={"white"} />
@@ -199,8 +201,8 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("delete")}
             disabled={running}
-            selected={mode === "delete"}
-            selectedColor="bg-[#8b0000]"
+            selected={mode == "delete"}
+            selectedColor="bg-red-900"
             sound="click"
           >
             <FontAwesome name="unlink" size={24} color="white" />
@@ -210,7 +212,7 @@ export default function Level({
             onPress={() => setMode("arch")}
             disabled={running}
             selected={mode === "arch"}
-            selectedColor="bg-[#c7a248]"
+            selectedColor="bg-yellow-600"
             sound="click"
           >
             <View>
@@ -222,7 +224,7 @@ export default function Level({
             onPress={() => setMode("chain")}
             disabled={running}
             selected={mode === "chain"}
-            selectedColor="bg-[#c7a248]"
+            selectedColor="bg-yellow-600"
             sound="click"
           >
             <Ionicons name="analytics-outline" size={38} color="white" />
@@ -318,9 +320,12 @@ export default function Level({
             className={`bg-[#588157] px-4 py-2 rounded`}
             onPress={() => {
               setRunning((r) => !r);
+              setReady(false);
+              setTimeout(() => setReady(true), 200);
             }}
             hapticStyle={"Heavy"}
             sound="success"
+            disabled={!ready}
           >
             {running ? (
               <PauseIcon color={"white"} />

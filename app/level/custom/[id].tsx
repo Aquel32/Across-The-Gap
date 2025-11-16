@@ -295,7 +295,7 @@ export default function NewLevel() {
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
                 selected={mode === "create"}
-                selectedColor="bg-[#8b0000]"
+                selectedColor="bg-red-900"
                 sound="click"
               >
                 <PuzzlePieceIcon color={"white"} />
@@ -304,7 +304,7 @@ export default function NewLevel() {
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("arch")}
                 selected={mode === "arch"}
-                selectedColor="bg-[#8b0000]"
+                selectedColor="bg-red-900"
                 sound="click"
               >
                 <AntDesign name="sisternode" size={24} color="white" />
@@ -313,7 +313,7 @@ export default function NewLevel() {
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("delete")}
                 selected={mode === "delete"}
-                selectedColor="bg-[#8b0000]"
+                selectedColor="bg-red-900"
                 sound="click"
               >
                 <FontAwesome name="remove" size={24} color="white" />
@@ -322,7 +322,7 @@ export default function NewLevel() {
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("move")}
                 selected={mode === "move"}
-                selectedColor="bg-[#c7a248]"
+                selectedColor="bg-yellow-600"
                 sound="click"
               >
                 <CursorArrowRippleIcon color={"white"} />
@@ -331,7 +331,7 @@ export default function NewLevel() {
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("resize")}
                 selected={mode === "resize"}
-                selectedColor="bg-[#c7a248]"
+                selectedColor="bg-yellow-600"
                 sound="click"
               >
                 <ArrowTopRightOnSquareIcon color={"white"} />
