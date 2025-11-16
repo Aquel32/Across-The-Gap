@@ -13,7 +13,13 @@ import {
   Modes,
   NodeData,
 } from "@/lib/types";
-import { AntDesign, FontAwesome, Foundation } from "@expo/vector-icons";
+import {
+  AntDesign,
+  FontAwesome,
+  FontAwesome5,
+  Foundation,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -86,7 +92,7 @@ export default function NewLevel() {
   const index = useRef(Number(params.id) - 1);
 
   const [menu, setMenu] = useState<Menus>("none");
-  const [mode, setMode] = useState<Modes>("create");
+  const [mode, setMode] = useState<Modes>("move");
 
   const [running, setRunning] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState(Materials.ROAD);
@@ -175,7 +181,7 @@ export default function NewLevel() {
     setMapElements([]);
     setCarSettings(DEFAULT_LEVEL.carSettings);
     setSelectedMaterial(Materials.ROAD);
-    setMode("create");
+    setMode("move");
     setBudget(DEFAULT_LEVEL.budget);
     setEndCollision(DEFAULT_LEVEL.endCollision);
     setChangesMade(true);
@@ -239,7 +245,7 @@ export default function NewLevel() {
               </Button>
 
               {menu === "settings" && (
-                <View className="absolute bottom-12 flex flex-col gap-2">
+                <View className="absolute bottom-14 flex flex-col gap-2">
                   <Button
                     className={`bg-[#2b2d42] px-4 py-2 rounded`}
                     onPress={() => backToCustoms()}
@@ -288,6 +294,8 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("create")}
+                selected={mode === "create"}
+                selectedColor="bg-[#8b0000]"
                 sound="click"
               >
                 <PuzzlePieceIcon color={"white"} />
@@ -295,6 +303,8 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("arch")}
+                selected={mode === "arch"}
+                selectedColor="bg-[#8b0000]"
                 sound="click"
               >
                 <AntDesign name="sisternode" size={24} color="white" />
@@ -302,6 +312,8 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#c1121f] px-4 py-2 rounded`}
                 onPress={() => setMode("delete")}
+                selected={mode === "delete"}
+                selectedColor="bg-[#8b0000]"
                 sound="click"
               >
                 <FontAwesome name="remove" size={24} color="white" />
@@ -309,6 +321,8 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("move")}
+                selected={mode === "move"}
+                selectedColor="bg-[#c7a248]"
                 sound="click"
               >
                 <CursorArrowRippleIcon color={"white"} />
@@ -316,6 +330,8 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("resize")}
+                selected={mode === "resize"}
+                selectedColor="bg-[#c7a248]"
                 sound="click"
               >
                 <ArrowTopRightOnSquareIcon color={"white"} />
@@ -323,13 +339,15 @@ export default function NewLevel() {
               <Button
                 className={`bg-[#e9c46a] px-4 py-2 rounded`}
                 onPress={() => setMode("rotate")}
+                selected={mode === "rotate"}
+                selectedColor="bg-[#c7a248]"
                 sound="click"
               >
                 <ArrowPathIcon color={"white"} />
               </Button>
               <View className="flex flex-row gap-3 relative">
                 <Button
-                  className={`bg-[#2b2d42] px-4 py-2 rounded`}
+                  className={`bg-gray-400 px-4 py-2 rounded items-center justify-center`}
                   onPress={() =>
                     setMenu((prev) =>
                       prev === "materials" ? "none" : "materials"
@@ -338,18 +356,40 @@ export default function NewLevel() {
                   hapticStyle={"Heavy"}
                   sound="click"
                 >
-                  {menu === "materials" ? (
-                    <BarsArrowDownIcon color={"white"} />
-                  ) : (
-                    <BarsArrowUpIcon color={"white"} />
+                  {selectedMaterial === Materials.ROAD && (
+                    <FontAwesome
+                      name="road"
+                      size={24}
+                      color={Materials.ROAD.color}
+                    />
+                  )}
+                  {selectedMaterial === Materials.STEEL && (
+                    <Image
+                      source={require("@/assets/images/steel.png")}
+                      style={{ width: 26, height: 24 }}
+                    />
+                  )}
+                  {selectedMaterial === Materials.WOOD && (
+                    <Image
+                      source={require("@/assets/images/wood.png")}
+                      style={{ width: 26, height: 26 }}
+                    />
+                  )}
+                  {selectedMaterial === Materials.GRASS && (
+                    <MaterialIcons name="grass" size={26} color="black" />
+                  )}
+                  {selectedMaterial === Materials.WATER && (
+                    <FontAwesome5 name="water" size={23} color="black" />
                   )}
                 </Button>
 
                 {menu === "materials" && (
-                  <View className="absolute bottom-12 flex flex-col gap-2">
+                  <View className="absolute bottom-14 flex flex-col gap-2">
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.ROAD)}
+                      selected={selectedMaterial === Materials.ROAD}
+                      selectedColor="bg-gray-600"
                       sound="click"
                     >
                       <FontAwesome
@@ -361,6 +401,8 @@ export default function NewLevel() {
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.STEEL)}
+                      selected={selectedMaterial === Materials.STEEL}
+                      selectedColor="bg-gray-600"
                       sound="click"
                     >
                       <Image
@@ -371,12 +413,32 @@ export default function NewLevel() {
                     <Button
                       className={`bg-gray-400 px-4 py-2 rounded`}
                       onPress={() => setMaterial(Materials.WOOD)}
+                      selected={selectedMaterial === Materials.WOOD}
+                      selectedColor="bg-gray-600"
                       sound="click"
                     >
                       <Image
                         source={require("@/assets/images/wood.png")}
                         style={{ width: 24, height: 24 }}
                       />
+                    </Button>
+                    <Button
+                      className={`bg-gray-400 px-4 py-2 rounded`}
+                      onPress={() => setMaterial(Materials.GRASS)}
+                      selected={selectedMaterial === Materials.GRASS}
+                      selectedColor="bg-gray-600"
+                      sound="click"
+                    >
+                      <MaterialIcons name="grass" size={24} color="black" />
+                    </Button>
+                    <Button
+                      className={`bg-gray-400 px-4 py-2 rounded`}
+                      onPress={() => setMaterial(Materials.WATER)}
+                      selected={selectedMaterial === Materials.WATER}
+                      selectedColor="bg-gray-600"
+                      sound="click"
+                    >
+                      <FontAwesome5 name="water" size={22} color="black" />
                     </Button>
                   </View>
                 )}

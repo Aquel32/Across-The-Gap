@@ -106,8 +106,8 @@ export default function Level({
     <View style={{ flex: 1 }}>
       {running ? (
         <Simulation
-          nodes={[...nodes]}
-          connections={[...connections]}
+          nodes={nodes}
+          connections={connections}
           mapElements={MAP_ELEMENTS}
           endCollision={END_COLLISION}
           carSettings={CAR_SETTINGS}
@@ -151,7 +151,7 @@ export default function Level({
           </Button>
 
           {menu === "settings" && (
-            <View className="absolute bottom-12 flex flex-col gap-2">
+            <View className="absolute bottom-14 flex flex-col gap-2">
               {parentTesting !== true && (
                 <Button
                   className={`bg-[#2b2d42] px-4 py-2 rounded`}
@@ -179,6 +179,8 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("move")}
             disabled={running}
+            selected={mode === "move"}
+            selectedColor="bg-[#8b0000]"
             sound="click"
           >
             <CursorArrowRippleIcon color={"white"} />
@@ -187,6 +189,8 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("create")}
             disabled={running}
+            selected={mode === "create"}
+            selectedColor="bg-[#8b0000]"
             sound="click"
           >
             <LinkIcon color={"white"} />
@@ -195,6 +199,8 @@ export default function Level({
             className={`bg-[#c1121f] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("delete")}
             disabled={running}
+            selected={mode === "delete"}
+            selectedColor="bg-[#8b0000]"
             sound="click"
           >
             <FontAwesome name="unlink" size={24} color="white" />
@@ -203,6 +209,8 @@ export default function Level({
             className={`bg-[#e9c46a] px-4 py-2 rounded items-center justify-center`}
             onPress={() => setMode("arch")}
             disabled={running}
+            selected={mode === "arch"}
+            selectedColor="bg-[#c7a248]"
             sound="click"
           >
             <View>
@@ -213,31 +221,49 @@ export default function Level({
             className={`bg-[#e9c46a] px-2 rounded items-center justify-center`}
             onPress={() => setMode("chain")}
             disabled={running}
+            selected={mode === "chain"}
+            selectedColor="bg-[#c7a248]"
             sound="click"
           >
             <Ionicons name="analytics-outline" size={38} color="white" />
           </Button>
           <View className="flex flex-row gap-3 relative">
             <Button
-              className={`bg-[#2b2d42] px-4 py-2 rounded`}
+              className={`bg-gray-400 px-4 py-2 rounded`}
               onPress={() =>
                 setMenu((prev) => (prev === "materials" ? "none" : "materials"))
               }
               disabled={running}
               sound="click"
             >
-              {menu === "materials" ? (
-                <BarsArrowDownIcon color={"white"} />
-              ) : (
-                <BarsArrowUpIcon color={"white"} />
+              {selectedMaterial === Materials.ROAD && (
+                <FontAwesome
+                  name="road"
+                  size={24}
+                  color={Materials.ROAD.color}
+                />
+              )}
+              {selectedMaterial === Materials.STEEL && (
+                <Image
+                  source={require("@/assets/images/steel.png")}
+                  style={{ width: 26, height: 24 }}
+                />
+              )}
+              {selectedMaterial === Materials.WOOD && (
+                <Image
+                  source={require("@/assets/images/wood.png")}
+                  style={{ width: 26, height: 26 }}
+                />
               )}
             </Button>
 
             {menu === "materials" && (
-              <View className="absolute bottom-12 flex flex-col gap-2">
+              <View className="absolute bottom-14 flex flex-col gap-2">
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.ROAD)}
+                  selected={selectedMaterial === Materials.ROAD}
+                  selectedColor="bg-gray-600"
                   sound="click"
                 >
                   <FontAwesome
@@ -249,6 +275,8 @@ export default function Level({
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.STEEL)}
+                  selected={selectedMaterial === Materials.STEEL}
+                  selectedColor="bg-gray-600"
                   sound="click"
                 >
                   <Image
@@ -259,6 +287,8 @@ export default function Level({
                 <Button
                   className={`bg-gray-400 px-4 py-2 rounded`}
                   onPress={() => setMaterial(Materials.WOOD)}
+                  selected={selectedMaterial === Materials.WOOD}
+                  selectedColor="bg-gray-600"
                   sound="click"
                 >
                   <Image
@@ -286,7 +316,9 @@ export default function Level({
 
           <Button
             className={`bg-[#588157] px-4 py-2 rounded`}
-            onPress={() => setRunning((r) => !r)}
+            onPress={() => {
+              setRunning((r) => !r);
+            }}
             hapticStyle={"Heavy"}
             sound="success"
           >

@@ -1,7 +1,7 @@
 import { CalculateBounds, EndMarker } from "@/lib/canvasHelper";
 import { CarSettings, Connection, MapElement, NodeData } from "@/lib/types";
 import { Circle, Line, Rect, SkPoint, vec } from "@shopify/react-native-skia";
-import Matter, { Events, Vector } from "matter-js";
+import Matter, { Vector } from "matter-js";
 import { useEffect, useRef, useState } from "react";
 import { Dimensions, View } from "react-native";
 import {
@@ -63,11 +63,16 @@ export default function Simulation({
 
   useEffect(() => {
     Matter.World.clear(world, false);
+    Matter.Engine.clear(engine);
+    timePassed.value = 0;
+    maxForce.value = 0;
+    internalConstraintsForces.value = connections.map((c) => 0);
+
     brokenBeams.value = [];
 
-    const carCollisionFilter = Matter.Body.nextCategory();
-    const carGroup = Matter.Body.nextGroup(true);
-    const mapGroup = Matter.Body.nextGroup(true);
+    const carCollisionFilter = 3;
+    const carGroup = 1;
+    const mapGroup = 2;
 
     function createCar() {
       const frontWheel = Matter.Bodies.circle(
@@ -248,7 +253,9 @@ export default function Simulation({
       x: 0,
       y: 0,
     }));
-    Events.on(engine, "collisionActive", (event) => {
+    const onCollisionActive = (
+      event: Matter.IEventCollision<Matter.Engine>
+    ) => {
       event.pairs.forEach((pair) => {
         if (
           (pair.bodyA.label === "endCollision" &&
@@ -281,7 +288,6 @@ export default function Simulation({
           (e) => e === beamBody
         );
         if (beamIndex == -1) return;
-        const conn = connections[beamIndex];
         if (brokenBeams.value.includes(beamIndex)) return;
 
         const normal = pair.collision.normal;
@@ -294,21 +300,24 @@ export default function Simulation({
           y: Math.abs(forcePerNode.y),
         };
       });
-    });
+    };
 
-    Events.on(engine, "beforeUpdate", (event) => {
+    const onBeforeUpdate = (event: Matter.IEvent<Matter.Engine>) => {
       connections.forEach((conn, index) => {
-        if (timePassed.value < 60 * 2) return;
+        if (timePassed.value < 60 * 1) return;
         if (brokenBeams.value.includes(index)) return;
-        if (internalConstraintsForces.value[index] == Infinity) return;
         const maxStrength =
           conn.material.durability /
           (1 +
             connectionsConstraints.current[index].length *
               conn.material.lengthPenaltyFactor) **
             2;
-        if (internalConstraintsForces.value[index] > maxStrength) {
+        if (
+          internalConstraintsForces.value[index] > maxStrength ||
+          isNaN(internalConstraintsForces.value[index]) == true
+        ) {
           console.log(
+            isNaN(internalConstraintsForces.value[index]),
             "Breaking beam at index:",
             index,
             " with force:",
@@ -332,9 +341,9 @@ export default function Simulation({
           Matter.Body.applyForce(nodeB, nodeB.position, force);
         }
       });
-    });
+    };
 
-    Events.on(engine, "afterUpdate", function (event) {
+    const onAfterUpdate = (event: Matter.IEvent<Matter.Engine>) => {
       function getConstraintCurrentLength(constraint: Matter.Constraint) {
         const worldPointA = Vector.add(
           constraint.bodyA!.position,
@@ -367,7 +376,11 @@ export default function Simulation({
         return getConstraintForce(conn) / maxForce.value;
       });
       internalConstraintsForces.value = forces;
-    });
+    };
+
+    Matter.Events.on(engine, "collisionActive", onCollisionActive);
+    Matter.Events.on(engine, "beforeUpdate", onBeforeUpdate);
+    Matter.Events.on(engine, "afterUpdate", onAfterUpdate);
 
     const update = () => {
       Matter.Engine.update(engine, 1000 / 60);
@@ -420,10 +433,15 @@ export default function Simulation({
 
     return () => {
       cancelAnimationFrame(animationFrame);
+
+      Matter.Events.off(engine, "collisionActive", onCollisionActive);
+      Matter.Events.off(engine, "beforeUpdate", onBeforeUpdate);
+      Matter.Events.off(engine, "afterUpdate", onAfterUpdate);
+
       Matter.World.clear(world, false);
       Matter.Engine.clear(engine);
     };
-  }, [engine, world, nodes, connections]);
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -511,7 +529,8 @@ const PhysicsBasedLine = ({
 
   const opacity = useDerivedValue(() => {
     const broken = brokenBeams.value.includes(index);
-    return broken ? 0 : 1 - forces.value[index];
+    const force = isNaN(forces.value[index]) ? 0 : forces.value[index];
+    return broken ? 0 : 1.5 - force;
   }, [index, forces, brokenBeams]);
 
   return (

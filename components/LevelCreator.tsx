@@ -142,7 +142,6 @@ export default function LevelCreator({
         cameraTransform.value
       );
 
-      console.log("NODE", nodeIndex);
       if (nodeIndex !== undefined) {
         selectedNode.value = nodeIndex;
         runOnJS(sfx.playSound)("click");

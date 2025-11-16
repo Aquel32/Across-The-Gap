@@ -13,6 +13,8 @@ export default function Button({
   sound,
   onPress,
   disabled,
+  selected,
+  selectedColor,
   children,
 }: {
   className: string;
@@ -20,6 +22,8 @@ export default function Button({
   sound?: "click" | "success" | "error";
   onPress: () => void;
   disabled?: boolean;
+  selected?: boolean;
+  selectedColor?: string;
   children: React.ReactNode;
 }) {
   const sfx = useSFX();
@@ -36,7 +40,7 @@ export default function Button({
 
   return (
     <TouchableOpacity
-      className={`${className} ${disabled ? "opacity-50" : ""}`}
+      className={`${selected === true ? selectedColor! : ""} ${className} ${disabled ? "opacity-50" : ""} `}
       onPress={handlePress}
       disabled={disabled}
     >
